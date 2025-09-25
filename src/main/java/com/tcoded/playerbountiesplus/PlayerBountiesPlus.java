@@ -2,7 +2,6 @@ package com.tcoded.playerbountiesplus;
 
 import com.google.common.collect.ImmutableList;
 import com.tcoded.folialib.FoliaLib;
-import com.tcoded.lightlibs.updatechecker.SimpleUpdateChecker;
 import com.tcoded.playerbountiesplus.command.BountyCommand;
 import com.tcoded.playerbountiesplus.command.PlayerBountiesPlusAdminCmd;
 import com.tcoded.playerbountiesplus.hook.currency.EconomyHook;
@@ -100,38 +99,19 @@ public final class PlayerBountiesPlus extends JavaPlugin {
         this.getServer().getPluginManager().registerEvents(new DeathListener(this), this);
         this.getServer().getPluginManager().registerEvents(new GuiListener(), this);
 
-        // Update checker
-        checkUpdate();
-
-        // bStats
-        Metrics metrics = new Metrics(this, 19617);
-        metrics.addCustomChart(new SimplePie("config_lang", () -> langUtil.getLang()));
-        metrics.addCustomChart(new SimplePie("datafolder_customlang", () -> Boolean.toString(langUtil.isCustomLang())));
-        metrics.addCustomChart(new SimplePie("hook_teamhook", () -> teamHook == null ? "None" : teamHook.getPluginName() + " (" + teamHook.getAuthor() + ")"));
-        metrics.addCustomChart(new SimplePie("server_isfolia", () -> Boolean.toString(foliaLib.isFolia())));
-
         List<Plugin> plugins = ImmutableList.copyOf(this.getServer().getPluginManager().getPlugins());
-        findPluginWithQuery(plugins, metrics, "team");
-        findPluginWithQuery(plugins, metrics, "teams");
-        findPluginWithQuery(plugins, metrics, "clan");
-        findPluginWithQuery(plugins, metrics, "clans");
-        findPluginWithQuery(plugins, metrics, "party", "voteparty");
-        findPluginWithQuery(plugins, metrics, "parties");
-        findPluginWithQuery(plugins, metrics, "guild");
-        findPluginWithQuery(plugins, metrics, "guilds");
+        findPluginWithQuery(plugins, "team");
+        findPluginWithQuery(plugins, "teams");
+        findPluginWithQuery(plugins, "clan");
+        findPluginWithQuery(plugins, "clans");
+        findPluginWithQuery(plugins, "party", "voteparty");
+        findPluginWithQuery(plugins, "parties");
+        findPluginWithQuery(plugins, "guild");
+        findPluginWithQuery(plugins, "guilds");
     }
 
     public void reloadLang() {
         this.langUtil = new LangUtil(this, this.getConfig().getString("lang", "en_us").toLowerCase());
-    }
-
-    public void checkUpdate() {
-        SimpleUpdateChecker.checkUpdate(
-                this,
-                ChatColor.translateAlternateColorCodes('&', "&f[&bPlayerBountiesPlus&f] "),
-                108637,
-                runnable -> this.getFoliaLib().getScheduler().runAsync(wt -> runnable.run())
-        );
     }
 
     @Override
@@ -166,7 +146,7 @@ public final class PlayerBountiesPlus extends JavaPlugin {
 
     // Utils
 
-    private static void findPluginWithQuery(List<Plugin> plugins, Metrics metrics, String pluginNameQuery, String... excludeStrings) {
+    private static void findPluginWithQuery(List<Plugin> plugins, String pluginNameQuery, String... excludeStrings) {
         String firstPluginFound = plugins.stream()
                 .filter(p -> {
                     String lowerName = p.getName().toLowerCase();
@@ -186,7 +166,6 @@ public final class PlayerBountiesPlus extends JavaPlugin {
 
         if (firstPluginFound == null) return;
 
-        metrics.addCustomChart(new SimplePie("plugins_query_" + pluginNameQuery, () -> firstPluginFound));
     }
 
     private void registerDefaultEcoHooks() {

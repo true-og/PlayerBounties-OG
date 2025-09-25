@@ -27,7 +27,6 @@ public class PlayerBountiesPlusReloadCmd implements TabCompleter {
 
         plugin.reloadConfig();
         plugin.reloadLang();
-        plugin.checkUpdate();
 
         sender.sendMessage(plugin.getLang().getColored("command.admin.reload.reloaded"));
 
