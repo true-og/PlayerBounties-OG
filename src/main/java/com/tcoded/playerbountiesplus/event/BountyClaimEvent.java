@@ -17,41 +17,57 @@ public class BountyClaimEvent extends Event implements Cancellable {
     private boolean cancelled;
 
     public BountyClaimEvent(@NotNull Player claimant, @NotNull Player victim, double amount) {
+
         this.claimant = claimant;
         this.victim = victim;
         this.amount = amount;
         this.cancelled = false;
+
     }
 
     @Override
     public boolean isCancelled() {
+
         return cancelled;
+
     }
 
     @Override
     public void setCancelled(boolean cancel) {
+
         this.cancelled = cancel;
+
     }
 
     public Player getClaimant() {
+
         return claimant;
+
     }
 
     public Player getVictim() {
+
         return victim;
+
     }
 
     public double getAmount() {
+
         return amount;
+
     }
 
     @Override
     public @NotNull HandlerList getHandlers() {
+
         return handlers;
+
     }
 
     public static HandlerList getHandlerList() {
+
         return handlers;
+
     }
 
 }

@@ -10,13 +10,17 @@ public class GuiListener implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
+
         // Get the inventory holder
         InventoryHolder holder = event.getView().getTopInventory().getHolder();
 
         // Ensure the holder is a GUI
         if (!(holder instanceof IPbpGui)) {
+
             return;
+
         }
+
         IPbpGui gui = (IPbpGui) holder;
 
         // Cancel normal click behaviour
@@ -24,6 +28,7 @@ public class GuiListener implements Listener {
 
         // Delegate the click handling
         gui.handleClick(event);
-    }
-}
 
+    }
+
+}

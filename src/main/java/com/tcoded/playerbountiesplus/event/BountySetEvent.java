@@ -17,48 +17,67 @@ public class BountySetEvent extends Event implements Cancellable {
     private boolean cancelled;
 
     public BountySetEvent(Player setter, @NotNull Player target, float amount) {
+
         this.setter = setter;
         this.target = target;
         this.amount = amount;
         this.cancelled = false;
+
     }
 
     /**
-     * @return The player who set the bounty or null if it's set by console/command block.
+     * @return The player who set the bounty or null if it's set by console/command
+     *         block.
      */
     public Player getSetter() {
+
         return setter;
+
     }
 
     public Player getTarget() {
+
         return target;
+
     }
 
     public float getAmount() {
+
         return amount;
+
     }
 
     public void setAmount(float amount) {
+
         this.amount = amount;
+
     }
 
     @Override
     public boolean isCancelled() {
+
         return cancelled;
+
     }
 
     @Override
     public void setCancelled(boolean cancel) {
+
         this.cancelled = cancel;
+
     }
 
     @Override
     public @NotNull HandlerList getHandlers() {
+
         return handlers;
+
     }
 
     public static HandlerList getHandlerList() {
+
         return handlers;
+
     }
 
 }

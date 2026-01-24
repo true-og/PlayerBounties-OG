@@ -1,16 +1,19 @@
 /* This is free and unencumbered software released into the public domain */
 
-import org.gradle.kotlin.dsl.provideDelegate
-
 /* ------------------------------ Plugins ------------------------------ */
 plugins {
     id("java") // Import Java plugin.
     id("java-library") // Import Java Library plugin.
-    id("com.diffplug.spotless") version "7.0.4" // Import Spotless plugin.
-    id("com.gradleup.shadow") version "8.3.8" // Import Shadow plugin.
+    id("com.diffplug.spotless") version "8.1.0" // Import Spotless plugin.
+    id("com.gradleup.shadow") version "8.3.9" // Import Shadow plugin.
+    id("checkstyle") // Import Checkstyle plugin.
     eclipse // Import Eclipse plugin.
     kotlin("jvm") version "2.1.21" // Import Kotlin JVM plugin.
 }
+
+extra["kotlinAttribute"] = Attribute.of("kotlin-tag", Boolean::class.javaObjectType)
+
+val kotlinAttribute: Attribute<Boolean> by rootProject.extra
 
 /* --------------------------- JDK / Kotlin ---------------------------- */
 java {
@@ -24,26 +27,27 @@ java {
 kotlin { jvmToolchain(17) }
 
 /* ----------------------------- Metadata ------------------------------ */
-group = "com.tcoded"
-version = "1.4.17"
+group = "com.tcoded" // Declare bundle identifier.
 
-val apiVersion = "1.19"
+version = "1.4.17" // Declare plugin version (will be in .jar).
+
+val apiVersion = "1.19" // Declare minecraft server target version.
 
 /* ----------------------------- Resources ----------------------------- */
 tasks.named<ProcessResources>("processResources") {
     val props = mapOf("version" to version, "apiVersion" to apiVersion)
-    inputs.properties(props)
+    inputs.properties(props) // Indicates to rerun if version changes.
     filesMatching("plugin.yml") { expand(props) }
-    from("LICENSE") { into("/") }
+    from("LICENSE") { into("/") } // Bundle licenses into jarfiles.
 }
 
 /* ---------------------------- Repos ---------------------------------- */
 repositories {
-    mavenCentral()
-    gradlePluginPortal()
-    maven { url = uri("https://repo.purpurmc.org/snapshots") }
+    mavenCentral() // Import the Maven Central Maven Repository.
+    gradlePluginPortal() // Import the Gradle Plugin Portal Maven Repository.
+    maven { url = uri("https://repo.purpurmc.org/snapshots") } // Import the PurpurMC Maven Repository.
     maven { url = uri("file://${System.getProperty("user.home")}/.m2/repository") }
-    System.getProperty("SELF_MAVEN_LOCAL_REPO")?.let {
+    System.getProperty("SELF_MAVEN_LOCAL_REPO")?.let { // TrueOG Bootstrap mavenLocal().
         val dir = file(it)
         if (dir.isDirectory) {
             println("Using SELF_MAVEN_LOCAL_REPO at: $it")
@@ -64,45 +68,84 @@ repositories {
 
 /* ---------------------- Java project deps ---------------------------- */
 dependencies {
-    compileOnly("org.spigotmc:spigot-api:1.19.3-R0.1-SNAPSHOT")
-    compileOnly("com.github.MilkBowl:VaultAPI:1.7")
+    compileOnly("org.purpurmc.purpur:purpur-api:1.19.4-R0.1-SNAPSHOT") // Declare Purpur API version to be packaged.
     compileOnly("org.jetbrains:annotations:23.0.0")
     compileOnly("com.github.CraptiCraft-Development:ClansLite-API:1.4.4")
     compileOnly("com.cortezromeo.clansplus:clansplus-plugin:2.8")
-    implementation("com.github.TechnicallyCoded:FoliaLib:0.4.3")
     implementation("com.github.lightlibs:LegacyColorCodeParser:1.0.0")
     compileOnly("net.sacredlabyrinth.phaed.simpleclans:SimpleClans:2.15.2")
     compileOnly("com.github.SaberLLC:Saber-Factions:4.1.4-STABLE")
     compileOnly("com.palmergames.bukkit.towny:towny:0.100.0.0")
     compileOnly("me.clip:placeholderapi:2.11.6")
+    compileOnlyApi(project(":libs:Utilities-OG")) // Import TrueOG Network Utilities-OG Java API (from source).
+    compileOnlyApi(project(":libs:DiamondBank-OG")) {
+        attributes { attribute(kotlinAttribute, true) }
+    } // Import TrueOG network DiamondBank-OG Kotlin API (from source).
 }
 
+apply(from = "eclipse.gradle.kts") // Import eclipse classpath support script.
+
 /* ---------------------- Reproducible jars ---------------------------- */
-tasks.withType<AbstractArchiveTask>().configureEach {
+tasks.withType<AbstractArchiveTask>().configureEach { // Ensure reproducible .jars
     isPreserveFileTimestamps = false
     isReproducibleFileOrder = true
 }
 
 /* ----------------------------- Shadow -------------------------------- */
 tasks.shadowJar {
-    archiveBaseName.set("PlayerBounties-OG")
-    archiveClassifier.set("")
+    exclude("io.github.miniplaceholders.*") // Exclude the MiniPlaceholders package from being shadowed.
+    isEnableRelocation = true
+    relocationPrefix = "${project.group}.shadow"
+    archiveClassifier.set("") // Use empty string instead of null.
     minimize()
-    relocate("com.tcoded.folialib", "net.trueog.playerbountiesog.lib.folialib")
-    relocate("org.bstats", "net.trueog.playerbountiesog.lib.bstats")
 }
 
-tasks.jar {
-    archiveBaseName.set("PlayerBounties-OG")
-    archiveClassifier.set("part")
-}
+tasks.jar { archiveClassifier.set("part") } // Applies to root jarfile only.
 
-tasks.build { dependsOn(tasks.spotlessApply, tasks.shadowJar) }
+tasks.build { dependsOn(tasks.spotlessApply, tasks.shadowJar) } // Build depends on spotless and shadow.
 
 /* --------------------------- Javac opts ------------------------------- */
 tasks.withType<JavaCompile>().configureEach {
-    options.compilerArgs.add("-parameters")
-    options.isFork = true
-    options.compilerArgs.add("-Xlint:deprecation")
-    options.encoding = "UTF-8"
+    options.compilerArgs.add("-parameters") // Enable reflection for java code.
+    options.isFork = true // Run javac in its own process.
+    options.compilerArgs.add("-Xlint:deprecation") // Trigger deprecation warning messages.
+    options.encoding = "UTF-8" // Use UTF-8 file encoding.
+}
+
+/* ----------------------------- Auto Formatting ------------------------ */
+spotless {
+    java {
+        eclipse().configFile("config/formatter/eclipse-java-formatter.xml") // Eclipse java formatting.
+        leadingTabsToSpaces() // Convert leftover leading tabs to spaces.
+        removeUnusedImports() // Remove imports that aren't being called.
+    }
+    kotlinGradle {
+        ktfmt().kotlinlangStyle().configure { it.setMaxWidth(120) } // JetBrains Kotlin formatting.
+        target("build.gradle.kts", "settings.gradle.kts") // Gradle files to format.
+    }
+}
+
+checkstyle {
+    toolVersion = "10.18.1" // Declare checkstyle version to use.
+    configFile = file("config/checkstyle/checkstyle.xml") // Point checkstyle to config file.
+    isIgnoreFailures = true // Don't fail the build if checkstyle does not pass.
+    isShowViolations = true // Show the violations in any IDE with the checkstyle plugin.
+}
+
+tasks.named("compileJava") {
+    dependsOn("spotlessApply") // Run spotless before compiling with the JDK.
+}
+
+tasks.named("spotlessCheck") {
+    dependsOn("spotlessApply") // Run spotless before checking if spotless ran.
+}
+
+/* ------------------------------ Eclipse SHIM ------------------------- */
+
+// This can't be put in eclipse.gradle.kts because Gradle is weird.
+subprojects {
+    apply(plugin = "java-library")
+    apply(plugin = "eclipse")
+    eclipse.project.name = "${project.name}-${rootProject.name}"
+    tasks.withType<Jar>().configureEach { archiveBaseName.set("${project.name}-${rootProject.name}") }
 }

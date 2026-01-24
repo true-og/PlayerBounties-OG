@@ -10,5 +10,5 @@ public interface IPbpGui extends InventoryHolder {
     void setContents();
 
     void handleClick(InventoryClickEvent event);
-}
 
+}

@@ -6,10 +6,10 @@ public interface EconomyHook {
 
     boolean isValid();
 
-    void giveEco(Player player, double amount);
+    void giveEco(Player killer, Player victim, double amount);
 
-    boolean takeEco(Player player, double amount);
+    void takeEco(Player killer, Player victim, double amount);
 
-    boolean takeEco(Player player, double amount, boolean force);
+    boolean takeEco(Player killer, Player victim, double amount, boolean force);
 
 }

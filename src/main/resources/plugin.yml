@@ -1,6 +1,6 @@
 name: PlayerBounties-OG
 version: '${version}'
-main: com.tcoded.playerbountiesplus.PlayerBountiesPlus
+main: com.tcoded.playerbountiesplus.PlayerBountiesOG
 api-version: '${apiVersion}'
 authors: [ TechnicallyCoded, NotAlexNoyle ]
 description:  A player bounty plugin for TrueOG Network using our custom Diamond Economy.
