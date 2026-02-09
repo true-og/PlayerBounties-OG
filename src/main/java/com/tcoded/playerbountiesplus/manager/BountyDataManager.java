@@ -121,7 +121,7 @@ public class BountyDataManager {
     public void saveBountiesAsync() {
 
         // Wait until the previous save is done
-        while (this.savingAsync.getAndSet(true)) {
+        while (!this.savingAsync.compareAndSet(false, true)) {
 
             try {
 
@@ -136,7 +136,20 @@ public class BountyDataManager {
 
             }
 
+        }
+
+        try {
+
             this.saveBounties();
+
+        } finally {
+
+            synchronized (this.savingAsync) {
+
+                this.savingAsync.set(false);
+                this.savingAsync.notifyAll();
+
+            }
 
         }
 
