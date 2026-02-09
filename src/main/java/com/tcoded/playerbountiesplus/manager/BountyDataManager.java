@@ -127,6 +127,7 @@ public class BountyDataManager {
 
                 synchronized (this.savingAsync) {
 
+                	// SERVER HANGS HERE.
                     this.savingAsync.wait();
 
                 }
