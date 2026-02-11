@@ -20,8 +20,6 @@ import net.trueog.utilitiesog.UtilitiesOG;
 
 public class BountySetCmd {
 
-    static float amount;
-
     public static boolean handleCmd(PlayerBountiesOG plugin, CommandSender sender, Command cmd, String cmdName,
             String[] args)
     {
@@ -45,9 +43,10 @@ public class BountySetCmd {
         }
 
         final String playerNameArg = args[1];
+        final double parsedAmount;
         try {
 
-            amount = Integer.parseInt(args[2]);
+            parsedAmount = Integer.parseInt(args[2]);
 
         } catch (NumberFormatException error) {
 
@@ -66,7 +65,7 @@ public class BountySetCmd {
 
         // Check limits
         final double minimum = plugin.getConfig().getDouble("bounty-minimum", 1.0);
-        if (amount < minimum) {
+        if (parsedAmount < minimum) {
 
             sender.sendMessage(plugin.getLang().getColored("command.bounty.set.under-minimum").content()
                     .replace("{minimum}", String.valueOf(minimum)));
@@ -75,34 +74,20 @@ public class BountySetCmd {
         }
 
         final double maximum = plugin.getConfig().getDouble("bounty-maximum", 1000000.0);
-        if (amount > maximum) {
+        if (parsedAmount > maximum) {
 
             sender.sendMessage(plugin.getLang().getColored("command.bounty.set.over-maximum").content()
-                    .replace("{maximum}", String.valueOf(minimum)));
+                    .replace("{maximum}", String.valueOf(maximum)));
             return true;
 
         }
 
-        // Check economy. Only charge if sender is a player.
-        if (sender instanceof Player player) {
-
-            final boolean allowed = plugin.getEcoHook().takeEco(player, target, amount, false);
-
-            if (!allowed) {
-
-                sender.sendMessage(plugin.getLang().getColored("command.bounty.set.not-enough-money"));
-                return true;
-
-            }
-
-        }
-
         // Apply bounty multiplier
-        amount *= (float) plugin.getConfig().getDouble("bounty-multiplier", 1.0);
+        double amount = parsedAmount * plugin.getConfig().getDouble("bounty-multiplier", 1.0);
 
         // Trigger bounty set event
         final BountySetEvent event = new BountySetEvent(sender instanceof Player ? (Player) sender : null, target,
-                amount);
+                (float) amount);
         plugin.getServer().getPluginManager().callEvent(event);
         amount = event.getAmount();
 
@@ -122,17 +107,32 @@ public class BountySetCmd {
 
         }
 
+        // Check economy. Only charge if sender is a player.
+        if (sender instanceof Player player) {
+
+            final boolean allowed = plugin.getEcoHook().takeEco(player, target, amount, false);
+
+            if (!allowed) {
+
+                sender.sendMessage(plugin.getLang().getColored("command.bounty.set.not-enough-money"));
+                return true;
+
+            }
+
+        }
+
         final UUID playerUUID = target.getUniqueId();
 
         // Calculate total bounty including previous bounties
         final BountyDataManager bountyDataManager = plugin.getBountyDataManager();
         final int bountyAlreadyPresent = bountyDataManager.getBounty(playerUUID);
-        final int totalBounty = ((int) amount) + bountyAlreadyPresent;
+        final int chargeAndBountyAmount = (int) amount;
+        final int totalBounty = chargeAndBountyAmount + bountyAlreadyPresent;
         bountyDataManager.setBounty(playerUUID, totalBounty);
 
         // Confirmation
         sender.sendMessage(plugin.getLang().getColored("command.bounty.set.success").content()
-                .replace("{bounty}", String.valueOf(amount)).replace("{total}", String.valueOf(totalBounty))
+                .replace("{bounty}", String.valueOf(chargeAndBountyAmount)).replace("{total}", String.valueOf(totalBounty))
                 .replace("{target}", target.getName()).replace("{player}", sender.getName()));
 
         // Announce
@@ -153,7 +153,7 @@ public class BountySetCmd {
             Bukkit.getOnlinePlayers()
                     .forEach((Player player) -> UtilitiesOG.trueogMessage(player,
                             plugin.getLang().getColored("command.bounty.set.announce").content()
-                                    .replace("{bounty}", String.valueOf(amount)).replace("{target}", target.getName())
+                                    .replace("{bounty}", String.valueOf(chargeAndBountyAmount)).replace("{target}", target.getName())
                                     .replace("{player}", sender.getName()).replace("{extra}", extra)));
 
         }
