@@ -49,7 +49,7 @@ public class BountySetCmd {
 
             amount = Integer.parseInt(args[2]);
 
-        } catch (NumberFormatException ex) {
+        } catch (NumberFormatException error) {
 
             sender.sendMessage(plugin.getLang().getColored("command.bounty.set.amount-nan"));
             return true;
@@ -83,7 +83,7 @@ public class BountySetCmd {
 
         }
 
-        // Check money
+        // Check economy. Only charge if sender is a player.
         if (sender instanceof Player player) {
 
             final boolean allowed = plugin.getEcoHook().takeEco(player, target, amount, false);
