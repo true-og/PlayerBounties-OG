@@ -25,76 +25,117 @@ public class BountyDataManager {
     private final ConcurrentHashMap<UUID, Integer> bounties;
 
     public BountyDataManager(PlayerBountiesOG plugin) {
+
         this.plugin = plugin;
         this.bounties = new ConcurrentHashMap<>();
+
     }
 
     public void init() {
+
         final String bountiesFileName = "bounties.yml";
         bountiesFile = new File(this.plugin.getDataFolder(), bountiesFileName);
         if (!bountiesFile.exists()) {
+
             this.plugin.saveResource(bountiesFileName, false);
+
         }
 
         bountiesConfig = YamlConfiguration.loadConfiguration(bountiesFile);
 
         final Set<String> keys = bountiesConfig.getKeys(false);
         keys.forEach(key -> {
+
             try {
+
                 this.bounties.put(UUID.fromString(key), bountiesConfig.getInt(key));
+
             } catch (Exception ex) {
+
                 ex.printStackTrace();
+
             }
+
         });
+
     }
 
     public ConcurrentHashMap<UUID, Integer> getBounties() {
+
         return this.bounties;
+
     }
 
     public boolean hasBounty(UUID player) {
+
         return this.bounties.containsKey(player) && this.bounties.get(player) > 0;
+
     }
 
     public void setBounty(UUID player, int amount) {
+
         this.bounties.put(player, amount);
+
     }
 
     public int getBounty(UUID player) {
+
         return this.bounties.getOrDefault(player, 0);
+
     }
 
     public void removeBounty(UUID player) {
+
         this.bounties.remove(player);
+
     }
 
     public void saveBounties() {
+
         synchronized (this.savingFileLock) {
+
             final Set<String> keys = bountiesConfig.getKeys(false);
             keys.forEach(key -> bountiesConfig.set(key, null));
 
-            this.bounties.entrySet().forEach(entry ->
-                    this.bountiesConfig.set(entry.getKey().toString(), entry.getValue()));
+            this.bounties.entrySet()
+                    .forEach(entry -> this.bountiesConfig.set(entry.getKey().toString(), entry.getValue()));
 
             try {
+
                 this.bountiesConfig.save(this.bountiesFile);
+
             } catch (IOException error) {
+
                 error.printStackTrace();
+
             }
+
         }
+
     }
 
     public void saveBountiesAsync() {
+
         if (!this.savingAsync.compareAndSet(false, true)) {
+
             return;
+
         }
 
         Bukkit.getScheduler().runTaskAsynchronously(this.plugin, () -> {
+
             try {
+
                 this.saveBounties();
+
             } finally {
+
                 this.savingAsync.set(false);
+
             }
+
         });
+
     }
+
 }

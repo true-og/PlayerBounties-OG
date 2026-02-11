@@ -132,8 +132,9 @@ public class BountySetCmd {
 
         // Confirmation
         sender.sendMessage(plugin.getLang().getColored("command.bounty.set.success").content()
-                .replace("{bounty}", String.valueOf(chargeAndBountyAmount)).replace("{total}", String.valueOf(totalBounty))
-                .replace("{target}", target.getName()).replace("{player}", sender.getName()));
+                .replace("{bounty}", String.valueOf(chargeAndBountyAmount))
+                .replace("{total}", String.valueOf(totalBounty)).replace("{target}", target.getName())
+                .replace("{player}", sender.getName()));
 
         // Announce
         final String extra;
@@ -153,8 +154,9 @@ public class BountySetCmd {
             Bukkit.getOnlinePlayers()
                     .forEach((Player player) -> UtilitiesOG.trueogMessage(player,
                             plugin.getLang().getColored("command.bounty.set.announce").content()
-                                    .replace("{bounty}", String.valueOf(chargeAndBountyAmount)).replace("{target}", target.getName())
-                                    .replace("{player}", sender.getName()).replace("{extra}", extra)));
+                                    .replace("{bounty}", String.valueOf(chargeAndBountyAmount))
+                                    .replace("{target}", target.getName()).replace("{player}", sender.getName())
+                                    .replace("{extra}", extra)));
 
         }
 
