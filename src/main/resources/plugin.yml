@@ -8,14 +8,9 @@ website: https://github.com/true-og/PlayerBounties-OG/
 folia-supported: false
 
 depend:
-  - Vault
+  - DiamondBank-OG
 softdepend:
-  - ClansLite
-  - ClansPlus
-  - Parties
-  - BetterTeams
   - SimpleClans
-  - Towny
 
 commands:
   bounty:

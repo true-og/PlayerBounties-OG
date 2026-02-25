@@ -23,289 +23,252 @@ import com.tcoded.playerbountiesplus.listener.GuiListener;
 import com.tcoded.playerbountiesplus.manager.BountyDataManager;
 import com.tcoded.playerbountiesplus.util.LangUtil;
 
-import net.trueog.diamondbankog.DiamondBankAPIJava;
+import net.trueog.diamondbankog.api.DiamondBankAPIJava;
 import net.trueog.utilitiesog.UtilitiesOG;
 
 public final class PlayerBountiesOG extends JavaPlugin {
 
-    // Instance
-    private static PlayerBountiesOG instance;
+	// Plugin instance declaration.
+	private static PlayerBountiesOG instance;
 
-    public static PlayerBountiesOG getInstance() {
+	public static PlayerBountiesOG getInstance() {
 
-        return instance;
+		return instance;
 
-    }
+	}
 
-    public static String getPrefix() {
+	public static String getPrefix() {
 
-        return "&7[&cPlayerBounties&f-&4OG&7] ";
+		return "&7[&cPlayerBounties&f-&4OG&7] ";
 
-    }
+	}
 
-    // Utilities.
-    private LangUtil langUtil;
+	// Utilities.
+	private LangUtil langUtil;
 
-    // Managers
-    private BountyDataManager bountyDataManager;
+	// Managers.
+	private BountyDataManager bountyDataManager;
 
-    // Hooks
-    private EconomyHook ecoHook;
-    private TeamHook teamHook;
-    private PlaceholderHook placeholderHook;
+	// Hooks.
+	private EconomyHook ecoHook;
+	private TeamHook teamHook;
+	private PlaceholderHook placeholderHook;
 
-    // DiamondBank-OG Economy
-    private static DiamondBankAPIJava diamondBankAPI;
+	// DiamondBank-OG Economy.
+	private static DiamondBankAPIJava diamondBankAPI;
 
-    public PlayerBountiesOG() {
+	public PlayerBountiesOG() {
 
-        instance = this;
+		instance = this;
 
-    }
+	}
 
-    @Override
-    public void onEnable() {
+	@Override
+	public void onEnable() {
 
-        // Config
-        saveDefaultConfig();
+		// Config
+		saveDefaultConfig();
 
-        // Initialize the DiamondBank-OG API.
-        final RegisteredServiceProvider<DiamondBankAPIJava> provider = getServer().getServicesManager()
-                .getRegistration(DiamondBankAPIJava.class);
+		// Initialize the DiamondBank-OG API.
+		final RegisteredServiceProvider<DiamondBankAPIJava> provider = getServer().getServicesManager()
+				.getRegistration(DiamondBankAPIJava.class);
 
-        // If the DiamondBank-OG API failed to initialize, do this...
-        if (provider == null) {
+		// If the DiamondBank-OG API failed to initialize, do this...
+		if (provider == null) {
 
-            // Tell Bukkit to disable this plugin, and inform the console.
-            disableSelf("DiamondBank-OG API is null – disabling " + getPluginMeta().getName() + "!");
-            return;
+			// Tell Bukkit to disable this plugin, and inform the console.
+			disableSelf("DiamondBank-OG API is null – disabling " + getPluginMeta().getName() + "!");
+			return;
 
-        }
+		}
 
-        // Assign the active instance of DiamondBank-OG to the API handler.
-        diamondBankAPI = provider.getProvider();
+		// Assign the active instance of DiamondBank-OG to the API handler.
+		diamondBankAPI = provider.getProvider();
 
-        // Utils
-        this.reloadLang();
+		// Utils.
+		this.reloadLang();
 
-        // Managers
-        this.bountyDataManager = new BountyDataManager(this);
-        this.bountyDataManager.init();
+		// Managers.
+		this.bountyDataManager = new BountyDataManager(this);
+		this.bountyDataManager.init();
 
-        // Economy Hooks
-        registerDefaultEcoHooks();
-        if (!applyEcoHookRegistration()) {
+		// Economy Hooks.
+		registerDefaultEcoHooks();
 
-            return;
+		// Team Hooks.
+		this.teamHook = TeamHook.findTeamHook(this);
+		if (this.teamHook == null) {
 
-        }
+			getLogger().warning(
+					"There is no supported team/clan/party plugin on the server! Feel free to request support for the plugin you use on GitHub or Discord!");
 
-        // Team Hooks
-        this.teamHook = TeamHook.findTeamHook(this);
-        if (this.teamHook == null) {
+		}
 
-            getLogger().warning(
-                    "There is no supported team/clan/party plugin on the server! Feel free to request support for the plugin you use on GitHub or Discord!");
+		// Placeholder Hooks.
+		this.placeholderHook = PlaceholderHook.findPlaceholderHook(this);
+		this.placeholderHook.enable();
 
-        }
+		// Commands.
+		final PluginCommand bountyCmd = this.getCommand("bounty");
+		if (bountyCmd != null) {
 
-        // Placeholder Hooks
-        this.placeholderHook = PlaceholderHook.findPlaceholderHook(this);
-        this.placeholderHook.enable();
+			final BountyCommand bountyExec = new BountyCommand(this);
+			bountyCmd.setExecutor(bountyExec);
+			bountyCmd.setTabCompleter(bountyExec);
 
-        // Commands
-        final PluginCommand bountyCmd = this.getCommand("bounty");
-        if (bountyCmd != null) {
+		}
 
-            final BountyCommand bountyExec = new BountyCommand(this);
-            bountyCmd.setExecutor(bountyExec);
-            bountyCmd.setTabCompleter(bountyExec);
+		final PluginCommand adminCmd = this.getCommand("playerbountiesplusadmin");
+		if (adminCmd != null) {
 
-        }
+			final PlayerBountiesPlusAdminCmd adminExec = new PlayerBountiesPlusAdminCmd(this);
+			adminCmd.setExecutor(adminExec);
+			adminCmd.setTabCompleter(adminExec);
 
-        final PluginCommand adminCmd = this.getCommand("playerbountiesplusadmin");
-        if (adminCmd != null) {
+		}
 
-            final PlayerBountiesPlusAdminCmd adminExec = new PlayerBountiesPlusAdminCmd(this);
-            adminCmd.setExecutor(adminExec);
-            adminCmd.setTabCompleter(adminExec);
+		// Listeners.
+		this.getServer().getPluginManager().registerEvents(new DeathListener(this), this);
+		this.getServer().getPluginManager().registerEvents(new GuiListener(), this);
 
-        }
+		final List<Plugin> plugins = ImmutableList.copyOf(this.getServer().getPluginManager().getPlugins());
+		findPluginWithQuery(plugins, "team");
+		findPluginWithQuery(plugins, "teams");
+		findPluginWithQuery(plugins, "clan");
+		findPluginWithQuery(plugins, "clans");
+		findPluginWithQuery(plugins, "party", "voteparty");
+		findPluginWithQuery(plugins, "parties");
+		findPluginWithQuery(plugins, "guild");
+		findPluginWithQuery(plugins, "guilds");
 
-        // Listeners
-        this.getServer().getPluginManager().registerEvents(new DeathListener(this), this);
-        this.getServer().getPluginManager().registerEvents(new GuiListener(), this);
+	}
 
-        final List<Plugin> plugins = ImmutableList.copyOf(this.getServer().getPluginManager().getPlugins());
-        findPluginWithQuery(plugins, "team");
-        findPluginWithQuery(plugins, "teams");
-        findPluginWithQuery(plugins, "clan");
-        findPluginWithQuery(plugins, "clans");
-        findPluginWithQuery(plugins, "party", "voteparty");
-        findPluginWithQuery(plugins, "parties");
-        findPluginWithQuery(plugins, "guild");
-        findPluginWithQuery(plugins, "guilds");
+	public void reloadLang() {
 
-    }
+		this.langUtil = new LangUtil(this, this.getConfig().getString("lang", "en_us").toLowerCase());
 
-    public void reloadLang() {
+	}
 
-        this.langUtil = new LangUtil(this, this.getConfig().getString("lang", "en_us").toLowerCase());
+	@Override
+	public void onDisable() {
 
-    }
+		HandlerList.unregisterAll(this);
+		this.placeholderHook.disable();
 
-    @Override
-    public void onDisable() {
+	}
 
-        HandlerList.unregisterAll(this);
-        this.placeholderHook.disable();
+	public EconomyHook getEcoHook() {
 
-    }
+		return this.ecoHook;
 
-    public EconomyHook getEcoHook() {
+	}
 
-        return this.ecoHook;
+	public TeamHook getTeamHook() {
 
-    }
+		return teamHook;
 
-    public TeamHook getTeamHook() {
+	}
 
-        return teamHook;
+	public PlaceholderHook getPlaceholderHook() {
 
-    }
+		return placeholderHook;
 
-    public PlaceholderHook getPlaceholderHook() {
+	}
 
-        return placeholderHook;
+	public BountyDataManager getBountyDataManager() {
 
-    }
+		return bountyDataManager;
 
-    public BountyDataManager getBountyDataManager() {
+	}
 
-        return bountyDataManager;
+	public LangUtil getLang() {
 
-    }
+		return this.langUtil;
 
-    public LangUtil getLang() {
+	}
 
-        return this.langUtil;
+	// Utils.
+	private static void findPluginWithQuery(List<Plugin> plugins, String pluginNameQuery, String... excludeStrings) {
 
-    }
+		final String firstPluginFound = plugins.stream().filter(p -> {
 
-    // Utils
+			final String lowerName = p.getName().toLowerCase();
+			// If the plugin name doesn't contain the query, skip.
+			if (!lowerName.contains(pluginNameQuery)) {
 
-    private static void findPluginWithQuery(List<Plugin> plugins, String pluginNameQuery, String... excludeStrings) {
+				return false;
 
-        final String firstPluginFound = plugins.stream().filter(p -> {
+			}
 
-            final String lowerName = p.getName().toLowerCase();
-            // If the plugin name doesn't contain the query, skip
-            if (!lowerName.contains(pluginNameQuery)) {
+			// If the plugin name contains any of the exclude strings, skip.
+			for (String excludeString : excludeStrings) {
 
-                return false;
+				if (lowerName.contains(excludeString)) {
 
-            }
+					return false;
 
-            // If the plugin name contains any of the exclude strings, skip
-            for (String excludeString : excludeStrings) {
+				}
 
-                if (lowerName.contains(excludeString)) {
+			}
 
-                    return false;
+			return true;
 
-                }
+		}).findFirst().map(p -> {
 
-            }
+			final List<String> authors = p.getPluginMeta().getAuthors();
 
-            return true;
+			return p.getName() + " (" + (authors.isEmpty() ? "N/A" : authors.get(0)) + ")";
 
-        }).findFirst().map(p -> {
+		}).orElse(null);
 
-            final List<String> authors = p.getPluginMeta().getAuthors();
-            return p.getName() + " (" + (authors.isEmpty() ? "N/A" : authors.get(0)) + ")";
+		if (firstPluginFound == null) {
 
-        }).orElse(null);
+			return;
 
-        if (firstPluginFound == null) {
+		}
 
-            return;
+	}
 
-        }
+	private void registerDefaultEcoHooks() {
 
-    }
+		final ServicesManager servicesManager = getServer().getServicesManager();
 
-    private void registerDefaultEcoHooks() {
+		// De-register old hook.
+		servicesManager.unregisterAll(this);
 
-        final ServicesManager servicesManager = getServer().getServicesManager();
+		// Initialize the DiamondBank-OG hook with the active plugin instance.
+		final DiamondBankOGHook diamondBankOGHook = new DiamondBankOGHook(getInstance(), diamondBankAPI);
 
-        // Unregister old eco hooks
-        servicesManager.unregisterAll(this);
+		// Register the DiamondBank-OG hook as the active economy hook.
+		servicesManager.register(EconomyHook.class, diamondBankOGHook, this, ServicePriority.Low);
 
-        // Register vault economy hook
-        final DiamondBankOGHook diamondBankOGHook = new DiamondBankOGHook(getInstance(), diamondBankAPI);
-        final boolean ecoPresent = diamondBankOGHook.init();
+	}
 
-        // Register or fallback
-        if (ecoPresent) {
+	// Helps this plugin kill itself gracefully (in minecraft).
+	public static void disableSelf(String reason) {
 
-            servicesManager.register(EconomyHook.class, diamondBankOGHook, this, ServicePriority.Low);
+		// Run a meta-task on the Bukkit server outside of the context of this plugin.
+		Bukkit.getScheduler().runTask(Bukkit.getServer().getPluginManager().getPlugin("PlayerBounties-OG"), () -> {
 
-        } else {
+			// Attempt to fetch the active instance of this plugin.
+			final PlayerBountiesOG pluginInstance = getInstance();
 
-            PlayerBountiesOG.disableSelf("DiamondBank-OG plugin not found, cannot proceed without it!");
+			// If this plugin is already disabled, do this...
+			if (!pluginInstance.isEnabled()) {
 
-        }
+				// Do nothing, task already completed.
+				return;
 
-    }
+			}
 
-    public boolean applyEcoHookRegistration() {
+			// Inform console of this plugin being disabled.
+			UtilitiesOG.logToConsole(getPrefix(), reason);
 
-        // Get economy hook
-        final ServicesManager servicesManager = getServer().getServicesManager();
-        final RegisteredServiceProvider<EconomyHook> ecoHookProvider = servicesManager
-                .getRegistration(EconomyHook.class);
-        if (ecoHookProvider == null) {
+			// Commit sudoku.
+			Bukkit.getPluginManager().disablePlugin(pluginInstance);
 
-            getLogger().severe("No economy hook is present! Aborting startup!");
-            return false;
+		});
 
-        }
-
-        final String hookName = ecoHookProvider.getProvider().getClass().getSimpleName();
-        final String hookPluginName = ecoHookProvider.getPlugin().getName();
-
-        getLogger().info("Using economy hook: " + hookName + " from plugin: " + hookPluginName);
-        this.ecoHook = ecoHookProvider.getProvider();
-
-        return true;
-
-    }
-
-    // Helps this plugin kill itself gracefully (in minecraft).
-    public static void disableSelf(String reason) {
-
-        // Run a meta-task on the Bukkit server outside of the context of this plugin.
-        Bukkit.getScheduler().runTask(Bukkit.getServer().getPluginManager().getPlugin("PlayerBounties-OG"), () -> {
-
-            // Attempt to fetch the active instance of this plugin.
-            final PlayerBountiesOG pluginInstance = getInstance();
-
-            // If this plugin is already disabled, do this...
-            if (!pluginInstance.isEnabled()) {
-
-                // Do nothing, task already completed.
-                return;
-
-            }
-
-            // Inform console of this plugin being disabled.
-            UtilitiesOG.logToConsole("&f[&bPlayerBountiesPlus&f]", reason);
-
-            // Commit sudoku.
-            Bukkit.getPluginManager().disablePlugin(pluginInstance);
-
-        });
-
-    }
+	}
 
 }

@@ -8,175 +8,155 @@ import org.bukkit.entity.Player;
 
 import com.tcoded.playerbountiesplus.PlayerBountiesOG;
 
-import net.trueog.diamondbankog.DiamondBankAPIJava;
 import net.trueog.diamondbankog.DiamondBankException;
-import net.trueog.diamondbankog.DiamondBankException.DatabaseException;
 import net.trueog.diamondbankog.DiamondBankException.EconomyDisabledException;
 import net.trueog.diamondbankog.DiamondBankException.InsufficientFundsException;
 import net.trueog.diamondbankog.DiamondBankException.InsufficientInventorySpaceException;
 import net.trueog.diamondbankog.DiamondBankException.InvalidPlayerException;
 import net.trueog.diamondbankog.DiamondBankException.PlayerNotOnlineException;
+import net.trueog.diamondbankog.api.DiamondBankAPIJava;
+import net.trueog.utilitiesog.UtilitiesOG;
 
 public class DiamondBankOGHook implements EconomyHook {
 
-    private static final long SHARDS_PER_DIAMOND = 9L;
+	private final PlayerBountiesOG plugin;
+	private final DiamondBankAPIJava diamondBank;
 
-    private final PlayerBountiesOG plugin;
-    private final DiamondBankAPIJava diamondBank;
+	public DiamondBankOGHook(PlayerBountiesOG plugin, DiamondBankAPIJava diamondBankAPITransporter) {
 
-    public DiamondBankOGHook(PlayerBountiesOG plugin, DiamondBankAPIJava diamondBankAPITransporter) {
+		this.plugin = plugin;
+		this.diamondBank = diamondBankAPITransporter;
 
-        this.plugin = plugin;
-        this.diamondBank = diamondBankAPITransporter;
+	}
 
-    }
+	@Override
+	public boolean giveEco(Player player, Player victim, double diamonds) {
 
-    public boolean init() {
+		final long shards = diamondBank.diamondsToShards(diamonds);
+		if (shards <= 0L) {
 
-        return this.plugin.getServer().getPluginManager().getPlugin("Vault") != null;
+			return false;
 
-    }
+		}
 
-    @Override
-    public boolean isValid() {
+		try { 
 
-        return diamondBank != null;
+			diamondBank.addToPlayerBankShards(
+					player.getUniqueId(),
+					shards,
+					"Player " + player.getName() + " defeated " + victim.getName() + " and earned a bounty of "
+							+ diamondBank.shardsToDiamonds(shards) + ".",
+							"Plugin: PlayerBounties-OG"
+					);
 
-    }
+		} catch (EconomyDisabledException economyDisabledError) {
 
-    @Override
-    public void giveEco(Player player, Player victim, double amount) {
+			PlayerBountiesOG.disableSelf("[PlayerBounties-OG] Paying " + player.getName() + " for killing "
+					+ victim.getName() + " failed because the economy is disabled! " + economyDisabledError.getMessage());
+			economyDisabledError.printStackTrace();
 
-        long diamonds = toWholeDiamonds(amount);
-        if (diamonds <= 0L) {
+			return false;
 
-            return;
+		}
 
-        }
+		return true;
 
-        long shards;
-        try {
+	}
 
-            shards = Math.multiplyExact(diamonds, SHARDS_PER_DIAMOND);
+	@Override
+	public boolean takeEco(Player player, Player victim, double diamonds) {
 
-        } catch (ArithmeticException e) {
+		final long shards = diamondBank.diamondsToShards(diamonds);
+		if (shards <= 0L) {
 
-            PlayerBountiesOG.disableSelf("[PlayerBounties-OG] Overflow converting diamonds to shards for payout.");
-            return;
+			return false;
 
-        }
+		}
 
-        try {
+		try {
 
-            diamondBank
-                    .addToPlayerBankShards(
-                            player.getUniqueId(), shards, "Player " + player.getName() + " defeated " + victim.getName()
-                                    + " and earned a bounty of " + diamonds + " Diamonds.",
-                            "Plugin: PlayerBounties-OG");
+			diamondBank.consumeFromPlayer(
+					player.getUniqueId(),
+					shards,
+					"Player " + player.getName() + " contributed " + diamondBank.shardsToDiamonds(shards)
+					+ " Diamonds toward a bounty on " + victim.getName() + ".",
+					"Plugin: PlayerBounties-OG"
+					);
 
-        } catch (EconomyDisabledException | DatabaseException error) {
+		}
+		catch (EconomyDisabledException economyDisabledError) {
 
-            PlayerBountiesOG.disableSelf("[PlayerBounties-OG] Paying " + player.getName() + " for killing "
-                    + victim.getName() + " failed with error: " + error.getMessage());
-            error.printStackTrace();
+			PlayerBountiesOG.disableSelf("[PlayerBounties-OG] DiamondBank-OG economy disabled: " + economyDisabledError.getMessage());
+			economyDisabledError.printStackTrace();
 
-        }
+			return false;
 
-    }
+		}
 
-    @Override
-    public void takeEco(Player player, Player victim, double amount) {
+		catch (InvalidPlayerException invalidPlayerError) {
 
-        this.takeEco(player, victim, amount, false);
+			plugin.getLogger().warning("Invalid player for consumeFromPlayer: " + player.getName());
+			UtilitiesOG.trueogMessage(player, "&cERROR: your player account could not be found by DiamondBank-OG. Contact an administrator!");
 
-    }
+			return false;
 
-    @Override
-    public boolean takeEco(Player player, Player victim, double amount, boolean force) {
+		}
+		catch (InsufficientFundsException insufficientFundsError) {
 
-        long diamonds = toWholeDiamonds(amount);
-        if (diamonds <= 0L) {
+			UtilitiesOG.trueogMessage(player, "&6WARNING: You do not have enough Diamonds to contribute to that bounty.");
 
-            return true;
+			return false;
 
-        }
+		}
+		// TODO: Remove InsufficientInventorySpaceException catch block after next DiamondBank-OG update.
+		catch (InsufficientInventorySpaceException temporaryInsufficientInventorySpaceError) {
 
-        try {
+			plugin.getLogger().info("Player " + player.getName() + " has insufficient inventory space to receive items. This error is expected to be removed in the next DiamondBank-OG update.");
+			temporaryInsufficientInventorySpaceError.printStackTrace();
 
-            diamondBank.consumeFromPlayer(player.getUniqueId(), diamonds, "Player " + player.getName() + " contributed "
-                    + diamonds + " Diamonds toward a bounty on " + victim.getName() + ".", "Plugin: PlayerBounties-OG");
-            return true;
+			return false;
 
-        } catch (InsufficientFundsException | InsufficientInventorySpaceException | InvalidPlayerException
-                | PlayerNotOnlineException e)
-        {
+		}
+		// TODO: Remove PlayerNotOnlineException catch block after next DiamondBank-OG update.
+		catch (PlayerNotOnlineException temporaryPlayerNotOnlineError) {
 
-            return false;
+			plugin.getLogger().warning("Player " + player.getName() + " not online when attempting to consumeFromPlayer. This error is expected to be removed in the next DiamondBank-OG update.");
+			temporaryPlayerNotOnlineError.printStackTrace();
 
-        } catch (EconomyDisabledException | DatabaseException e) {
+			return false;
 
-            PlayerBountiesOG
-                    .disableSelf("[PlayerBounties-OG] Collecting " + diamonds + " Diamonds from " + player.getName()
-                            + " for a bounty on " + victim.getName() + " failed with error: " + e.getMessage());
-            e.printStackTrace();
-            return false;
+		}
 
-        }
+		return true;
 
-    }
+	}
 
-    public CompletableFuture<Double> getBalanceAsync(UUID uuid) {
+	public CompletableFuture<Long> getShardBalance(UUID uuid) {
 
-        CompletableFuture<Double> future = new CompletableFuture<>();
+		final CompletableFuture<Long> future = new CompletableFuture<>();
+		Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
 
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+			try {
 
-            try {
+				final long totalShards = diamondBank.getTotalShards(uuid);
+				future.complete(totalShards);
 
-                long totalShards = diamondBank.getTotalShards(uuid);
-                future.complete(totalShards / (double) SHARDS_PER_DIAMOND);
+			} catch (DiamondBankException.EconomyDisabledException error) {
 
-            } catch (DiamondBankException.EconomyDisabledException error) {
+				PlayerBountiesOG
+				.disableSelf("The DiamondBank-OG economy is disabled — disabling " + plugin.getName() + "!");
+				future.completeExceptionally(error);
 
-                PlayerBountiesOG
-                        .disableSelf("The DiamondBank-OG economy is disabled — disabling " + plugin.getName() + "!");
-                future.completeExceptionally(error);
+			} catch (Throwable t) {
 
-            } catch (DiamondBankException.DatabaseException error) {
+				future.completeExceptionally(t);
 
-                PlayerBountiesOG.disableSelf("DiamondBank-OG database error — disabling " + plugin.getName()
-                        + ". Cause: " + error.getMessage());
-                future.completeExceptionally(error);
+			}
 
-            } catch (Throwable t) {
+		});
 
-                future.completeExceptionally(t);
+		return future;
 
-            }
-
-        });
-
-        return future;
-
-    }
-
-    public CompletableFuture<Double> getBalanceAsync(Player player) {
-
-        return getBalanceAsync(player.getUniqueId());
-
-    }
-
-    private static long toWholeDiamonds(double diamonds) {
-
-        if (!Double.isFinite(diamonds) || diamonds <= 0.0) {
-
-            return 0L;
-
-        }
-
-        long whole = (long) Math.floor(diamonds);
-        return Math.max(0L, whole);
-
-    }
+	}
 
 }

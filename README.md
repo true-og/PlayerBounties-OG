@@ -1,14 +1,14 @@
-# PlayerBountiesPlus
+# PlayerBounties-OG
 
 ## Overview
-PlayerBountiesPlus lets players set and claim bounties while blocking teammates from claiming rewards. Hooks into Vault for economy handling and supports many team plugins.
+PlayerBounties-OG is a hard fork of [PlayerBountiesPlus](https://github.com/TechnicallyCoded/PlayerBountiesPlus) that lets players set and claim bounties while blocking teammates from claiming rewards. Hooks into [DiamondBank-OG](https://github.com/true-og/DiamondBank-OG) for economy handling and supports [SimpleClans](https://github.com/true-og/SimpleClans). Built for Purpur 1.19.4.
 
 ## Features
-- Clan-aware bounty system that prevents teammates from claiming each other's bounties
-- Integrates with Vault and supports ClansLite, ClansPlus, Parties, BetterTeams, SimpleClans and Towny for team detection
-- Inventory GUI for viewing bounties
-- PlaceholderAPI support for custom placeholders
-- Localized messages in multiple languages
+- Clan-aware bounty system that prevents teammates from claiming each other's bounties.
+- Integrates with [DiamondBank-OG](https://github.com/true-og/DiamondBank-OG) and supports [SimpleClans](https://github.com/true-og/SimpleClans) for team detection.
+- Inventory GUI for viewing bounties.
+- PlaceholderAPI support for custom placeholders.
+- Localized messages in multiple languages.
 
 ## Commands
 - `/bounty set <player> <amount>` – set a bounty on a player
@@ -17,8 +17,8 @@ PlayerBountiesPlus lets players set and claim bounties while blocking teammates 
 - `/pbp reload` – reload configuration and messages
 - `/pbp version` – display plugin version
 - `/pbp bounty set <player> <amount>` – admin set a bounty
-- `/pbp bounty add <player> <amount>` – add to a bounty
-- `/pbp bounty remove <player> <amount>` – remove from a bounty
+- `/pbp bounty add <player> <amount>` – add diamonds to a bounty
+- `/pbp bounty remove <player> <amount>` – remove diamonds from a bounty
 - `/pbp bounty delete <player>` – delete a bounty
 - `/pbp bounty get <player>` – view a bounty
 
@@ -38,9 +38,9 @@ PlayerBountiesPlus lets players set and claim bounties while blocking teammates 
 | `playerbountiesplus.command.admin.bounty.get` | op |
 
 ## Developer Notes
-- Commands reside in `com.tcoded.playerbountiesplus.command` with subpackages for bounty and admin actions
-- Event listeners like `DeathListener` handle bounty claim logic
-- Hooks under `com.tcoded.playerbountiesplus.hook` integrate with Vault, PlaceholderAPI and team plugins
-- Inventory GUIs in `com.tcoded.playerbountiesplus.gui` present bounty data
-- `BountyDataManager` manages persistence of bounties
+- Commands reside in `com.tcoded.playerbountiesplus.command` with subpackages for bounty and admin actions.
+- Event listeners like `DeathListener` handle bounty claim logic.
+- Hooks under `com.tcoded.playerbountiesplus.hook` integrate with DiamondBank-OG, PlaceholderAPI and SimpleClans.
+- Inventory GUIs in `com.tcoded.playerbountiesplus.gui` present bounty data.
+- `BountyDataManager` manages persistence of bounties.
 

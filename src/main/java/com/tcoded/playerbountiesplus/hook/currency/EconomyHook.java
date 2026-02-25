@@ -4,12 +4,8 @@ import org.bukkit.entity.Player;
 
 public interface EconomyHook {
 
-    boolean isValid();
+    boolean giveEco(Player killer, Player victim, double diamonds);
 
-    void giveEco(Player killer, Player victim, double amount);
-
-    void takeEco(Player killer, Player victim, double amount);
-
-    boolean takeEco(Player killer, Player victim, double amount, boolean force);
+    boolean takeEco(Player killer, Player victim, double diamonds);
 
 }
