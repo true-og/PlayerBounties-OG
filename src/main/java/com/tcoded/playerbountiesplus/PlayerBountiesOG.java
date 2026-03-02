@@ -55,7 +55,7 @@ public final class PlayerBountiesOG extends JavaPlugin {
     private PlaceholderHook placeholderHook;
 
     // DiamondBank-OG Economy.
-    private static DiamondBankAPIJava diamondBankAPI;
+    private DiamondBankAPIJava diamondBankAPI;
 
     public PlayerBountiesOG() {
 
@@ -83,7 +83,7 @@ public final class PlayerBountiesOG extends JavaPlugin {
         }
 
         // Assign the active instance of DiamondBank-OG to the API handler.
-        diamondBankAPI = provider.getProvider();
+        this.diamondBankAPI = provider.getProvider();
 
         // Utils.
         this.reloadLang();
