@@ -9,49 +9,49 @@ import com.tcoded.playerbountiesplus.PlayerBountiesOG;
 
 public abstract class AbstractTeamHook implements TeamHook {
 
-    protected PlayerBountiesOG plugin;
-    protected JavaPlugin teamPlugin;
+	protected PlayerBountiesOG plugin;
+	protected JavaPlugin teamPlugin;
 
-    public AbstractTeamHook(PlayerBountiesOG plugin, Plugin teamPlugin) {
+	public AbstractTeamHook(PlayerBountiesOG plugin, Plugin teamPlugin) {
 
-        this.plugin = plugin;
-        this.teamPlugin = (JavaPlugin) teamPlugin;
+		this.plugin = plugin;
+		this.teamPlugin = (JavaPlugin) teamPlugin;
 
-    }
+	}
 
-    @Override
-    public String getPluginName() {
+	@Override
+	public String getPluginName() {
 
-        return this.teamPlugin.getName();
+		return this.teamPlugin.getName();
 
-    }
+	}
 
-    @Override
-    public String getAuthor() {
+	@Override
+	public String getAuthor() {
 
-        final List<String> authors = this.teamPlugin.getPluginMeta().getAuthors();
-        if (authors.isEmpty()) {
+		final List<String> authors = this.teamPlugin.getPluginMeta().getAuthors();
+		if (authors.isEmpty()) {
 
-            return "N/A";
+			return "N/A";
 
-        }
+		}
 
-        return authors.get(0);
+		return authors.get(0);
 
-    }
+	}
 
-    @Override
-    public String[] getAuthors() {
+	@Override
+	public String[] getAuthors() {
 
-        final List<String> authors = this.teamPlugin.getPluginMeta().getAuthors();
-        if (authors.isEmpty()) {
+		final List<String> authors = this.teamPlugin.getPluginMeta().getAuthors();
+		if (authors.isEmpty()) {
 
-            return new String[0];
+			return new String[0];
 
-        }
+		}
 
-        return authors.toArray(new String[0]);
+		return authors.toArray(new String[0]);
 
-    }
+	}
 
 }

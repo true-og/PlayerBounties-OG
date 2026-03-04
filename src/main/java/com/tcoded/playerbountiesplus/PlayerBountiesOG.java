@@ -159,6 +159,7 @@ public final class PlayerBountiesOG extends JavaPlugin {
 
     public EconomyHook getEcoHook() {
 
+    	// TODO: Fix this NPE.
         return this.ecoHook;
 
     }
