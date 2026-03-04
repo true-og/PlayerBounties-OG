@@ -159,7 +159,12 @@ public final class PlayerBountiesOG extends JavaPlugin {
 
     public EconomyHook getEcoHook() {
 
-    	// TODO: Fix this NPE.
+        if (this.ecoHook == null) {
+
+            throw new IllegalStateException("Economy hook is not initialized. DiamondBank-OG may be unavailable.");
+
+        }
+
         return this.ecoHook;
 
     }
@@ -239,6 +244,9 @@ public final class PlayerBountiesOG extends JavaPlugin {
 
         // Initialize the DiamondBank-OG hook with the active plugin instance.
         final DiamondBankOGHook diamondBankOGHook = new DiamondBankOGHook(getInstance(), diamondBankAPI);
+
+        // Set DiamondBank-OG as the active economy implementation used by commands/listeners.
+        this.ecoHook = diamondBankOGHook;
 
         // Register the DiamondBank-OG hook as the active economy hook.
         servicesManager.register(EconomyHook.class, diamondBankOGHook, this, ServicePriority.Low);
