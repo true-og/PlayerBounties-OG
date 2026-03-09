@@ -6,6 +6,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -153,6 +155,7 @@ public class DeathListener implements Listener {
             }
 
             Bukkit.getOnlinePlayers().forEach(player -> UtilitiesOG.trueogMessage(player, message));
+            playGlobalCelebrationEffects(killer, victim);
 
         }
 
@@ -167,6 +170,20 @@ public class DeathListener implements Listener {
 
         bountyDataManager.removeBounty(victimId);
         bountyDataManager.saveBountiesAsync();
+
+    }
+
+    private void playGlobalCelebrationEffects(Player killer, Player victim) {
+
+        Bukkit.getOnlinePlayers().forEach(player -> {
+
+            player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0F, 1.0F);
+
+            player.spawnParticle(Particle.FIREWORK, killer.getLocation().add(0D, 1D, 0D), 40, 0.6D, 0.8D, 0.6D, 0.01D);
+            player.spawnParticle(Particle.FIREWORK, victim.getLocation().add(0D, 1D, 0D), 40, 0.6D, 0.8D, 0.6D, 0.01D);
+            player.spawnParticle(Particle.TOTEM, killer.getLocation().add(0D, 1D, 0D), 20, 0.5D, 0.7D, 0.5D, 0.01D);
+
+        });
 
     }
 

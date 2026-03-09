@@ -203,6 +203,12 @@ public final class PlayerBountiesOG extends JavaPlugin {
 
     }
 
+    public LuckPerms getLuckPerms() {
+
+        return this.luckPerms;
+
+    }
+
     // Utilities.
     private static void findPluginWithQuery(List<Plugin> plugins, String pluginNameQuery, String... excludeStrings) {
 
