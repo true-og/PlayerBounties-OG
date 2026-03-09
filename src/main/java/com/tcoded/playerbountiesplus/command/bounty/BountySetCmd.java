@@ -314,17 +314,17 @@ public class BountySetCmd {
 
         if (prefix.isBlank()) {
 
-            return player.getName();
+            return player.getName().replaceAll("\\s*>$", "");
 
         }
 
         if (leadingColorCodes.isBlank()) {
 
-            return prefix + " " + player.getName();
+            return (prefix + " " + player.getName()).replaceAll("\\s*>$", "");
 
         }
 
-        return prefix + " " + leadingColorCodes + player.getName();
+        return (prefix + " " + leadingColorCodes + player.getName()).replaceAll("\\s*>$", "");
 
     }
 

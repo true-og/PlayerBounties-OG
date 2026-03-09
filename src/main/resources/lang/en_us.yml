@@ -36,7 +36,7 @@ command:
         player-not-found: "&cThat player is not online or doesn't exist!"
         success: "&a{target} currently has a bounty of {bounty}."
   bounty:
-    no-action: "&cYou need to specify an action! /bounty <set/top/check>"
+    no-action: "&cYou need to specify an action! /bounty <set/add/top/check>"
     invalid-action: "&cThat's not a valid action!"
     set:
       missing-args: "&cYou need to specify a player and an amount! /bounty set <player> <amount>"
@@ -49,6 +49,14 @@ command:
       success: "&cYou placed a bounty of {bounty} on {target}'s head!"
       announce: "\nA bounty of {bounty} was placed on {target}'s &ahead by&r {player}!{extra}\n"
       announce-extra: " (Total: {total})"
+    add:
+      missing-args: "&cYou need to specify a player and an amount! /bounty add <player> <amount>"
+      amount-nan: "&cThat's not a valid number!"
+      player-not-found: "&cThat player could not be found!"
+      success: "&aYou increased {target}'s bounty by {amount}. Total: {total}."
+      announce: "\n{player} increased {target}'s bounty by {amount}&a! &7(Total: &b{total}&7)\n"
+      prompt: "&eType how many diamonds to add to {target}'s bounty in chat. Type &ccancel &eto abort."
+      cancelled: "&cBounty increase cancelled."
     check:
       no-player-specified: "&cYou need to specify a player! /bounty check <player>"
       player-not-found: "&cThat player is not online or doesn't exist!"

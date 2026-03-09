@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import com.google.common.collect.Lists;
 import com.tcoded.playerbountiesplus.PlayerBountiesOG;
 import com.tcoded.playerbountiesplus.command.bounty.BountyCheckCmd;
+import com.tcoded.playerbountiesplus.command.bounty.BountyAddCmd;
 import com.tcoded.playerbountiesplus.command.bounty.BountySetCmd;
 import com.tcoded.playerbountiesplus.command.bounty.BountyTopCmd;
 
@@ -69,6 +70,12 @@ public class BountyCommand implements CommandExecutor, TabCompleter {
 
             }
 
+            case "add" -> {
+
+                return BountyAddCmd.handleCmd(plugin, sender, cmd, cmdName, args);
+
+            }
+
             case "top" -> {
 
                 return BountyTopCmd.handleCmd(plugin, diamondBankAPI, sender, cmd, cmdName, args);
@@ -99,7 +106,7 @@ public class BountyCommand implements CommandExecutor, TabCompleter {
 
         if (args.length == 1) {
 
-            return Lists.newArrayList("set", "top", "check").stream()
+            return Lists.newArrayList("set", "add", "top", "check").stream()
                     .filter(action -> StringUtils.startsWith(action, StringUtils.lowerCase(args[0])))
                     .collect(Collectors.toList());
 
@@ -109,6 +116,10 @@ public class BountyCommand implements CommandExecutor, TabCompleter {
             return switch (subCommand) {
 
                 case "set" -> BountySetCmd
+                        .onTabComplete(sender, args).stream().filter(suggestion -> StringUtils
+                                .startsWith(StringUtils.lowerCase(suggestion), StringUtils.lowerCase(args[1])))
+                        .collect(Collectors.toList());
+                case "add" -> BountyAddCmd
                         .onTabComplete(sender, args).stream().filter(suggestion -> StringUtils
                                 .startsWith(StringUtils.lowerCase(suggestion), StringUtils.lowerCase(args[1])))
                         .collect(Collectors.toList());

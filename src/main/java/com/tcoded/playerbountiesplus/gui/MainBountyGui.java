@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
 
+import org.apache.commons.lang3.StringUtils;
+
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
@@ -16,6 +18,7 @@ import net.trueog.diamondbankog.api.DiamondBankAPIJava;
 import net.trueog.gxui.GUIBase;
 import net.trueog.gxui.GUIButton;
 import net.trueog.gxui.GUIItem;
+import net.trueog.utilitiesog.UtilitiesOG;
 
 public class MainBountyGui extends GUIBase {
 
@@ -246,6 +249,8 @@ public class MainBountyGui extends GUIBase {
         final ArrayList<String> lore = new ArrayList<>();
 
         lore.add("&eBounty: &b" + formatBounty(entry.bountyDiamonds()));
+        lore.add("&7Click to increase this player's bounty.");
+        lore.add("&8You will be prompted in chat for the amount.");
         lore.add("");
         lore.add("&6Claiming the bounty will give you a 50% chance of beheading your victim!");
 
@@ -261,9 +266,63 @@ public class MainBountyGui extends GUIBase {
         }
 
         item.lore(lore);
+        item.setButton(new GUIButton()
+        {
+
+            @Override
+            public boolean leftClick() {
+
+                return promptIncrease(entry);
+
+            }
+
+            @Override
+            public boolean leftClickShift() {
+
+                return promptIncrease(entry);
+
+            }
+
+            @Override
+            public boolean rightClick() {
+
+                return promptIncrease(entry);
+
+            }
+
+            @Override
+            public boolean rightClickShift() {
+
+                return promptIncrease(entry);
+
+            }
+
+        });
         item.setPlayErrorSound(false);
 
         return item;
+
+    }
+
+    private boolean promptIncrease(BountyGuiEntry entry) {
+
+        if (entry.targetUuid() == null) {
+
+            UtilitiesOG.trueogMessage(viewer, plugin.getLang().getColored("command.bounty.add.player-not-found"));
+            return true;
+
+        }
+
+        final String targetName = StringUtils.defaultIfBlank(entry.targetName(), "Unknown Player");
+        plugin.getBountyIncreasePromptListener().prompt(viewer.getUniqueId(), entry.targetUuid(), targetName);
+
+        final String promptMessage = plugin.getLang().getColored("command.bounty.add.prompt")
+                .replace("{target}", safeDisplayName(entry.displayName()));
+        UtilitiesOG.trueogMessage(viewer, promptMessage);
+
+        viewer.closeInventory();
+
+        return true;
 
     }
 

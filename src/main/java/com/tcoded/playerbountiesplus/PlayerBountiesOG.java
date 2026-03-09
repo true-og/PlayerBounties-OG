@@ -20,6 +20,7 @@ import com.tcoded.playerbountiesplus.hook.logging.CoreProtectHook;
 import com.tcoded.playerbountiesplus.hook.currency.EconomyHook;
 import com.tcoded.playerbountiesplus.hook.team.TeamHook;
 import com.tcoded.playerbountiesplus.listener.BountyHeadListener;
+import com.tcoded.playerbountiesplus.listener.BountyIncreasePromptListener;
 import com.tcoded.playerbountiesplus.listener.DeathListener;
 import com.tcoded.playerbountiesplus.listener.GuiProtectionListener;
 import com.tcoded.playerbountiesplus.manager.BountyDataManager;
@@ -64,6 +65,8 @@ public final class PlayerBountiesOG extends JavaPlugin {
 
     // CoreProtect API hook.
     private CoreProtectHook coreProtectHook;
+
+    private BountyIncreasePromptListener bountyIncreasePromptListener;
 
     public PlayerBountiesOG() {
 
@@ -157,8 +160,11 @@ public final class PlayerBountiesOG extends JavaPlugin {
         // Listeners.
         this.getServer().getPluginManager().registerEvents(new DeathListener(this, this.diamondBankAPI, this.luckPerms),
                 this);
+        this.bountyIncreasePromptListener = new BountyIncreasePromptListener(this);
+
         this.getServer().getPluginManager().registerEvents(
                 new BountyHeadListener(this, this.diamondBankAPI, this.luckPerms, this.coreProtectHook), this);
+        this.getServer().getPluginManager().registerEvents(this.bountyIncreasePromptListener, this);
         this.getServer().getPluginManager().registerEvents(new GuiProtectionListener(this), this);
 
         final List<Plugin> plugins = ImmutableList.copyOf(this.getServer().getPluginManager().getPlugins());
@@ -227,6 +233,12 @@ public final class PlayerBountiesOG extends JavaPlugin {
     public CoreProtectHook getCoreProtectHook() {
 
         return this.coreProtectHook;
+
+    }
+
+    public BountyIncreasePromptListener getBountyIncreasePromptListener() {
+
+        return this.bountyIncreasePromptListener;
 
     }
 
