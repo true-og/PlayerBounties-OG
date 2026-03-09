@@ -8,10 +8,10 @@ PlayerBounties-OG is a hard fork of [PlayerBountiesPlus](https://github.com/Tech
 - Inventory GUI for viewing bounties.
 - Customizable odds for receiving player head from bounty victim.
 - Localized messages in multiple languages.
-- Integrates [DiamondBank-OG](https://github.com/true-og/DiamondBank-OG) for currency.
-- Integrates [SimpleClans](https://github.com/true-og/SimpleClans) for team detection.
 - Integrates [CoreProtect-OG](https://github.com/true-og/CoreProtect-OG) for player head rollback injection.
+- Integrates [DiamondBank-OG](https://github.com/true-og/DiamondBank-OG) for currency.
 - Integrates [LuckPerms](https://github.com/true-og/LuckPerms) for player name and rank formatting.
+- Integrates [SimpleClans](https://github.com/true-og/SimpleClans) for team detection.
 
 ## Commands
 - `/bounty set <player> <amount>` – set a bounty on a player

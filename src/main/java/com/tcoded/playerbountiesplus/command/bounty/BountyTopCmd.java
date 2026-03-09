@@ -124,10 +124,8 @@ public class BountyTopCmd {
 
     private static String sanitizeDisplay(String formatted, String fallbackName) {
 
-        final String cleaned = StringUtils.trimToEmpty(formatted)
-                .replaceAll("(?i)(?:\\s*(?:<reset>|[&§]r))+$", "")
-                .replaceAll("\\s+>", " >")
-                .replaceAll("\\s*>$", "");
+        final String cleaned = StringUtils.trimToEmpty(formatted).replaceAll("(?i)(?:\\s*(?:<reset>|[&§]r))+$", "")
+                .replaceAll("\\s+>", " >").replaceAll("\\s*>$", "");
 
         if (cleaned.isBlank()) {
 
@@ -162,9 +160,7 @@ public class BountyTopCmd {
 
         }
 
-        return input.replaceAll("(?i)[&§][0-9A-FK-ORX]", "")
-                .replaceAll("<[^>]+>", "")
-                .trim();
+        return input.replaceAll("(?i)[&§][0-9A-FK-ORX]", "").replaceAll("<[^>]+>", "").trim();
 
     }
 

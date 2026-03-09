@@ -273,8 +273,8 @@ public class BountyHeadListener implements Listener {
         final CachedMetaData meta = user.getCachedData().getMetaData();
         final String prefix = StringUtils.trim(StringUtils.defaultString(meta.getPrefix()).replace('§', '&'));
         final String suffix = StringUtils.trim(StringUtils.defaultString(meta.getSuffix()).replace('§', '&'));
-        final boolean metaContainsName = containsVisibleName(prefix, playerName) || containsVisibleName(suffix,
-                playerName);
+        final boolean metaContainsName = containsVisibleName(prefix, playerName)
+                || containsVisibleName(suffix, playerName);
 
         final StringBuilder out = new StringBuilder();
         if (!prefix.isBlank()) {
@@ -301,8 +301,7 @@ public class BountyHeadListener implements Listener {
 
     private static String sanitizeDisplay(String formatted, String fallbackName) {
 
-        final String cleaned = StringUtils.trimToEmpty(formatted)
-                .replaceAll("(?i)(?:\\s*(?:<reset>|[&§]r))+$", "")
+        final String cleaned = StringUtils.trimToEmpty(formatted).replaceAll("(?i)(?:\\s*(?:<reset>|[&§]r))+$", "")
                 .replaceAll("\\s*>$", "");
 
         if (cleaned.isBlank()) {
@@ -338,9 +337,7 @@ public class BountyHeadListener implements Listener {
 
         }
 
-        return input.replaceAll("(?i)[&§][0-9A-FK-ORX]", "")
-                .replaceAll("<[^>]+>", "")
-                .trim();
+        return input.replaceAll("(?i)[&§][0-9A-FK-ORX]", "").replaceAll("<[^>]+>", "").trim();
 
     }
 
