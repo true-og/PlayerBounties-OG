@@ -47,8 +47,16 @@ public class BountyCommand implements CommandExecutor, TabCompleter {
 
         if (args.length < 1) {
 
-            // If "/bounty" is run without a valid subcommand, treat it as "/bounty top".
-            return BountyTopCmd.handleCmd(plugin, diamondBankAPI, sender, cmd, cmdName, args);
+            if (StringUtils.equalsIgnoreCase(cmdName, "bounties")) {
+
+                return BountyTopCmd.handleCmd(plugin, diamondBankAPI, sender, cmd, cmdName, args);
+
+            }
+
+            final String noAction = plugin.getLang().getColored("command.bounty.no-action");
+            UtilitiesOG.trueogMessage((Player) sender, noAction);
+
+            return true;
 
         }
 
