@@ -75,7 +75,11 @@ public class LangUtil {
         final FileConfiguration selectedLangDefaults = resolvedLang == SupportedLang.EN_US ? englishDefaults
                 : loadBundledYaml(langFilePath, false);
 
-        selectedLangDefaults.setDefaults(englishDefaults);
+        if (resolvedLang != SupportedLang.EN_US) {
+
+            selectedLangDefaults.setDefaults(englishDefaults);
+
+        }
 
         this.overrideMessagesFile = new File(plugin.getDataFolder(), langFilePath);
 
