@@ -252,10 +252,10 @@ public class MainBountyGui extends GUIBase {
         lore.add("&6Claiming the bounty will give you a 50% chance of beheading the victim.");
 
         final GUIItem item;
-        if (entry.targetUuid() != null) {
+        if (entry.targetName() != null && !entry.targetName().isBlank()) {
 
             item = new GUIItem(Material.PLAYER_HEAD, 1, " &f#" + rank + " " + displayName,
-                    entry.targetUuid().toString());
+                    entry.targetName());
 
         } else {
 

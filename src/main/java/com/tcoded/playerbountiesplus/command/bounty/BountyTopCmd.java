@@ -3,6 +3,7 @@ package com.tcoded.playerbountiesplus.command.bounty;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
@@ -29,7 +30,8 @@ public class BountyTopCmd {
 
         if (sender instanceof Player player) {
 
-            new MainBountyGui(plugin, player, () -> buildGuiEntries(plugin), diamondBankAPI).open();
+            final List<MainBountyGui.BountyGuiEntry> entries = buildGuiEntries(plugin);
+            new MainBountyGui(plugin, player, () -> entries, diamondBankAPI).open();
 
             return true;
 
@@ -95,6 +97,7 @@ public class BountyTopCmd {
         final CachedMetaData meta = user.getCachedData().getMetaData();
         final String prefix = StringUtils.trim(StringUtils.defaultString(meta.getPrefix()).replace('§', '&'));
         final String suffix = StringUtils.trim(StringUtils.defaultString(meta.getSuffix()).replace('§', '&'));
+        final boolean metaContainsName = containsVisibleName(prefix, safeName) || containsVisibleName(suffix, safeName);
 
         final StringBuilder out = new StringBuilder();
         if (!prefix.isBlank()) {
@@ -103,7 +106,11 @@ public class BountyTopCmd {
 
         }
 
-        out.append("&f").append(safeName);
+        if (!metaContainsName) {
+
+            out.append(safeName);
+
+        }
 
         if (!suffix.isBlank()) {
 
@@ -111,7 +118,53 @@ public class BountyTopCmd {
 
         }
 
-        return out.toString();
+        return sanitizeDisplay(out.toString(), safeName);
+
+    }
+
+    private static String sanitizeDisplay(String formatted, String fallbackName) {
+
+        final String cleaned = StringUtils.trimToEmpty(formatted)
+                .replaceAll("(?i)(?:\\s*(?:<reset>|[&§]r))+$", "")
+                .replaceAll("\\s+>", " >")
+                .replaceAll("\\s*>$", "");
+
+        if (cleaned.isBlank()) {
+
+            return fallbackName;
+
+        }
+
+        return cleaned;
+
+    }
+
+    private static boolean containsVisibleName(String text, String playerName) {
+
+        if (text == null || playerName == null || playerName.isBlank()) {
+
+            return false;
+
+        }
+
+        final String normalizedText = stripFormatting(text).toLowerCase(Locale.ROOT);
+        final String normalizedName = playerName.toLowerCase(Locale.ROOT);
+
+        return normalizedText.contains(normalizedName);
+
+    }
+
+    private static String stripFormatting(String input) {
+
+        if (input == null || input.isBlank()) {
+
+            return "";
+
+        }
+
+        return input.replaceAll("(?i)[&§][0-9A-FK-ORX]", "")
+                .replaceAll("<[^>]+>", "")
+                .trim();
 
     }
 

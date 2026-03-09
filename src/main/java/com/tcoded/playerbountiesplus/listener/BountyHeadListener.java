@@ -2,6 +2,7 @@ package com.tcoded.playerbountiesplus.listener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
@@ -272,6 +273,8 @@ public class BountyHeadListener implements Listener {
         final CachedMetaData meta = user.getCachedData().getMetaData();
         final String prefix = StringUtils.trim(StringUtils.defaultString(meta.getPrefix()).replace('§', '&'));
         final String suffix = StringUtils.trim(StringUtils.defaultString(meta.getSuffix()).replace('§', '&'));
+        final boolean metaContainsName = containsVisibleName(prefix, playerName) || containsVisibleName(suffix,
+                playerName);
 
         final StringBuilder out = new StringBuilder();
         if (!prefix.isBlank()) {
@@ -280,7 +283,11 @@ public class BountyHeadListener implements Listener {
 
         }
 
-        out.append("&f").append(playerName);
+        if (!metaContainsName) {
+
+            out.append(playerName);
+
+        }
 
         if (!suffix.isBlank()) {
 
@@ -288,7 +295,52 @@ public class BountyHeadListener implements Listener {
 
         }
 
-        return out.toString();
+        return sanitizeDisplay(out.toString(), playerName);
+
+    }
+
+    private static String sanitizeDisplay(String formatted, String fallbackName) {
+
+        final String cleaned = StringUtils.trimToEmpty(formatted)
+                .replaceAll("(?i)(?:\\s*(?:<reset>|[&§]r))+$", "")
+                .replaceAll("\\s*>$", "");
+
+        if (cleaned.isBlank()) {
+
+            return fallbackName;
+
+        }
+
+        return cleaned;
+
+    }
+
+    private static boolean containsVisibleName(String text, String playerName) {
+
+        if (text == null || playerName == null || playerName.isBlank()) {
+
+            return false;
+
+        }
+
+        final String normalizedText = stripFormatting(text).toLowerCase(Locale.ROOT);
+        final String normalizedName = playerName.toLowerCase(Locale.ROOT);
+
+        return normalizedText.contains(normalizedName);
+
+    }
+
+    private static String stripFormatting(String input) {
+
+        if (input == null || input.isBlank()) {
+
+            return "";
+
+        }
+
+        return input.replaceAll("(?i)[&§][0-9A-FK-ORX]", "")
+                .replaceAll("<[^>]+>", "")
+                .trim();
 
     }
 
