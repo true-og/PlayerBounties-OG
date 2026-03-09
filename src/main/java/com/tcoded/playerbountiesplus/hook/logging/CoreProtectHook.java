@@ -32,7 +32,8 @@ public class CoreProtectHook {
 
         }
 
-        return this.coreProtectAPI.logPlacement(user, blockState);
+        return this.coreProtectAPI.logPlacement(user, blockState.getLocation(), blockState.getType(),
+                blockState.getBlockData());
 
     }
 
@@ -44,7 +45,8 @@ public class CoreProtectHook {
 
         }
 
-        return this.coreProtectAPI.logRemoval(user, blockState);
+        return this.coreProtectAPI.logRemoval(user, blockState.getLocation(), blockState.getType(),
+                blockState.getBlockData());
 
     }
 
