@@ -6,6 +6,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -15,6 +16,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.persistence.PersistentDataType;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.tcoded.playerbountiesplus.PlayerBountiesOG;
@@ -29,6 +31,9 @@ import net.trueog.diamondbankog.api.DiamondBankAPIJava;
 import net.trueog.utilitiesog.UtilitiesOG;
 
 public class DeathListener implements Listener {
+
+    public static final String BOUNTY_HEAD_NAME_KEY = "bounty_head_target";
+    public static final String BOUNTY_HEAD_AMOUNT_KEY = "bounty_head_diamonds";
 
     private final PlayerBountiesOG plugin;
     private final DiamondBankAPIJava diamondBankAPI;
@@ -137,19 +142,19 @@ public class DeathListener implements Listener {
 
                 if (Double.compare(awardedAmount, bounty) == 0) {
 
-                    message = killerDisplay + " &akilled " + victimDisplay + " &aand earned the &b" + awardedDisplay
+                    message = killerDisplay + "&r &akilled " + victimDisplay + "&r &aand earned the &b" + awardedDisplay
                             + " &abounty!";
 
                 } else {
 
-                    message = killerDisplay + " &akilled " + victimDisplay + " &aand claimed the &b" + bountyDisplay
+                    message = killerDisplay + "&r &akilled " + victimDisplay + "&r &aand claimed the &b" + bountyDisplay
                             + " &abounty for &b" + awardedDisplay + "&a!";
 
                 }
 
             } else {
 
-                message = killerDisplay + " &akilled " + victimDisplay + " &aand claimed the &b" + bountyDisplay
+                message = killerDisplay + "&r &akilled " + victimDisplay + "&r &aand claimed the &b" + bountyDisplay
                         + " &abounty!";
 
             }
@@ -159,12 +164,12 @@ public class DeathListener implements Listener {
 
         }
 
-        final boolean beheaded = maybeDropPlayerHead(event, victim);
+        final boolean beheaded = maybeDropPlayerHead(event, victim, bounty);
 
         if (beheaded) {
 
             Bukkit.getOnlinePlayers().forEach(player -> UtilitiesOG.trueogMessage(player,
-                    killerDisplay + " &abeheaded " + victimDisplay + "&a!"));
+                    killerDisplay + "&r &abeheaded " + victimDisplay + "&r&a!"));
 
         }
 
@@ -179,13 +184,26 @@ public class DeathListener implements Listener {
 
             player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0F, 1.0F);
 
-            player.spawnParticle(Particle.FIREWORKS_SPARK, killer.getLocation().add(0D, 1D, 0D), 40, 0.6D, 0.8D, 0.6D,
-                    0.01D);
-            player.spawnParticle(Particle.FIREWORKS_SPARK, victim.getLocation().add(0D, 1D, 0D), 40, 0.6D, 0.8D, 0.6D,
-                    0.01D);
+            final Particle fireworkParticle = resolveFireworkParticle();
+            player.spawnParticle(fireworkParticle, killer.getLocation().add(0D, 1D, 0D), 40, 0.6D, 0.8D, 0.6D, 0.01D);
+            player.spawnParticle(fireworkParticle, victim.getLocation().add(0D, 1D, 0D), 40, 0.6D, 0.8D, 0.6D, 0.01D);
             player.spawnParticle(Particle.TOTEM, killer.getLocation().add(0D, 1D, 0D), 20, 0.5D, 0.7D, 0.5D, 0.01D);
 
         });
+
+    }
+
+    private Particle resolveFireworkParticle() {
+
+        try {
+
+            return Particle.valueOf("FIREWORK");
+
+        } catch (IllegalArgumentException exception) {
+
+            return Particle.FIREWORKS_SPARK;
+
+        }
 
     }
 
@@ -224,7 +242,7 @@ public class DeathListener implements Listener {
 
     }
 
-    private boolean maybeDropPlayerHead(PlayerDeathEvent event, Player victim) {
+    private boolean maybeDropPlayerHead(PlayerDeathEvent event, Player victim, double bounty) {
 
         final double dropChance = Math.max(0D,
                 Math.min(100D, plugin.getConfig().getDouble("bounty-head-drop-chance", 50D)));
@@ -239,6 +257,13 @@ public class DeathListener implements Listener {
 
         final PlayerProfile profile = Bukkit.createProfile(victim.getUniqueId());
         headMeta.setPlayerProfile(profile);
+        headMeta.setDisplayName("§c" + victim.getName() + "'s Bounty Head");
+        final String bountyDisplay = formatDiamonds(bounty);
+        headMeta.setLore(java.util.List.of("§7Target: §f" + victim.getName(), "§7Beheaded for: §b" + bountyDisplay));
+        headMeta.getPersistentDataContainer().set(new NamespacedKey(plugin, BOUNTY_HEAD_NAME_KEY),
+                PersistentDataType.STRING, victim.getName());
+        headMeta.getPersistentDataContainer().set(new NamespacedKey(plugin, BOUNTY_HEAD_AMOUNT_KEY),
+                PersistentDataType.DOUBLE, bounty);
         head.setItemMeta(headMeta);
 
         event.getDrops().add(head);
