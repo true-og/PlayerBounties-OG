@@ -9,6 +9,8 @@ import org.bukkit.inventory.InventoryView;
 
 import com.tcoded.playerbountiesplus.PlayerBountiesOG;
 
+import net.trueog.utilitiesog.UtilitiesOG;
+
 public class GuiProtectionListener implements Listener {
 
     private final PlayerBountiesOG plugin;
@@ -68,7 +70,8 @@ public class GuiProtectionListener implements Listener {
 
         }
 
-        return view.getTitle().equals(plugin.getLang().getColored("gui.main.title"));
+        return UtilitiesOG.stripFormatting(view.title().examinableName())
+                .equals(UtilitiesOG.stripFormatting(plugin.getLang().getColored("gui.main.title")));
 
     }
 

@@ -13,8 +13,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.profile.PlayerProfile;
 
+import com.destroystokyo.paper.profile.PlayerProfile;
 import com.tcoded.playerbountiesplus.PlayerBountiesOG;
 import com.tcoded.playerbountiesplus.event.BountyClaimEvent;
 import com.tcoded.playerbountiesplus.hook.team.TeamHook;
@@ -199,7 +199,8 @@ public class DeathListener implements Listener {
 
     private void maybeDropPlayerHead(PlayerDeathEvent event, Player victim) {
 
-        final double dropChance = Math.max(0D, Math.min(100D, plugin.getConfig().getDouble("bounty-head-drop-chance", 50D)));
+        final double dropChance = Math.max(0D,
+                Math.min(100D, plugin.getConfig().getDouble("bounty-head-drop-chance", 50D)));
         if (ThreadLocalRandom.current().nextDouble(100D) >= dropChance) {
 
             return;
@@ -209,7 +210,7 @@ public class DeathListener implements Listener {
         final ItemStack head = new ItemStack(Material.PLAYER_HEAD, 1);
         final SkullMeta headMeta = (SkullMeta) head.getItemMeta();
 
-        final PlayerProfile profile = Bukkit.createPlayerProfile(victim.getUniqueId());
+        final PlayerProfile profile = Bukkit.createProfile(victim.getUniqueId());
         headMeta.setPlayerProfile(profile);
         head.setItemMeta(headMeta);
 
