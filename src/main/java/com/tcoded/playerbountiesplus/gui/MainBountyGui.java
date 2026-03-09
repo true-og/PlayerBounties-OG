@@ -254,7 +254,8 @@ public class MainBountyGui extends GUIBase {
         final GUIItem item;
         if (entry.targetUuid() != null) {
 
-            item = new GUIItem(Material.PLAYER_HEAD, 1, " &f#" + rank + " " + displayName, entry.targetUuid().toString());
+            item = new GUIItem(Material.PLAYER_HEAD, 1, " &f#" + rank + " " + displayName,
+                    entry.targetUuid().toString());
 
         } else {
 

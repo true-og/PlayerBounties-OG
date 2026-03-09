@@ -140,8 +140,8 @@ public class DeathListener implements Listener {
         if (beheaded) {
 
             final String bountyDisplay = formatDiamonds(bounty);
-            final String beheadedMessage = killerDisplay + "&r &abeheaded " + victimDisplay
-                    + "&r &afor &b" + bountyDisplay + " &bDiamonds&a!";
+            final String beheadedMessage = killerDisplay + "&r &abeheaded " + victimDisplay + "&r &afor &b"
+                    + bountyDisplay + " &bDiamonds&a!";
 
             Bukkit.getOnlinePlayers().forEach(player -> UtilitiesOG.trueogMessage(player, beheadedMessage));
             playGlobalCelebrationEffects(killer, victim);
@@ -296,7 +296,6 @@ public class DeathListener implements Listener {
 
     }
 
-
     private String getLuckPermsSuffixLegacy(Player player) {
 
         if (luckPerms == null) {
@@ -324,6 +323,7 @@ public class DeathListener implements Listener {
         return StringUtils.trim(suffix).replace('§', '&');
 
     }
+
     private String getLuckPermsPrefixLegacy(Player player) {
 
         if (luckPerms == null) {

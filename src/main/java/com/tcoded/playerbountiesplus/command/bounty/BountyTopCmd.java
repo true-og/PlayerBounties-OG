@@ -147,7 +147,8 @@ public class BountyTopCmd {
                         .shardsToDiamonds(diamondBankAPI.diamondsToShards(entry.getValue()));
 
                 strb.append("&7 - ");
-                final String displayName = resolveLuckPermsDisplayName(plugin.getLuckPerms(), entry.getKey(), targetName);
+                final String displayName = resolveLuckPermsDisplayName(plugin.getLuckPerms(), entry.getKey(),
+                        targetName);
 
                 strb.append(displayName);
                 strb.append(": &b");

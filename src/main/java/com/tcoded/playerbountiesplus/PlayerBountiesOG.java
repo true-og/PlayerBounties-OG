@@ -145,7 +145,8 @@ public final class PlayerBountiesOG extends JavaPlugin {
         // Listeners.
         this.getServer().getPluginManager().registerEvents(new DeathListener(this, this.diamondBankAPI, this.luckPerms),
                 this);
-        this.getServer().getPluginManager().registerEvents(new BountyHeadListener(this, this.diamondBankAPI, this.luckPerms), this);
+        this.getServer().getPluginManager()
+                .registerEvents(new BountyHeadListener(this, this.diamondBankAPI, this.luckPerms), this);
         this.getServer().getPluginManager().registerEvents(new GuiProtectionListener(this), this);
 
         final List<Plugin> plugins = ImmutableList.copyOf(this.getServer().getPluginManager().getPlugins());

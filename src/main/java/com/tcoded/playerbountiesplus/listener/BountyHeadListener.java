@@ -7,7 +7,6 @@ import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Skull;
 import org.bukkit.entity.Player;
@@ -193,7 +192,8 @@ public class BountyHeadListener implements Listener {
         final UUID uuid = parseUuid(targetUuid);
         final String playerDisplay = formatLuckPermsDisplay(uuid, targetName);
         final String diamonds = formatDiamonds(bountyAmount);
-        player.sendActionBar(UtilitiesOG.trueogColorize("&cBounty Head: " + playerDisplay + " &7- &b" + diamonds + " &bDiamonds"));
+        player.sendActionBar(
+                UtilitiesOG.trueogColorize("&cBounty Head: " + playerDisplay + " &7- &b" + diamonds + " &bDiamonds"));
 
     }
 
@@ -214,7 +214,6 @@ public class BountyHeadListener implements Listener {
         meta.getPersistentDataContainer().set(amountKey, PersistentDataType.DOUBLE, bountyAmount);
 
     }
-
 
     private UUID parseUuid(String uuidString) {
 
