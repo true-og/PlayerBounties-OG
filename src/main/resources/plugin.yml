@@ -16,27 +16,27 @@ softdepend:
 
 commands:
   bounty:
-    permission: playerbountiesplus.command.bounty
+    permission: playerbountiesog.command.bounty
     aliases: [bounties, prime, primes]
   playerbountiesplusadmin:
-    permission: playerbountiesplus.command.admin
+    permission: playerbountiesog.command.admin
     aliases: [playerbountiesplus, pbpa, pbp]
 
 permissions:
-  playerbountiesplus.command.bounty:
+  playerbountiesog.command.bounty:
     default: true
-  playerbountiesplus.command.admin:
+  playerbountiesog.command.admin:
     default: op
     children:
-      playerbountiesplus.command.admin.version: {}
-      playerbountiesplus.command.admin.reload: {}
-      playerbountiesplus.command.admin.bounty.set: {}
-      playerbountiesplus.command.admin.bounty.add: {}
-      playerbountiesplus.command.admin.bounty.remove: {}
-      playerbountiesplus.command.admin.bounty.delete: {}
-  playerbountiesplus.command.bounty.set:
+      playerbountiesog.command.admin.version: {}
+      playerbountiesog.command.admin.reload: {}
+      playerbountiesog.command.admin.bounty.set: {}
+      playerbountiesog.command.admin.bounty.add: {}
+      playerbountiesog.command.admin.bounty.remove: {}
+      playerbountiesog.command.admin.bounty.delete: {}
+  playerbountiesog.command.bounty.set:
     default: true
-  playerbountiesplus.command.bounty.add:
+  playerbountiesog.command.bounty.add:
     default: true
-  playerbountiesplus.event.claim:
+  playerbountiesog.event.claim:
     default: true

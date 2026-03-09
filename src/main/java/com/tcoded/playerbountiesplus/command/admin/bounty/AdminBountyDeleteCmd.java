@@ -19,7 +19,7 @@ import net.trueog.utilitiesog.UtilitiesOG;
 
 public class AdminBountyDeleteCmd {
 
-    private static final String PERMISSION = "playerbountiesplus.command.admin.bounty.delete";
+    private static final String PERMISSION = "playerbountiesog.command.admin.bounty.delete";
 
     public static boolean handleCmd(PlayerBountiesOG plugin, CommandSender sender, Command cmd, String label,
             String[] args)

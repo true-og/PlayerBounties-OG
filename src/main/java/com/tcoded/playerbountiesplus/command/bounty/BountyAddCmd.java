@@ -42,12 +42,12 @@ public class BountyAddCmd {
 
         }
 
-        if (!sender.hasPermission("playerbountiesplus.command.bounty.add")) {
+        if (!sender.hasPermission("playerbountiesog.command.bounty.add")) {
 
             final String noPerm = plugin.getLang().getColored("command.no-permission");
             final String noPermDetailed = plugin.getLang().getColored("command.no-permission-detailed")
                     .replace("{no-permission-msg}", noPerm)
-                    .replace("{permission}", "playerbountiesplus.command.bounty.add");
+                    .replace("{permission}", "playerbountiesog.command.bounty.add");
             UtilitiesOG.trueogMessage(player, noPermDetailed);
 
             return true;
