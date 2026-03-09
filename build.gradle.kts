@@ -66,6 +66,7 @@ repositories {
     maven { url = uri("https://repo.glaremasters.me/repository/towny/") }
     maven { url = uri("https://repo.extendedclip.com/releases/") }
     maven { url = uri("https://repo.tcoded.com/public/") }
+    maven { url = uri("https://maven.playpro.com") }
 }
 
 /* ---------------------- Java project deps ---------------------------- */
@@ -73,6 +74,7 @@ dependencies {
     compileOnly("org.purpurmc.purpur:purpur-api:1.19.4-R0.1-SNAPSHOT") // Declare Purpur API version to be packaged.
     compileOnly("net.sacredlabyrinth.phaed.simpleclans:SimpleClans:2.15.2")
     compileOnly("net.luckperms:api:5.5") // Import LuckPerms API.
+    compileOnly("net.coreprotect:coreprotect:23.1")
     compileOnlyApi(project(":libs:Utilities-OG")) // Import TrueOG Network Utilities-OG Java API (from source).
     compileOnlyApi(project(":libs:GxUI-OG")) // Import TrueOG Network GxUI-OG Java API (from source).
     compileOnlyApi(project(":libs:DiamondBank-OG")) {
