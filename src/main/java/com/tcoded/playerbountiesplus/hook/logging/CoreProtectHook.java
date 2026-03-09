@@ -94,7 +94,7 @@ public class CoreProtectHook {
 
         }
 
-        final Plugin coreProtectPlugin = plugin.getServer().getPluginManager().getPlugin("CoreProtect");
+        final Plugin coreProtectPlugin = plugin.getServer().getPluginManager().getPlugin("CoreProtect-OG");
         if (!(coreProtectPlugin instanceof CoreProtect coreProtect)) {
 
             return null;
