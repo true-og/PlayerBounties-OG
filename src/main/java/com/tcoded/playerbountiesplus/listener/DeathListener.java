@@ -1,14 +1,19 @@
 package com.tcoded.playerbountiesplus.listener;
 
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.profile.PlayerProfile;
 
 import com.tcoded.playerbountiesplus.PlayerBountiesOG;
 import com.tcoded.playerbountiesplus.event.BountyClaimEvent;
@@ -150,6 +155,8 @@ public class DeathListener implements Listener {
 
         }
 
+        maybeDropPlayerHead(event, victim);
+
         bountyDataManager.removeBounty(victimId);
         bountyDataManager.saveBountiesAsync();
 
@@ -187,6 +194,26 @@ public class DeathListener implements Listener {
         }
 
         return prefix + " " + leadingColorCodes + player.getName();
+
+    }
+
+    private void maybeDropPlayerHead(PlayerDeathEvent event, Player victim) {
+
+        final double dropChance = Math.max(0D, Math.min(100D, plugin.getConfig().getDouble("bounty-head-drop-chance", 50D)));
+        if (ThreadLocalRandom.current().nextDouble(100D) >= dropChance) {
+
+            return;
+
+        }
+
+        final ItemStack head = new ItemStack(Material.PLAYER_HEAD, 1);
+        final SkullMeta headMeta = (SkullMeta) head.getItemMeta();
+
+        final PlayerProfile profile = Bukkit.createPlayerProfile(victim.getUniqueId());
+        headMeta.setPlayerProfile(profile);
+        head.setItemMeta(headMeta);
+
+        event.getDrops().add(head);
 
     }
 
