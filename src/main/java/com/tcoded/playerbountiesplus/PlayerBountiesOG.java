@@ -16,6 +16,7 @@ import com.google.common.collect.ImmutableList;
 import com.tcoded.playerbountiesplus.command.BountyCommand;
 import com.tcoded.playerbountiesplus.command.PlayerBountiesPlusAdminCmd;
 import com.tcoded.playerbountiesplus.hook.currency.DiamondBankOGHook;
+import com.tcoded.playerbountiesplus.hook.logging.CoreProtectHook;
 import com.tcoded.playerbountiesplus.hook.currency.EconomyHook;
 import com.tcoded.playerbountiesplus.hook.team.TeamHook;
 import com.tcoded.playerbountiesplus.listener.BountyHeadListener;
@@ -61,6 +62,9 @@ public final class PlayerBountiesOG extends JavaPlugin {
     // LuckPerms API hook.
     private LuckPerms luckPerms;
 
+    // CoreProtect API hook.
+    private CoreProtectHook coreProtectHook;
+
     public PlayerBountiesOG() {
 
         instance = this;
@@ -85,6 +89,14 @@ public final class PlayerBountiesOG extends JavaPlugin {
 
             getLogger().warning(
                     "LuckPerms not found – bounty claim announcements will not include rank colors or prefixes.");
+
+        }
+
+        this.coreProtectHook = new CoreProtectHook(this);
+        if (!this.coreProtectHook.isEnabled()) {
+
+            getLogger().warning(
+                    "CoreProtect API v11+ not found - custom bounty head metadata may not rollback correctly.");
 
         }
 
@@ -146,7 +158,9 @@ public final class PlayerBountiesOG extends JavaPlugin {
         this.getServer().getPluginManager().registerEvents(new DeathListener(this, this.diamondBankAPI, this.luckPerms),
                 this);
         this.getServer().getPluginManager()
-                .registerEvents(new BountyHeadListener(this, this.diamondBankAPI, this.luckPerms), this);
+                .registerEvents(
+                        new BountyHeadListener(this, this.diamondBankAPI, this.luckPerms, this.coreProtectHook),
+                        this);
         this.getServer().getPluginManager().registerEvents(new GuiProtectionListener(this), this);
 
         final List<Plugin> plugins = ImmutableList.copyOf(this.getServer().getPluginManager().getPlugins());
@@ -209,6 +223,12 @@ public final class PlayerBountiesOG extends JavaPlugin {
     public LuckPerms getLuckPerms() {
 
         return this.luckPerms;
+
+    }
+
+    public CoreProtectHook getCoreProtectHook() {
+
+        return this.coreProtectHook;
 
     }
 

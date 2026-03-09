@@ -24,6 +24,7 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import com.tcoded.playerbountiesplus.PlayerBountiesOG;
+import com.tcoded.playerbountiesplus.hook.logging.CoreProtectHook;
 
 import net.kyori.adventure.text.TextComponent;
 import net.luckperms.api.LuckPerms;
@@ -39,14 +40,17 @@ public class BountyHeadListener implements Listener {
     private final NamespacedKey targetUuidKey;
     private final NamespacedKey amountKey;
     private final LuckPerms luckPerms;
+    private final CoreProtectHook coreProtectHook;
 
-    public BountyHeadListener(PlayerBountiesOG plugin, DiamondBankAPIJava diamondBankAPI, LuckPerms luckPerms) {
+    public BountyHeadListener(PlayerBountiesOG plugin, DiamondBankAPIJava diamondBankAPI, LuckPerms luckPerms,
+            CoreProtectHook coreProtectHook) {
 
         this.diamondBankAPI = diamondBankAPI;
         this.targetKey = new NamespacedKey(plugin, DeathListener.BOUNTY_HEAD_NAME_KEY);
         this.targetUuidKey = new NamespacedKey(plugin, DeathListener.BOUNTY_HEAD_UUID_KEY);
         this.amountKey = new NamespacedKey(plugin, DeathListener.BOUNTY_HEAD_AMOUNT_KEY);
         this.luckPerms = luckPerms;
+        this.coreProtectHook = coreProtectHook;
 
     }
 
@@ -89,6 +93,12 @@ public class BountyHeadListener implements Listener {
         blockData.set(amountKey, PersistentDataType.DOUBLE, bountyAmount);
         skull.update(true, false);
 
+        if (this.coreProtectHook != null) {
+
+            this.coreProtectHook.logPlacement(event.getPlayer().getName(), skull);
+
+        }
+
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -101,6 +111,7 @@ public class BountyHeadListener implements Listener {
         }
 
         final BlockState state = event.getBlock().getState();
+        final BlockState snapshot = state;
         if (!(state instanceof Skull skull)) {
 
             return;
@@ -125,6 +136,12 @@ public class BountyHeadListener implements Listener {
         applyBountyData(meta, targetName, targetUuid, bountyAmount);
 
         drop.setItemMeta(meta);
+
+        if (this.coreProtectHook != null) {
+
+            this.coreProtectHook.logRemoval(event.getPlayer().getName(), snapshot);
+
+        }
 
         event.setDropItems(false);
         event.getBlock().setType(Material.AIR, false);
