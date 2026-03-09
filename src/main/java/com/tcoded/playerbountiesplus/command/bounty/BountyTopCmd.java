@@ -15,6 +15,9 @@ import org.bukkit.entity.Player;
 import com.tcoded.playerbountiesplus.PlayerBountiesOG;
 import com.tcoded.playerbountiesplus.gui.MainBountyGui;
 
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.cacheddata.CachedMetaData;
+import net.luckperms.api.model.user.User;
 import net.trueog.diamondbankog.api.DiamondBankAPIJava;
 import net.trueog.utilitiesog.UtilitiesOG;
 
@@ -63,11 +66,48 @@ public class BountyTopCmd {
 
             }
 
-            entries.add(new MainBountyGui.BountyGuiEntry(entry.getKey(), targetName, entry.getValue()));
+            final String rankName = resolveLuckPermsRankName(plugin.getLuckPerms(), entry.getKey());
+
+            entries.add(new MainBountyGui.BountyGuiEntry(entry.getKey(), targetName, rankName, entry.getValue()));
 
         }
 
         return entries;
+
+    }
+
+
+    private static String resolveLuckPermsRankName(LuckPerms luckPerms, UUID playerId) {
+
+        if (luckPerms == null) {
+
+            return "&7Unranked";
+
+        }
+
+        final User user = luckPerms.getUserManager().getUser(playerId);
+        if (user == null) {
+
+            return "&7Unranked";
+
+        }
+
+        final CachedMetaData meta = user.getCachedData().getMetaData();
+        final String prefix = meta.getPrefix();
+        if (prefix != null && !prefix.isBlank()) {
+
+            return StringUtils.trim(prefix).replace('§', '&');
+
+        }
+
+        final String primaryGroup = user.getPrimaryGroup();
+        if (primaryGroup == null || primaryGroup.isBlank()) {
+
+            return "&7Unranked";
+
+        }
+
+        return "&7" + primaryGroup;
 
     }
 

@@ -246,10 +246,12 @@ public class MainBountyGui extends GUIBase {
     private GUIItem createBountyItem(BountyGuiEntry entry, int rank) {
 
         final String targetName = safeName(entry.targetName());
+        final String rankName = safeRank(entry.rankName());
         final ArrayList<String> lore = new ArrayList<>();
 
-        lore.add("&cRank: &f#" + rank);
+        lore.add("&cPosition: &f#" + rank);
         lore.add("&cTarget: &f" + targetName);
+        lore.add("&cRank: " + rankName);
         lore.add("&cBounty: &b" + formatBounty(entry.bountyDiamonds()));
         lore.add("");
         lore.add("&6Claiming the bounty will give you a 50% chance of beheading the victim.");
@@ -257,11 +259,11 @@ public class MainBountyGui extends GUIBase {
         final GUIItem item;
         if (isUsableHeadName(targetName)) {
 
-            item = new GUIItem(Material.PLAYER_HEAD, 1, " &f" + targetName, targetName);
+            item = new GUIItem(Material.PLAYER_HEAD, 1, " " + rankName + " &f" + targetName, targetName);
 
         } else {
 
-            item = new GUIItem(Material.PAPER, 1, "&6&l#" + rank + " &f" + targetName);
+            item = new GUIItem(Material.PAPER, 1, "&6&l#" + rank + " " + rankName + " &f" + targetName);
 
         }
 
@@ -343,6 +345,18 @@ public class MainBountyGui extends GUIBase {
 
     }
 
+    private String safeRank(String rankName) {
+
+        if (rankName == null || rankName.isBlank()) {
+
+            return "&7Unranked";
+
+        }
+
+        return rankName;
+
+    }
+
     private boolean isUsableHeadName(String name) {
 
         return name != null && !name.isBlank() && !"Unknown Player".equals(name)
@@ -350,7 +364,7 @@ public class MainBountyGui extends GUIBase {
 
     }
 
-    public static record BountyGuiEntry(UUID targetUuid, String targetName, double bountyDiamonds) {
+    public static record BountyGuiEntry(UUID targetUuid, String targetName, String rankName, double bountyDiamonds) {
     }
 
 }
