@@ -66,9 +66,9 @@ public class BountyTopCmd {
 
             }
 
-            final String rankName = resolveLuckPermsRankName(plugin.getLuckPerms(), entry.getKey());
+            final String displayName = resolveLuckPermsDisplayName(plugin.getLuckPerms(), entry.getKey(), targetName);
 
-            entries.add(new MainBountyGui.BountyGuiEntry(entry.getKey(), targetName, rankName, entry.getValue()));
+            entries.add(new MainBountyGui.BountyGuiEntry(entry.getKey(), targetName, displayName, entry.getValue()));
 
         }
 
@@ -76,37 +76,42 @@ public class BountyTopCmd {
 
     }
 
-    private static String resolveLuckPermsRankName(LuckPerms luckPerms, UUID playerId) {
+    private static String resolveLuckPermsDisplayName(LuckPerms luckPerms, UUID playerId, String playerName) {
 
+        final String safeName = StringUtils.defaultIfBlank(playerName, "Unknown Player");
         if (luckPerms == null) {
 
-            return "&7Unranked";
+            return "&f" + safeName;
 
         }
 
         final User user = luckPerms.getUserManager().getUser(playerId);
         if (user == null) {
 
-            return "&7Unranked";
+            return "&f" + safeName;
 
         }
 
         final CachedMetaData meta = user.getCachedData().getMetaData();
-        final String prefix = meta.getPrefix();
-        if (prefix != null && !prefix.isBlank()) {
+        final String prefix = StringUtils.defaultString(meta.getPrefix()).replace('§', '&').trim();
+        final String suffix = StringUtils.defaultString(meta.getSuffix()).replace('§', '&').trim();
 
-            return StringUtils.trim(prefix).replace('§', '&');
+        final StringBuilder out = new StringBuilder();
+        if (!prefix.isBlank()) {
 
-        }
-
-        final String primaryGroup = user.getPrimaryGroup();
-        if (primaryGroup == null || primaryGroup.isBlank()) {
-
-            return "&7Unranked";
+            out.append(prefix).append(' ');
 
         }
 
-        return "&7" + primaryGroup;
+        out.append("&f").append(safeName);
+
+        if (!suffix.isBlank()) {
+
+            out.append(' ').append(suffix);
+
+        }
+
+        return out.toString();
 
     }
 
@@ -142,9 +147,12 @@ public class BountyTopCmd {
                         .shardsToDiamonds(diamondBankAPI.diamondsToShards(entry.getValue()));
 
                 strb.append("&7 - ");
-                strb.append(targetName);
-                strb.append(": ");
+                final String displayName = resolveLuckPermsDisplayName(plugin.getLuckPerms(), entry.getKey(), targetName);
+
+                strb.append(displayName);
+                strb.append(": &b");
                 strb.append(formattedBounty);
+                strb.append(" &bDiamonds");
                 strb.append('\n');
 
             }
