@@ -35,6 +35,7 @@ import net.trueog.utilitiesog.UtilitiesOG;
 public class DeathListener implements Listener {
 
     public static final String BOUNTY_HEAD_NAME_KEY = "bounty_head_target";
+    public static final String BOUNTY_HEAD_UUID_KEY = "bounty_head_target_uuid";
     public static final String BOUNTY_HEAD_AMOUNT_KEY = "bounty_head_diamonds";
 
     private final PlayerBountiesOG plugin;
@@ -134,7 +135,18 @@ public class DeathListener implements Listener {
         final String killerDisplay = formatLuckPermsDisplay(killer);
         final String victimDisplay = formatLuckPermsDisplay(victim);
 
-        if (plugin.getConfig().getBoolean("bounty-claimed-announce", true)) {
+        final boolean beheaded = maybeDropPlayerHead(event, victim, bounty);
+
+        if (beheaded) {
+
+            final String bountyDisplay = formatDiamonds(bounty);
+            final String beheadedMessage = killerDisplay + "&r &abeheaded " + victimDisplay
+                    + "&r &afor &b" + bountyDisplay + " &bDiamonds&a!";
+
+            Bukkit.getOnlinePlayers().forEach(player -> UtilitiesOG.trueogMessage(player, beheadedMessage));
+            playGlobalCelebrationEffects(killer, victim);
+
+        } else if (plugin.getConfig().getBoolean("bounty-claimed-announce", true)) {
 
             final String bountyDisplay = formatDiamonds(bounty);
             final String awardedDisplay = formatDiamonds(awardedAmount);
@@ -144,34 +156,25 @@ public class DeathListener implements Listener {
 
                 if (Double.compare(awardedAmount, bounty) == 0) {
 
-                    message = killerDisplay + "&r &akilled " + victimDisplay + "&r &aand earned the &b" + awardedDisplay
-                            + " &abounty!";
+                    message = killerDisplay + "&r &akilled " + victimDisplay + "&r &aand earned &b" + awardedDisplay
+                            + " &bDiamonds &afor the bounty!";
 
                 } else {
 
-                    message = killerDisplay + "&r &akilled " + victimDisplay + "&r &aand claimed the &b" + bountyDisplay
-                            + " &abounty for &b" + awardedDisplay + "&a!";
+                    message = killerDisplay + "&r &akilled " + victimDisplay + "&r &aand claimed &b" + bountyDisplay
+                            + " &bDiamonds &afor &b" + awardedDisplay + " &bDiamonds&a!";
 
                 }
 
             } else {
 
-                message = killerDisplay + "&r &akilled " + victimDisplay + "&r &aand claimed the &b" + bountyDisplay
-                        + " &abounty!";
+                message = killerDisplay + "&r &akilled " + victimDisplay + "&r &aand claimed &b" + bountyDisplay
+                        + " &bDiamonds &abounty!";
 
             }
 
             Bukkit.getOnlinePlayers().forEach(player -> UtilitiesOG.trueogMessage(player, message));
             playGlobalCelebrationEffects(killer, victim);
-
-        }
-
-        final boolean beheaded = maybeDropPlayerHead(event, victim, bounty);
-
-        if (beheaded) {
-
-            Bukkit.getOnlinePlayers().forEach(player -> UtilitiesOG.trueogMessage(player,
-                    killerDisplay + "&r &abeheaded " + victimDisplay + "&r&a!"));
 
         }
 
@@ -225,22 +228,35 @@ public class DeathListener implements Listener {
 
     private String formatLuckPermsDisplay(Player player) {
 
+        final String playerName = player.getName();
         final String prefix = stripLeadingReset(stripTrailingReset(getLuckPermsPrefixLegacy(player)));
+        final String suffix = stripLeadingReset(stripTrailingReset(getLuckPermsSuffixLegacy(player)));
         final String leadingColorCodes = extractLeadingColorCodes(prefix);
 
-        if (prefix.isBlank()) {
+        final StringBuilder out = new StringBuilder();
+        if (!prefix.isBlank()) {
 
-            return player.getName();
+            out.append(prefix).append(" ");
 
         }
 
         if (leadingColorCodes.isBlank()) {
 
-            return prefix + " " + player.getName();
+            out.append(playerName);
+
+        } else {
+
+            out.append(leadingColorCodes).append(playerName);
 
         }
 
-        return prefix + " " + leadingColorCodes + player.getName();
+        if (!suffix.isBlank()) {
+
+            out.append(" ").append(suffix);
+
+        }
+
+        return out.toString();
 
     }
 
@@ -265,9 +281,11 @@ public class DeathListener implements Listener {
                 Component.text("Target: ", NamedTextColor.GRAY)
                         .append(Component.text(victim.getName(), NamedTextColor.WHITE)),
                 Component.text("Beheaded for: ", NamedTextColor.GRAY)
-                        .append(Component.text(bountyDisplay, NamedTextColor.AQUA))));
+                        .append(Component.text(bountyDisplay + " Diamonds", NamedTextColor.AQUA))));
         headMeta.getPersistentDataContainer().set(new NamespacedKey(plugin, BOUNTY_HEAD_NAME_KEY),
                 PersistentDataType.STRING, victim.getName());
+        headMeta.getPersistentDataContainer().set(new NamespacedKey(plugin, BOUNTY_HEAD_UUID_KEY),
+                PersistentDataType.STRING, victim.getUniqueId().toString());
         headMeta.getPersistentDataContainer().set(new NamespacedKey(plugin, BOUNTY_HEAD_AMOUNT_KEY),
                 PersistentDataType.DOUBLE, bounty);
         head.setItemMeta(headMeta);
@@ -278,6 +296,34 @@ public class DeathListener implements Listener {
 
     }
 
+
+    private String getLuckPermsSuffixLegacy(Player player) {
+
+        if (luckPerms == null) {
+
+            return "";
+
+        }
+
+        final User user = luckPerms.getUserManager().getUser(player.getUniqueId());
+        if (user == null) {
+
+            return "";
+
+        }
+
+        final CachedMetaData meta = user.getCachedData().getMetaData();
+        final String suffix = meta.getSuffix();
+
+        if (suffix == null || suffix.isBlank()) {
+
+            return "";
+
+        }
+
+        return StringUtils.trim(suffix).replace('§', '&');
+
+    }
     private String getLuckPermsPrefixLegacy(Player player) {
 
         if (luckPerms == null) {

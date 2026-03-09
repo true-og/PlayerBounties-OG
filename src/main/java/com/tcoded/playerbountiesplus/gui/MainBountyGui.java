@@ -6,7 +6,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
-import java.util.regex.Pattern;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -27,8 +26,6 @@ public class MainBountyGui extends GUIBase {
     private static final int PAGE_INFO_SLOT = 49;
     private static final int NEXT_PAGE_SLOT = 51;
     private static final int CLOSE_SLOT = 53;
-
-    private static final Pattern MINECRAFT_USERNAME_PATTERN = Pattern.compile("^[A-Za-z0-9_]{1,16}$");
 
     private final PlayerBountiesOG plugin;
     private final Player viewer;
@@ -245,25 +242,23 @@ public class MainBountyGui extends GUIBase {
 
     private GUIItem createBountyItem(BountyGuiEntry entry, int rank) {
 
-        final String targetName = safeName(entry.targetName());
-        final String rankName = safeRank(entry.rankName());
+        final String displayName = safeDisplayName(entry.displayName());
         final ArrayList<String> lore = new ArrayList<>();
 
         lore.add("&cPosition: &f#" + rank);
-        lore.add("&cTarget: &f" + targetName);
-        lore.add("&cRank: " + rankName);
+        lore.add("&cTarget: " + displayName);
         lore.add("&cBounty: &b" + formatBounty(entry.bountyDiamonds()));
         lore.add("");
         lore.add("&6Claiming the bounty will give you a 50% chance of beheading the victim.");
 
         final GUIItem item;
-        if (isUsableHeadName(targetName)) {
+        if (entry.targetUuid() != null) {
 
-            item = new GUIItem(Material.PLAYER_HEAD, 1, " " + rankName + " &f" + targetName, targetName);
+            item = new GUIItem(Material.PLAYER_HEAD, 1, " &f#" + rank + " " + displayName, entry.targetUuid().toString());
 
         } else {
 
-            item = new GUIItem(Material.PAPER, 1, "&6&l#" + rank + " " + rankName + " &f" + targetName);
+            item = new GUIItem(Material.PAPER, 1, "&6&l#" + rank + " " + displayName);
 
         }
 
@@ -345,26 +340,19 @@ public class MainBountyGui extends GUIBase {
 
     }
 
-    private String safeRank(String rankName) {
+    private String safeDisplayName(String displayName) {
 
-        if (rankName == null || rankName.isBlank()) {
+        if (displayName == null || displayName.isBlank()) {
 
-            return "&7Unranked";
+            return "&fUnknown Player";
 
         }
 
-        return rankName;
+        return displayName;
 
     }
 
-    private boolean isUsableHeadName(String name) {
-
-        return name != null && !name.isBlank() && !"Unknown Player".equals(name)
-                && MINECRAFT_USERNAME_PATTERN.matcher(name).matches();
-
-    }
-
-    public static record BountyGuiEntry(UUID targetUuid, String targetName, String rankName, double bountyDiamonds) {
+    public static record BountyGuiEntry(UUID targetUuid, String targetName, String displayName, double bountyDiamonds) {
     }
 
 }
