@@ -245,11 +245,9 @@ public class MainBountyGui extends GUIBase {
         final String displayName = safeDisplayName(entry.displayName());
         final ArrayList<String> lore = new ArrayList<>();
 
-        lore.add("&cPosition: &f#" + rank);
-        lore.add("&cTarget: " + displayName);
-        lore.add("&cBounty: &b" + formatBounty(entry.bountyDiamonds()));
+        lore.add("&eBounty: &b" + formatBounty(entry.bountyDiamonds()));
         lore.add("");
-        lore.add("&6Claiming the bounty will give you a 50% chance of beheading the victim.");
+        lore.add("&6Claiming the bounty will give you a 50% chance of beheading your victim!");
 
         final GUIItem item;
         if (entry.targetName() != null && !entry.targetName().isBlank()) {
