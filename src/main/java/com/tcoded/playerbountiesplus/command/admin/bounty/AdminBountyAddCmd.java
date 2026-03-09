@@ -64,10 +64,10 @@ public class AdminBountyAddCmd {
         }
 
         final String playerName = args[2];
-        final int amount;
+        final double amount;
         try {
 
-            amount = Integer.parseInt(args[3]);
+            amount = parseAmount(args[3]);
 
         } catch (NumberFormatException numberFormatException) {
 
@@ -128,6 +128,18 @@ public class AdminBountyAddCmd {
         }
 
         return true;
+
+    }
+
+    private static double parseAmount(String amountInput) {
+
+        if (!amountInput.matches("^\\d+(?:\\.\\d)?$")) {
+
+            throw new NumberFormatException("Invalid amount format");
+
+        }
+
+        return Double.parseDouble(amountInput);
 
     }
 

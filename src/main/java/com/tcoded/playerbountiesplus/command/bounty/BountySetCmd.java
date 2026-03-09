@@ -10,6 +10,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,6 +18,10 @@ import com.tcoded.playerbountiesplus.PlayerBountiesOG;
 import com.tcoded.playerbountiesplus.event.BountySetEvent;
 import com.tcoded.playerbountiesplus.manager.BountyDataManager;
 
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.cacheddata.CachedMetaData;
+import net.luckperms.api.model.user.User;
+import net.trueog.diamondbankog.api.DiamondBankAPIJava;
 import net.trueog.utilitiesog.UtilitiesOG;
 
 public class BountySetCmd {
@@ -66,7 +71,7 @@ public class BountySetCmd {
         final double parsedAmount;
         try {
 
-            parsedAmount = Integer.parseInt(args[2]);
+            parsedAmount = parseAmount(args[2]);
 
         } catch (NumberFormatException numberFormatException) {
 
@@ -216,47 +221,40 @@ public class BountySetCmd {
 
         // Calculate total bounty including previous bounties.
         final BountyDataManager bountyDataManager = plugin.getBountyDataManager();
-        final double bountyAlreadyPresent = bountyDataManager.getBounty(playerUUID);
-        final double chargeAndBountyAmount = (int) amount;
-        final double totalBounty = chargeAndBountyAmount + bountyAlreadyPresent;
+        final DiamondBankAPIJava diamondBankAPI = resolveDiamondBankApi(plugin);
+        final long newBountyShards = diamondBankAPI.diamondsToShards(amount);
+        final long existingBountyShards = diamondBankAPI.diamondsToShards((float) bountyDataManager.getBounty(playerUUID));
+        final long totalBountyShards = newBountyShards + existingBountyShards;
+        final double totalBounty = Double.parseDouble(diamondBankAPI.shardsToDiamonds(totalBountyShards));
         bountyDataManager.setBounty(playerUUID, totalBounty);
-
-        // Confirmation.
-        final String bountySetSuccessMessage = plugin.getLang().getColored("command.bounty.set.success")
-                .replace("{bounty}", String.valueOf(chargeAndBountyAmount))
-                .replace("{total}", String.valueOf(totalBounty)).replace("{target}", target.getName())
-                .replace("{player}", sender.getName());
-        if (!(sender instanceof Player)) {
-
-            UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), bountySetSuccessMessage);
-
-        } else {
-
-            UtilitiesOG.trueogMessage((Player) sender, bountySetSuccessMessage);
-
-        }
 
         // Announcement.
         final String extra;
-        if (bountyAlreadyPresent == 0) {
+        if (existingBountyShards == 0L) {
 
             extra = "";
 
         } else {
 
             extra = plugin.getLang().getColored("command.bounty.set.announce-extra").replace("{total}",
-                    String.valueOf(totalBounty));
+                    diamondBankAPI.shardsToDiamonds(totalBountyShards));
 
         }
 
         if (plugin.getConfig().getBoolean("bounty-placed-announce", true)) {
 
+            final LuckPerms luckPerms = resolveLuckPerms(plugin);
+            final String setterDisplay = sender instanceof Player player ? formatLuckPermsDisplay(luckPerms, player)
+                    : sender.getName();
+            final String targetDisplay = formatLuckPermsDisplay(luckPerms, target);
+            final String bountyDisplay = diamondBankAPI.shardsToDiamonds(newBountyShards);
+
             Bukkit.getOnlinePlayers()
                     .forEach((Player player) -> UtilitiesOG.trueogMessage(player,
                             PlayerBountiesOG.getPrefix() + "&a"
                                     + plugin.getLang().getColored("command.bounty.set.announce")
-                                            .replace("{bounty}", String.valueOf(chargeAndBountyAmount))
-                                            .replace("{target}", target.getName()).replace("{player}", sender.getName())
+                                            .replace("{bounty}", bountyDisplay)
+                                            .replace("{target}", targetDisplay).replace("{player}", setterDisplay)
                                             .replace("{extra}", extra)));
 
         }
@@ -264,6 +262,148 @@ public class BountySetCmd {
         bountyDataManager.saveBountiesAsync();
 
         return true;
+
+    }
+
+    private static double parseAmount(String amountInput) {
+
+        if (!amountInput.matches("^\\d+(?:\\.\\d)?$")) {
+
+            throw new NumberFormatException("Invalid amount format");
+
+        }
+
+        return Double.parseDouble(amountInput);
+
+    }
+
+    private static DiamondBankAPIJava resolveDiamondBankApi(PlayerBountiesOG plugin) {
+
+        final RegisteredServiceProvider<DiamondBankAPIJava> provider = plugin.getServer().getServicesManager()
+                .getRegistration(DiamondBankAPIJava.class);
+
+        if (provider == null) {
+
+            throw new IllegalStateException("DiamondBank-OG API is null");
+
+        }
+
+        return provider.getProvider();
+
+    }
+
+    private static LuckPerms resolveLuckPerms(PlayerBountiesOG plugin) {
+
+        final RegisteredServiceProvider<LuckPerms> provider = plugin.getServer().getServicesManager()
+                .getRegistration(LuckPerms.class);
+
+        if (provider == null) {
+
+            return null;
+
+        }
+
+        return provider.getProvider();
+
+    }
+
+    private static String formatLuckPermsDisplay(LuckPerms luckPerms, Player player) {
+
+        final String prefix = stripLeadingReset(stripTrailingReset(getLuckPermsPrefixLegacy(luckPerms, player)));
+        final String leadingColorCodes = extractLeadingColorCodes(prefix);
+
+        if (prefix.isBlank()) {
+
+            return player.getName();
+
+        }
+
+        if (leadingColorCodes.isBlank()) {
+
+            return prefix + " " + player.getName();
+
+        }
+
+        return prefix + " " + leadingColorCodes + player.getName();
+
+    }
+
+    private static String getLuckPermsPrefixLegacy(LuckPerms luckPerms, Player player) {
+
+        if (luckPerms == null) {
+
+            return "";
+
+        }
+
+        final User user = luckPerms.getUserManager().getUser(player.getUniqueId());
+        if (user == null) {
+
+            return "";
+
+        }
+
+        final CachedMetaData meta = user.getCachedData().getMetaData();
+        final String prefix = meta.getPrefix();
+
+        if (prefix == null || prefix.isBlank()) {
+
+            return "";
+
+        }
+
+        return StringUtils.trim(prefix).replace('§', '&');
+
+    }
+
+    private static String stripTrailingReset(String input) {
+
+        if (input == null || input.isBlank()) {
+
+            return "";
+
+        }
+
+        return StringUtils.trim(input.replaceAll("(?i)(?:\\s*(?:<reset>|[&§]r))+$", ""));
+
+    }
+
+    private static String stripLeadingReset(String input) {
+
+        if (input == null || input.isBlank()) {
+
+            return "";
+
+        }
+
+        return StringUtils.trim(input.replaceFirst("(?i)^(?:\\s*(?:<reset>|[&§]r))+", ""));
+
+    }
+
+    private static String extractLeadingColorCodes(String input) {
+
+        if (input == null || input.length() < 2) {
+
+            return "";
+
+        }
+
+        final StringBuilder out = new StringBuilder();
+        for (int i = 0; i < input.length() - 1; i++) {
+
+            final char current = input.charAt(i);
+            if (current != '&' && current != '§') {
+
+                break;
+
+            }
+
+            out.append(current).append(input.charAt(i + 1));
+            i++;
+
+        }
+
+        return out.toString();
 
     }
 
