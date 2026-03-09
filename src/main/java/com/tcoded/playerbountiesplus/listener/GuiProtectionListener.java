@@ -23,11 +23,15 @@ public class GuiProtectionListener implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
 
         if (!isMainBountyGui(event.getView())) {
+
             return;
+
         }
 
         if (event.getRawSlot() < event.getView().getTopInventory().getSize()) {
+
             event.setCancelled(true);
+
         }
 
     }
@@ -36,15 +40,21 @@ public class GuiProtectionListener implements Listener {
     public void onInventoryDrag(InventoryDragEvent event) {
 
         if (!isMainBountyGui(event.getView())) {
+
             return;
+
         }
 
         final int topInventorySize = event.getView().getTopInventory().getSize();
         for (int rawSlot : event.getRawSlots()) {
+
             if (rawSlot < topInventorySize) {
+
                 event.setCancelled(true);
                 return;
+
             }
+
         }
 
     }
@@ -53,7 +63,9 @@ public class GuiProtectionListener implements Listener {
 
         final HumanEntity player = view.getPlayer();
         if (player == null) {
+
             return false;
+
         }
 
         return view.getTitle().equals(plugin.getLang().getColored("gui.main.title"));

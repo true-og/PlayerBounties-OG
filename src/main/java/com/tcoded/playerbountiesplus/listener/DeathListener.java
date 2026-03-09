@@ -23,251 +23,251 @@ import net.trueog.utilitiesog.UtilitiesOG;
 
 public class DeathListener implements Listener {
 
-	private final PlayerBountiesOG plugin;
-	private final DiamondBankAPIJava diamondBankAPI;
-	private final LuckPerms luckPerms;
+    private final PlayerBountiesOG plugin;
+    private final DiamondBankAPIJava diamondBankAPI;
+    private final LuckPerms luckPerms;
 
-	public DeathListener(PlayerBountiesOG plugin, DiamondBankAPIJava diamondBankAPI, LuckPerms luckPerms) {
+    public DeathListener(PlayerBountiesOG plugin, DiamondBankAPIJava diamondBankAPI, LuckPerms luckPerms) {
 
-		this.plugin = plugin;
-		this.diamondBankAPI = diamondBankAPI;
-		this.luckPerms = luckPerms;
+        this.plugin = plugin;
+        this.diamondBankAPI = diamondBankAPI;
+        this.luckPerms = luckPerms;
 
-	}
+    }
 
-	@EventHandler(priority = EventPriority.HIGH)
-	public void onDeath(PlayerDeathEvent event) {
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onDeath(PlayerDeathEvent event) {
 
-		final Player victim = event.getEntity();
-		final Player killer = victim.getKiller();
+        final Player victim = event.getEntity();
+        final Player killer = victim.getKiller();
 
-		if (killer == null) {
+        if (killer == null) {
 
-			return;
+            return;
 
-		}
+        }
 
-		if (!killer.hasPermission("playerbountiesplus.event.claim")) {
+        if (!killer.hasPermission("playerbountiesplus.event.claim")) {
 
-			UtilitiesOG.trueogMessage(killer, plugin.getLang().getColored("death.no-permission"));
-			return;
+            UtilitiesOG.trueogMessage(killer, plugin.getLang().getColored("death.no-permission"));
+            return;
 
-		}
+        }
 
-		final BountyDataManager bountyDataManager = this.plugin.getBountyDataManager();
-		final UUID victimId = victim.getUniqueId();
+        final BountyDataManager bountyDataManager = this.plugin.getBountyDataManager();
+        final UUID victimId = victim.getUniqueId();
 
-		if (!bountyDataManager.hasBounty(victimId)) {
+        if (!bountyDataManager.hasBounty(victimId)) {
 
-			return;
+            return;
 
-		}
+        }
 
-		final TeamHook teamHook = this.plugin.getTeamHook();
-		if (teamHook != null && teamHook.isFriendly(killer, victim)) {
+        final TeamHook teamHook = this.plugin.getTeamHook();
+        if (teamHook != null && teamHook.isFriendly(killer, victim)) {
 
-			UtilitiesOG.trueogMessage(killer, plugin.getLang().getColored("death.same-team"));
-			return;
+            UtilitiesOG.trueogMessage(killer, plugin.getLang().getColored("death.same-team"));
+            return;
 
-		}
+        }
 
-		final double bounty = bountyDataManager.getBounty(victimId);
-		if (bounty <= 0D) {
+        final double bounty = bountyDataManager.getBounty(victimId);
+        if (bounty <= 0D) {
 
-			bountyDataManager.removeBounty(victimId);
-			bountyDataManager.saveBountiesAsync();
-			return;
+            bountyDataManager.removeBounty(victimId);
+            bountyDataManager.saveBountiesAsync();
+            return;
 
-		}
+        }
 
-		final BountyClaimEvent claimEvent = new BountyClaimEvent(killer, victim, bounty);
-		this.plugin.getServer().getPluginManager().callEvent(claimEvent);
+        final BountyClaimEvent claimEvent = new BountyClaimEvent(killer, victim, bounty);
+        this.plugin.getServer().getPluginManager().callEvent(claimEvent);
 
-		if (claimEvent.isCancelled()) {
+        if (claimEvent.isCancelled()) {
 
-			return;
+            return;
 
-		}
+        }
 
-		final boolean bountyClaimable = plugin.getConfig().getBoolean("bounty-claimable", true);
-		final double claimMultiplier = plugin.getConfig().getDouble("bounty-claim-multiplier", 1.0D);
-		final double awardedAmount = Math.max(0D, bounty * claimMultiplier);
+        final boolean bountyClaimable = plugin.getConfig().getBoolean("bounty-claimable", true);
+        final double claimMultiplier = plugin.getConfig().getDouble("bounty-claim-multiplier", 1.0D);
+        final double awardedAmount = Math.max(0D, bounty * claimMultiplier);
 
-		if (bountyClaimable && awardedAmount > 0D) {
+        if (bountyClaimable && awardedAmount > 0D) {
 
-			try {
+            try {
 
-				this.plugin.getEcoHook().giveEco(killer, victim, awardedAmount);
+                this.plugin.getEcoHook().giveEco(killer, victim, awardedAmount);
 
-			} catch (RuntimeException runtimeException) {
+            } catch (RuntimeException runtimeException) {
 
-				plugin.getLogger().severe("Failed to award bounty payout to " + killer.getName() + " for killing "
-						+ victim.getName() + ": " + runtimeException.getMessage());
-				runtimeException.printStackTrace();
+                plugin.getLogger().severe("Failed to award bounty payout to " + killer.getName() + " for killing "
+                        + victim.getName() + ": " + runtimeException.getMessage());
+                runtimeException.printStackTrace();
 
-				UtilitiesOG.trueogMessage(killer,
-						"&cAn error occurred while awarding the bounty payout. The bounty was not removed.");
-				return;
+                UtilitiesOG.trueogMessage(killer,
+                        "&cAn error occurred while awarding the bounty payout. The bounty was not removed.");
+                return;
 
-			}
+            }
 
-		}
+        }
 
-		// Suppress the normal Minecraft death message because this death is being
-		// handled as a bounty claim.
-		event.deathMessage(null);
+        // Suppress the normal Minecraft death message because this death is being
+        // handled as a bounty claim.
+        event.deathMessage(null);
 
-		if (plugin.getConfig().getBoolean("bounty-claimed-announce", true)) {
+        if (plugin.getConfig().getBoolean("bounty-claimed-announce", true)) {
 
-			final String killerDisplay = formatLuckPermsDisplay(killer);
-			final String victimDisplay = formatLuckPermsDisplay(victim);
-			final String bountyDisplay = formatDiamonds(bounty);
-			final String awardedDisplay = formatDiamonds(awardedAmount);
+            final String killerDisplay = formatLuckPermsDisplay(killer);
+            final String victimDisplay = formatLuckPermsDisplay(victim);
+            final String bountyDisplay = formatDiamonds(bounty);
+            final String awardedDisplay = formatDiamonds(awardedAmount);
 
-			final String message;
-			if (bountyClaimable && awardedAmount > 0D) {
+            final String message;
+            if (bountyClaimable && awardedAmount > 0D) {
 
-				if (Double.compare(awardedAmount, bounty) == 0) {
+                if (Double.compare(awardedAmount, bounty) == 0) {
 
-					message = killerDisplay + " &akilled " + victimDisplay + " &aand earned the &b" + awardedDisplay
-							+ " &abounty!";
+                    message = killerDisplay + " &akilled " + victimDisplay + " &aand earned the &b" + awardedDisplay
+                            + " &abounty!";
 
-				} else {
+                } else {
 
-					message = killerDisplay + " &akilled " + victimDisplay + " &aand claimed the &b" + bountyDisplay
-							+ " &abounty for &b" + awardedDisplay + "&a!";
+                    message = killerDisplay + " &akilled " + victimDisplay + " &aand claimed the &b" + bountyDisplay
+                            + " &abounty for &b" + awardedDisplay + "&a!";
 
-				}
+                }
 
-			} else {
+            } else {
 
-				message = killerDisplay + " &akilled " + victimDisplay + " &aand claimed the &b" + bountyDisplay
-						+ " &abounty!";
+                message = killerDisplay + " &akilled " + victimDisplay + " &aand claimed the &b" + bountyDisplay
+                        + " &abounty!";
 
-			}
+            }
 
-			Bukkit.getOnlinePlayers().forEach(player -> UtilitiesOG.trueogMessage(player, message));
+            Bukkit.getOnlinePlayers().forEach(player -> UtilitiesOG.trueogMessage(player, message));
 
-		}
+        }
 
-		bountyDataManager.removeBounty(victimId);
-		bountyDataManager.saveBountiesAsync();
+        bountyDataManager.removeBounty(victimId);
+        bountyDataManager.saveBountiesAsync();
 
-	}
+    }
 
-	private String formatDiamonds(double diamonds) {
+    private String formatDiamonds(double diamonds) {
 
-		try {
+        try {
 
-			return diamondBankAPI.shardsToDiamonds(diamondBankAPI.diamondsToShards(diamonds));
+            return diamondBankAPI.shardsToDiamonds(diamondBankAPI.diamondsToShards(diamonds));
 
-		} catch (RuntimeException runtimeException) {
+        } catch (RuntimeException runtimeException) {
 
-			return String.valueOf(diamonds);
+            return String.valueOf(diamonds);
 
-		}
+        }
 
-	}
+    }
 
-	private String formatLuckPermsDisplay(Player player) {
+    private String formatLuckPermsDisplay(Player player) {
 
-		final String prefix = stripLeadingReset(stripTrailingReset(getLuckPermsPrefixLegacy(player)));
-		final String leadingColorCodes = extractLeadingColorCodes(prefix);
+        final String prefix = stripLeadingReset(stripTrailingReset(getLuckPermsPrefixLegacy(player)));
+        final String leadingColorCodes = extractLeadingColorCodes(prefix);
 
-		if (prefix.isBlank()) {
+        if (prefix.isBlank()) {
 
-			return player.getName();
+            return player.getName();
 
-		}
+        }
 
-		if (leadingColorCodes.isBlank()) {
+        if (leadingColorCodes.isBlank()) {
 
-			return prefix + " " + player.getName();
+            return prefix + " " + player.getName();
 
-		}
+        }
 
-		return prefix + " " + leadingColorCodes + player.getName();
+        return prefix + " " + leadingColorCodes + player.getName();
 
-	}
+    }
 
-	private String getLuckPermsPrefixLegacy(Player player) {
+    private String getLuckPermsPrefixLegacy(Player player) {
 
-		if (luckPerms == null) {
+        if (luckPerms == null) {
 
-			return "";
+            return "";
 
-		}
+        }
 
-		final User user = luckPerms.getUserManager().getUser(player.getUniqueId());
-		if (user == null) {
+        final User user = luckPerms.getUserManager().getUser(player.getUniqueId());
+        if (user == null) {
 
-			return "";
+            return "";
 
-		}
+        }
 
-		final CachedMetaData meta = user.getCachedData().getMetaData();
-		final String prefix = meta.getPrefix();
+        final CachedMetaData meta = user.getCachedData().getMetaData();
+        final String prefix = meta.getPrefix();
 
-		if (prefix == null || prefix.isBlank()) {
+        if (prefix == null || prefix.isBlank()) {
 
-			return "";
+            return "";
 
-		}
+        }
 
-		return StringUtils.trim(prefix).replace('§', '&');
+        return StringUtils.trim(prefix).replace('§', '&');
 
-	}
+    }
 
-	private static String stripTrailingReset(String input) {
+    private static String stripTrailingReset(String input) {
 
-		if (input == null || input.isBlank()) {
+        if (input == null || input.isBlank()) {
 
-			return "";
+            return "";
 
-		}
+        }
 
-		return StringUtils.trim(input.replaceAll("(?i)(?:\\s*(?:<reset>|[&§]r))+$", ""));
+        return StringUtils.trim(input.replaceAll("(?i)(?:\\s*(?:<reset>|[&§]r))+$", ""));
 
-	}
+    }
 
-	private static String stripLeadingReset(String input) {
+    private static String stripLeadingReset(String input) {
 
-		if (input == null || input.isBlank()) {
+        if (input == null || input.isBlank()) {
 
-			return "";
+            return "";
 
-		}
+        }
 
-		return StringUtils.trim(input.replaceFirst("(?i)^(?:\\s*(?:<reset>|[&§]r))+", ""));
+        return StringUtils.trim(input.replaceFirst("(?i)^(?:\\s*(?:<reset>|[&§]r))+", ""));
 
-	}
+    }
 
-	private static String extractLeadingColorCodes(String input) {
+    private static String extractLeadingColorCodes(String input) {
 
-		if (input == null || input.length() < 2) {
+        if (input == null || input.length() < 2) {
 
-			return "";
+            return "";
 
-		}
+        }
 
-		final StringBuilder out = new StringBuilder();
-		for (int i = 0; i < input.length() - 1; i++) {
+        final StringBuilder out = new StringBuilder();
+        for (int i = 0; i < input.length() - 1; i++) {
 
-			final char current = input.charAt(i);
-			if (current != '&' && current != '§') {
+            final char current = input.charAt(i);
+            if (current != '&' && current != '§') {
 
-				break;
+                break;
 
-			}
+            }
 
-			out.append(current).append(input.charAt(i + 1));
+            out.append(current).append(input.charAt(i + 1));
 
-			i++;
+            i++;
 
-		}
+        }
 
-		return out.toString();
+        return out.toString();
 
-	}
+    }
 
 }

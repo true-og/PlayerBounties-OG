@@ -20,115 +20,115 @@ import net.trueog.utilitiesog.UtilitiesOG;
 
 public class BountyTopCmd {
 
-	public static boolean handleCmd(PlayerBountiesOG plugin, DiamondBankAPIJava diamondBankAPI, CommandSender sender,
-			Command cmd, String cmdName, String[] args)
-	{
+    public static boolean handleCmd(PlayerBountiesOG plugin, DiamondBankAPIJava diamondBankAPI, CommandSender sender,
+            Command cmd, String cmdName, String[] args)
+    {
 
-		if (sender instanceof Player player) {
+        if (sender instanceof Player player) {
 
-			new MainBountyGui(plugin, player, () -> buildGuiEntries(plugin), diamondBankAPI).open();
+            new MainBountyGui(plugin, player, () -> buildGuiEntries(plugin), diamondBankAPI).open();
 
-			return true;
+            return true;
 
-		}
+        }
 
-		sendTextTopList(plugin, diamondBankAPI, sender);
+        sendTextTopList(plugin, diamondBankAPI, sender);
 
-		return true;
+        return true;
 
-	}
+    }
 
-	private static List<MainBountyGui.BountyGuiEntry> buildGuiEntries(PlayerBountiesOG plugin) {
+    private static List<MainBountyGui.BountyGuiEntry> buildGuiEntries(PlayerBountiesOG plugin) {
 
-		final Set<Map.Entry<UUID, Double>> bountiesSet = plugin.getBountyDataManager().getBounties().entrySet();
-		final List<Map.Entry<UUID, Double>> bounties = new ArrayList<>(bountiesSet);
+        final Set<Map.Entry<UUID, Double>> bountiesSet = plugin.getBountyDataManager().getBounties().entrySet();
+        final List<Map.Entry<UUID, Double>> bounties = new ArrayList<>(bountiesSet);
 
-		bounties.sort((a, b) -> Double.compare(b.getValue(), a.getValue()));
+        bounties.sort((a, b) -> Double.compare(b.getValue(), a.getValue()));
 
-		final List<MainBountyGui.BountyGuiEntry> entries = new ArrayList<>();
-		for (Map.Entry<UUID, Double> entry : bounties) {
+        final List<MainBountyGui.BountyGuiEntry> entries = new ArrayList<>();
+        for (Map.Entry<UUID, Double> entry : bounties) {
 
-			if (entry.getValue() == null || entry.getValue() <= 0D) {
+            if (entry.getValue() == null || entry.getValue() <= 0D) {
 
-				continue;
+                continue;
 
-			}
+            }
 
-			final OfflinePlayer offlinePlayer = plugin.getServer().getOfflinePlayer(entry.getKey());
-			String targetName = offlinePlayer.getName();
+            final OfflinePlayer offlinePlayer = plugin.getServer().getOfflinePlayer(entry.getKey());
+            String targetName = offlinePlayer.getName();
 
-			if (targetName == null || targetName.isBlank()) {
+            if (targetName == null || targetName.isBlank()) {
 
-				targetName = "Unknown Player";
+                targetName = "Unknown Player";
 
-			}
+            }
 
-			entries.add(new MainBountyGui.BountyGuiEntry(entry.getKey(), targetName, entry.getValue()));
+            entries.add(new MainBountyGui.BountyGuiEntry(entry.getKey(), targetName, entry.getValue()));
 
-		}
+        }
 
-		return entries;
+        return entries;
 
-	}
+    }
 
-	private static void sendTextTopList(PlayerBountiesOG plugin, DiamondBankAPIJava diamondBankAPI,
-			CommandSender sender)
-	{
+    private static void sendTextTopList(PlayerBountiesOG plugin, DiamondBankAPIJava diamondBankAPI,
+            CommandSender sender)
+    {
 
-		final Set<Map.Entry<UUID, Double>> bountiesSet = plugin.getBountyDataManager().getBounties().entrySet();
-		final List<Map.Entry<UUID, Double>> bounties = new ArrayList<>(bountiesSet);
+        final Set<Map.Entry<UUID, Double>> bountiesSet = plugin.getBountyDataManager().getBounties().entrySet();
+        final List<Map.Entry<UUID, Double>> bounties = new ArrayList<>(bountiesSet);
 
-		bounties.sort((a, b) -> Double.compare(b.getValue(), a.getValue()));
+        bounties.sort((a, b) -> Double.compare(b.getValue(), a.getValue()));
 
-		final StringBuilder strb = new StringBuilder();
-		strb.append(plugin.getLang().getColored("command.bounty.top.top-10")).append('\n');
+        final StringBuilder strb = new StringBuilder();
+        strb.append(plugin.getLang().getColored("command.bounty.top.top-10")).append('\n');
 
-		final int bountiesSize = bounties.size();
-		final int maxInList = Math.min(10, bountiesSize);
-		if (bountiesSize > 0) {
+        final int bountiesSize = bounties.size();
+        final int maxInList = Math.min(10, bountiesSize);
+        if (bountiesSize > 0) {
 
-			for (int i = 0; i < maxInList; i++) {
+            for (int i = 0; i < maxInList; i++) {
 
-				final Map.Entry<UUID, Double> entry = bounties.get(i);
-				final OfflinePlayer offlinePlayer = plugin.getServer().getOfflinePlayer(entry.getKey());
+                final Map.Entry<UUID, Double> entry = bounties.get(i);
+                final OfflinePlayer offlinePlayer = plugin.getServer().getOfflinePlayer(entry.getKey());
 
-				String targetName = offlinePlayer.getName();
-				if (targetName == null || targetName.isBlank()) {
+                String targetName = offlinePlayer.getName();
+                if (targetName == null || targetName.isBlank()) {
 
-					targetName = "Unknown Player";
+                    targetName = "Unknown Player";
 
-				}
+                }
 
-				final String formattedBounty = diamondBankAPI
-						.shardsToDiamonds(diamondBankAPI.diamondsToShards(entry.getValue()));
+                final String formattedBounty = diamondBankAPI
+                        .shardsToDiamonds(diamondBankAPI.diamondsToShards(entry.getValue()));
 
-				strb.append("&7 - ");
-				strb.append(targetName);
-				strb.append(": ");
-				strb.append(formattedBounty);
-				strb.append('\n');
+                strb.append("&7 - ");
+                strb.append(targetName);
+                strb.append(": ");
+                strb.append(formattedBounty);
+                strb.append('\n');
 
-			}
+            }
 
-		} else {
+        } else {
 
-			strb.append(plugin.getLang().getColored("command.bounty.top.no-bounties")).append('\n');
+            strb.append(plugin.getLang().getColored("command.bounty.top.no-bounties")).append('\n');
 
-		}
+        }
 
-		String message = strb.toString();
-		message = StringUtils.substring(message, 0, message.length() - 1);
+        String message = strb.toString();
+        message = StringUtils.substring(message, 0, message.length() - 1);
 
-		if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player)) {
 
-			UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), message);
+            UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), message);
 
-		} else {
+        } else {
 
-			UtilitiesOG.trueogMessage((Player) sender, message);
+            UtilitiesOG.trueogMessage((Player) sender, message);
 
-		}
+        }
 
-	}
+    }
 
 }
