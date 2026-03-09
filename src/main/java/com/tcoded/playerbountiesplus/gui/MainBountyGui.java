@@ -20,339 +20,335 @@ import net.trueog.gxui.GUIItem;
 
 public class MainBountyGui extends GUIBase {
 
-    private static final List<Integer> PYRAMID_SLOTS = List.of(4, 12, 13, 14, 20, 21, 22, 23, 24, 28, 29, 30, 31, 32,
-            33, 34, 36, 37, 38, 39, 40, 41, 42, 43, 44);
+	private static final List<Integer> PYRAMID_SLOTS = List.of(4, 12, 13, 14, 20, 21, 22, 23, 24, 28, 29, 30, 31, 32,
+			33, 34, 36, 37, 38, 39, 40, 41, 42, 43, 44);
 
-    private static final int PREVIOUS_PAGE_SLOT = 47;
-    private static final int PAGE_INFO_SLOT = 49;
-    private static final int NEXT_PAGE_SLOT = 51;
-    private static final int CLOSE_SLOT = 53;
+	private static final int PREVIOUS_PAGE_SLOT = 47;
+	private static final int PAGE_INFO_SLOT = 49;
+	private static final int NEXT_PAGE_SLOT = 51;
+	private static final int CLOSE_SLOT = 53;
 
-    private static final Pattern MINECRAFT_USERNAME_PATTERN = Pattern.compile("^[A-Za-z0-9_]{1,16}$");
+	private static final Pattern MINECRAFT_USERNAME_PATTERN = Pattern.compile("^[A-Za-z0-9_]{1,16}$");
 
-    private final PlayerBountiesOG plugin;
-    private final Player viewer;
-    private final Supplier<List<BountyGuiEntry>> bountySupplier;
-    private final DiamondBankAPIJava diamondBankAPI;
-    private final int page;
+	private final PlayerBountiesOG plugin;
+	private final Player viewer;
+	private final Supplier<List<BountyGuiEntry>> bountySupplier;
+	private final DiamondBankAPIJava diamondBankAPI;
+	private final int page;
 
-    public MainBountyGui(PlayerBountiesOG plugin, Player viewer, Supplier<List<BountyGuiEntry>> bountySupplier,
-            DiamondBankAPIJava diamondBankAPI)
-    {
+	public MainBountyGui(PlayerBountiesOG plugin, Player viewer, Supplier<List<BountyGuiEntry>> bountySupplier,
+			DiamondBankAPIJava diamondBankAPI) {
 
-        this(plugin, viewer, bountySupplier, 0, diamondBankAPI);
+		this(plugin, viewer, bountySupplier, 0, diamondBankAPI);
 
-    }
+	}
 
-    private MainBountyGui(PlayerBountiesOG plugin, Player viewer, Supplier<List<BountyGuiEntry>> bountySupplier,
-            int page, DiamondBankAPIJava diamondBankAPITransporter)
-    {
+	private MainBountyGui(PlayerBountiesOG plugin, Player viewer, Supplier<List<BountyGuiEntry>> bountySupplier,
+			int page, DiamondBankAPIJava diamondBankAPITransporter) {
 
-        super(plugin, viewer, plugin.getLang().getColored("gui.main.title"), 54, true);
+		super(plugin, viewer, plugin.getLang().getColored("gui.main.title"), 54, true);
 
-        this.plugin = plugin;
-        this.viewer = viewer;
-        this.bountySupplier = bountySupplier;
-        this.diamondBankAPI = diamondBankAPITransporter;
-        this.page = Math.max(0, page);
+		this.plugin = plugin;
+		this.viewer = viewer;
+		this.bountySupplier = bountySupplier;
+		this.diamondBankAPI = diamondBankAPITransporter;
+		this.page = Math.max(0, page);
 
-    }
+	}
 
-    public void open() {
+	public void open() {
 
-        super.open(false);
+		super.open(false);
 
-    }
+	}
 
-    @Override
-    public void setupItems() {
+	@Override
+	public void setupItems() {
 
-        final List<BountyGuiEntry> sortedBounties = getSortedBounties();
-        final int maxPage = getMaxPage(sortedBounties);
-        final int currentPage = Math.min(page, maxPage);
+		final List<BountyGuiEntry> sortedBounties = getSortedBounties();
+		final int maxPage = getMaxPage(sortedBounties);
+		final int currentPage = Math.min(page, maxPage);
 
-        addNavigationItems(currentPage, maxPage, sortedBounties.size());
+		addNavigationItems(currentPage, maxPage, sortedBounties.size());
 
-        if (sortedBounties.isEmpty()) {
+		if (sortedBounties.isEmpty()) {
 
-            addItem(22,
-                    createStaticItem(Material.WRITABLE_BOOK, "&e&lNo Active Bounties",
-                            List.of("&7Nobody currently has a bounty.", "&7Place one with your bounty command to get",
-                                    "&7this leaderboard moving again.")));
-            return;
+			addItem(22,
+					createStaticItem(Material.WRITABLE_BOOK, "&6&lNo Active Bounties",
+							List.of("&7Nobody currently has a bounty.", "&7Place one with your bounty command to get",
+									"&7this leaderboard populated again.")));
+			return;
 
-        }
+		}
 
-        final int startIndex = currentPage * PYRAMID_SLOTS.size();
-        final int endIndex = Math.min(startIndex + PYRAMID_SLOTS.size(), sortedBounties.size());
+		final int startIndex = currentPage * PYRAMID_SLOTS.size();
+		final int endIndex = Math.min(startIndex + PYRAMID_SLOTS.size(), sortedBounties.size());
 
-        int pyramidIndex = 0;
-        for (int i = startIndex; i < endIndex; i++) {
+		int pyramidIndex = 0;
+		for (int i = startIndex; i < endIndex; i++) {
 
-            final BountyGuiEntry entry = sortedBounties.get(i);
-            final int globalRank = i + 1;
+			final BountyGuiEntry entry = sortedBounties.get(i);
+			final int globalRank = i + 1;
 
-            addItem(PYRAMID_SLOTS.get(pyramidIndex), createBountyItem(entry, globalRank));
+			addItem(PYRAMID_SLOTS.get(pyramidIndex), createBountyItem(entry, globalRank));
 
-            pyramidIndex++;
+			pyramidIndex++;
 
-        }
+		}
 
-    }
+	}
 
-    private void addNavigationItems(int currentPage, int maxPage, int totalBounties) {
+	private void addNavigationItems(int currentPage, int maxPage, int totalBounties) {
 
-        if (currentPage > 0) {
+		if (currentPage > 0) {
 
-            addItem(PREVIOUS_PAGE_SLOT, createButtonItem(Material.ARROW, "&a&lPrevious Page",
-                    List.of("&7Go to page &f" + currentPage), new GUIButton()
-                    {
+			addItem(PREVIOUS_PAGE_SLOT, createButtonItem(Material.ARROW, "&a&lPrevious Page",
+					List.of("&7Go to page &f" + currentPage), new GUIButton() {
 
-                        @Override
-                        public boolean leftClick() {
+				@Override
+				public boolean leftClick() {
 
-                            return openPage(currentPage - 1);
+					return openPage(currentPage - 1);
 
-                        }
+				}
 
-                        @Override
-                        public boolean leftClickShift() {
+				@Override
+				public boolean leftClickShift() {
 
-                            return openPage(currentPage - 1);
+					return openPage(currentPage - 1);
 
-                        }
+				}
 
-                        @Override
-                        public boolean rightClick() {
+				@Override
+				public boolean rightClick() {
 
-                            return openPage(currentPage - 1);
+					return openPage(currentPage - 1);
 
-                        }
+				}
 
-                        @Override
-                        public boolean rightClickShift() {
+				@Override
+				public boolean rightClickShift() {
 
-                            return openPage(currentPage - 1);
+					return openPage(currentPage - 1);
 
-                        }
+				}
 
-                    }));
+			}));
 
-        } else {
+		} else {
 
-            addItem(PREVIOUS_PAGE_SLOT,
-                    createStaticItem(Material.GRAY_DYE, "&7Previous Page", List.of("&8Already on the first page.")));
+			addItem(PREVIOUS_PAGE_SLOT,
+					createStaticItem(Material.GRAY_DYE, "&7Previous Page", List.of("&8Already on the first page.")));
 
-        }
+		}
 
-        addItem(PAGE_INFO_SLOT,
-                createStaticItem(Material.BOOK, "&e&lPage " + (currentPage + 1) + "/" + (maxPage + 1),
-                        List.of("&7Active bounties: &f" + totalBounties, "&7Shown per page: &f" + PYRAMID_SLOTS.size(),
-                                "&7Sorted from highest to lowest.")));
+		addItem(PAGE_INFO_SLOT,
+				createStaticItem(Material.BOOK, "&3&lPage " + (currentPage + 1) + "/" + (maxPage + 1),
+						List.of("&6Active bounties: &c" + totalBounties)));
 
-        if (currentPage < maxPage) {
+		if (currentPage < maxPage) {
 
-            addItem(NEXT_PAGE_SLOT, createButtonItem(Material.ARROW, "&a&lNext Page",
-                    List.of("&7Go to page &f" + (currentPage + 2)), new GUIButton()
-                    {
+			addItem(NEXT_PAGE_SLOT, createButtonItem(Material.ARROW, "&a&lNext Page",
+					List.of("&7Go to page &f" + (currentPage + 2)), new GUIButton()
+			{
 
-                        @Override
-                        public boolean leftClick() {
+				@Override
+				public boolean leftClick() {
 
-                            return openPage(currentPage + 1);
+					return openPage(currentPage + 1);
 
-                        }
+				}
 
-                        @Override
-                        public boolean leftClickShift() {
+				@Override
+				public boolean leftClickShift() {
 
-                            return openPage(currentPage + 1);
+					return openPage(currentPage + 1);
 
-                        }
+				}
 
-                        @Override
-                        public boolean rightClick() {
+				@Override
+				public boolean rightClick() {
 
-                            return openPage(currentPage + 1);
+					return openPage(currentPage + 1);
 
-                        }
+				}
 
-                        @Override
-                        public boolean rightClickShift() {
+				@Override
+				public boolean rightClickShift() {
 
-                            return openPage(currentPage + 1);
+					return openPage(currentPage + 1);
 
-                        }
+				}
 
-                    }));
+			}));
 
-        } else {
+		} else {
 
-            addItem(NEXT_PAGE_SLOT,
-                    createStaticItem(Material.GRAY_DYE, "&7Next Page", List.of("&8Already on the last page.")));
+			addItem(NEXT_PAGE_SLOT,
+					createStaticItem(Material.GRAY_DYE, "&7Next Page", List.of("&8Already on the last page.")));
 
-        }
+		}
 
-        addItem(CLOSE_SLOT,
-                createButtonItem(Material.BARRIER, "&c&lClose", List.of("&7Close the bounty menu."), new GUIButton()
-                {
+		addItem(CLOSE_SLOT,
+				createButtonItem(Material.BARRIER, "&c&lClose", List.of("&7Close the bounty menu."), new GUIButton()
+				{
 
-                    @Override
-                    public boolean leftClick() {
+					@Override
+					public boolean leftClick() {
 
-                        viewer.closeInventory();
+						viewer.closeInventory();
 
-                        return true;
+						return true;
 
-                    }
+					}
 
-                    @Override
-                    public boolean leftClickShift() {
+					@Override
+					public boolean leftClickShift() {
 
-                        viewer.closeInventory();
+						viewer.closeInventory();
 
-                        return true;
+						return true;
 
-                    }
+					}
 
-                    @Override
-                    public boolean rightClick() {
+					@Override
+					public boolean rightClick() {
 
-                        viewer.closeInventory();
+						viewer.closeInventory();
 
-                        return true;
+						return true;
 
-                    }
+					}
 
-                    @Override
-                    public boolean rightClickShift() {
+					@Override
+					public boolean rightClickShift() {
 
-                        viewer.closeInventory();
+						viewer.closeInventory();
 
-                        return true;
+						return true;
 
-                    }
+					}
 
-                }));
+				}));
 
-    }
+	}
 
-    private boolean openPage(int targetPage) {
+	private boolean openPage(int targetPage) {
 
-        new MainBountyGui(plugin, viewer, bountySupplier, targetPage, diamondBankAPI).open();
+		new MainBountyGui(plugin, viewer, bountySupplier, targetPage, diamondBankAPI).open();
 
-        return true;
+		return true;
 
-    }
+	}
 
-    private GUIItem createBountyItem(BountyGuiEntry entry, int rank) {
+	private GUIItem createBountyItem(BountyGuiEntry entry, int rank) {
 
-        final String targetName = safeName(entry.targetName());
-        final ArrayList<String> lore = new ArrayList<>();
+		final String targetName = safeName(entry.targetName());
+		final ArrayList<String> lore = new ArrayList<>();
 
-        lore.add("&7Rank: &f#" + rank);
-        lore.add("&7Target: &f" + targetName);
-        lore.add("&7Bounty: &6" + formatBounty(entry.bountyDiamonds()));
-        lore.add("");
-        lore.add("&8Highest bounty sits at the top.");
+		lore.add("&cRank: &f#" + rank);
+		lore.add("&cTarget: &f" + targetName);
+		lore.add("&cBounty: &b" + formatBounty(entry.bountyDiamonds()));
+		lore.add("");
+		lore.add("&6Claiming the bounty will give you a 50% chance of beheading the victim.");
 
-        final GUIItem item;
-        if (isUsableHeadName(targetName)) {
+		final GUIItem item;
+		if (isUsableHeadName(targetName)) {
 
-            item = new GUIItem(Material.PLAYER_HEAD, 1, "&6&l#" + rank + " &f" + targetName, targetName);
+			item = new GUIItem(Material.PLAYER_HEAD, 1, " &f" + targetName, targetName);
 
-        } else {
+		} else {
 
-            item = new GUIItem(Material.PAPER, 1, "&6&l#" + rank + " &f" + targetName);
+			item = new GUIItem(Material.PAPER, 1, "&6&l#" + rank + " &f" + targetName);
 
-        }
+		}
 
-        item.lore(lore);
-        item.setPlayErrorSound(false);
+		item.lore(lore);
+		item.setPlayErrorSound(false);
 
-        return item;
+		return item;
 
-    }
+	}
 
-    private String formatBounty(double bountyDiamonds) {
+	private String formatBounty(double bountyDiamonds) {
 
-        final long shards = diamondBankAPI.diamondsToShards(bountyDiamonds);
+		final long shards = diamondBankAPI.diamondsToShards(bountyDiamonds);
 
-        return diamondBankAPI.shardsToDiamonds(shards);
+		return diamondBankAPI.shardsToDiamonds(shards) + " Diamonds";
 
-    }
+	}
 
-    private GUIItem createStaticItem(Material material, String displayName, List<String> lore) {
+	private GUIItem createStaticItem(Material material, String displayName, List<String> lore) {
 
-        final GUIItem item = new GUIItem(material, 1, displayName);
-        item.lore(new ArrayList<>(lore));
-        item.setPlayErrorSound(false);
+		final GUIItem item = new GUIItem(material, 1, displayName);
+		item.lore(new ArrayList<>(lore));
+		item.setPlayErrorSound(false);
 
-        return item;
+		return item;
 
-    }
+	}
 
-    private GUIItem createButtonItem(Material material, String displayName, List<String> lore, GUIButton button) {
+	private GUIItem createButtonItem(Material material, String displayName, List<String> lore, GUIButton button) {
 
-        final GUIItem item = new GUIItem(material, 1, displayName);
-        item.lore(new ArrayList<>(lore));
-        item.setButton(button);
-        item.setPlayErrorSound(false);
+		final GUIItem item = new GUIItem(material, 1, displayName);
+		item.lore(new ArrayList<>(lore));
+		item.setButton(button);
+		item.setPlayErrorSound(false);
 
-        return item;
+		return item;
 
-    }
+	}
 
-    private List<BountyGuiEntry> getSortedBounties() {
+	private List<BountyGuiEntry> getSortedBounties() {
 
-        final List<BountyGuiEntry> supplied = bountySupplier.get();
-        if (supplied == null || supplied.isEmpty()) {
+		final List<BountyGuiEntry> supplied = bountySupplier.get();
+		if (supplied == null || supplied.isEmpty()) {
 
-            return Collections.emptyList();
+			return Collections.emptyList();
 
-        }
+		}
 
-        final List<BountyGuiEntry> sorted = new ArrayList<>(supplied);
-        sorted.removeIf(entry -> entry == null || entry.bountyDiamonds() <= 0D);
-        sorted.sort(Comparator.comparingDouble(BountyGuiEntry::bountyDiamonds).reversed()
-                .thenComparing(entry -> safeName(entry.targetName()), String.CASE_INSENSITIVE_ORDER));
+		final List<BountyGuiEntry> sorted = new ArrayList<>(supplied);
+		sorted.removeIf(entry -> entry == null || entry.bountyDiamonds() <= 0D);
+		sorted.sort(Comparator.comparingDouble(BountyGuiEntry::bountyDiamonds).reversed()
+				.thenComparing(entry -> safeName(entry.targetName()), String.CASE_INSENSITIVE_ORDER));
 
-        return sorted;
+		return sorted;
 
-    }
+	}
 
-    private int getMaxPage(List<BountyGuiEntry> bounties) {
+	private int getMaxPage(List<BountyGuiEntry> bounties) {
 
-        if (bounties.isEmpty()) {
+		if (bounties.isEmpty()) {
 
-            return 0;
+			return 0;
 
-        }
+		}
 
-        return (bounties.size() - 1) / PYRAMID_SLOTS.size();
+		return (bounties.size() - 1) / PYRAMID_SLOTS.size();
 
-    }
+	}
 
-    private String safeName(String name) {
+	private String safeName(String name) {
 
-        if (name == null || name.isBlank()) {
+		if (name == null || name.isBlank()) {
 
-            return "Unknown Player";
+			return "Unknown Player";
 
-        }
+		}
 
-        return name;
+		return name;
 
-    }
+	}
 
-    private boolean isUsableHeadName(String name) {
+	private boolean isUsableHeadName(String name) {
 
-        return name != null && !name.isBlank() && !"Unknown Player".equals(name)
-                && MINECRAFT_USERNAME_PATTERN.matcher(name).matches();
+		return name != null && !name.isBlank() && !"Unknown Player".equals(name)
+				&& MINECRAFT_USERNAME_PATTERN.matcher(name).matches();
 
-    }
+	}
 
-    public static record BountyGuiEntry(UUID targetUuid, String targetName, double bountyDiamonds) {
-    }
+	public static record BountyGuiEntry(UUID targetUuid, String targetName, double bountyDiamonds) {
+	}
 
 }

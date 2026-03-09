@@ -20,269 +20,269 @@ import net.trueog.utilitiesog.UtilitiesOG;
 
 public class BountySetCmd {
 
-    public static boolean handleCmd(PlayerBountiesOG plugin, CommandSender sender, Command cmd, String cmdName,
-            String[] args)
-    {
+	public static boolean handleCmd(PlayerBountiesOG plugin, CommandSender sender, Command cmd, String cmdName,
+			String[] args)
+	{
 
-        if (args.length < 3) {
+		if (args.length < 3) {
 
-            final String missingArgumentsMessage = plugin.getLang().getColored("command.bounty.set.missing-args");
-            if (!(sender instanceof Player)) {
+			final String missingArgumentsMessage = plugin.getLang().getColored("command.bounty.set.missing-args");
+			if (!(sender instanceof Player)) {
 
-                UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), missingArgumentsMessage);
+				UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), missingArgumentsMessage);
 
-            } else {
+			} else {
 
-                UtilitiesOG.trueogMessage((Player) sender, missingArgumentsMessage);
+				UtilitiesOG.trueogMessage((Player) sender, missingArgumentsMessage);
 
-            }
+			}
 
-            return true;
+			return true;
 
-        }
+		}
 
-        if (sender instanceof Player && !sender.hasPermission("playerbountiesplus.command.bounty.set")) {
+		if (sender instanceof Player && !sender.hasPermission("playerbountiesplus.command.bounty.set")) {
 
-            final String noPerm = plugin.getLang().getColored("command.no-permission");
-            final String noPermDetailed = plugin.getLang().getColored("command.no-permission-detailed")
-                    .replace("{no-permission-msg}", noPerm)
-                    .replace("{permission}", "playerbountiesplus.command.bounty.set");
-            if (!(sender instanceof Player)) {
+			final String noPerm = plugin.getLang().getColored("command.no-permission");
+			final String noPermDetailed = plugin.getLang().getColored("command.no-permission-detailed")
+					.replace("{no-permission-msg}", noPerm)
+					.replace("{permission}", "playerbountiesplus.command.bounty.set");
+			if (!(sender instanceof Player)) {
 
-                UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), noPermDetailed);
+				UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), noPermDetailed);
 
-            } else {
+			} else {
 
-                UtilitiesOG.trueogMessage((Player) sender, noPermDetailed);
+				UtilitiesOG.trueogMessage((Player) sender, noPermDetailed);
 
-            }
+			}
 
-            return true;
+			return true;
 
-        }
+		}
 
-        final String playerNameArg = args[1];
-        final double parsedAmount;
-        try {
+		final String playerNameArg = args[1];
+		final double parsedAmount;
+		try {
 
-            parsedAmount = Integer.parseInt(args[2]);
+			parsedAmount = Integer.parseInt(args[2]);
 
-        } catch (NumberFormatException numberFormatException) {
+		} catch (NumberFormatException numberFormatException) {
 
-            final String notNumberMessage = plugin.getLang().getColored("command.bounty.set.amount-nan");
-            if (!(sender instanceof Player)) {
+			final String notNumberMessage = plugin.getLang().getColored("command.bounty.set.amount-nan");
+			if (!(sender instanceof Player)) {
 
-                UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), notNumberMessage);
+				UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), notNumberMessage);
 
-            } else {
+			} else {
 
-                UtilitiesOG.trueogMessage((Player) sender, notNumberMessage);
+				UtilitiesOG.trueogMessage((Player) sender, notNumberMessage);
 
-            }
+			}
 
-            return true;
+			return true;
 
-        }
+		}
 
-        final Player target = plugin.getServer().getPlayerExact(playerNameArg);
-        if (target == null) {
+		final Player target = plugin.getServer().getPlayerExact(playerNameArg);
+		if (target == null) {
 
-            final String playerNotFoundMessage = plugin.getLang().getColored("command.bounty.set.player-not-found");
-            if (!(sender instanceof Player)) {
+			final String playerNotFoundMessage = plugin.getLang().getColored("command.bounty.set.player-not-found");
+			if (!(sender instanceof Player)) {
 
-                UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), playerNotFoundMessage);
+				UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), playerNotFoundMessage);
 
-            } else {
+			} else {
 
-                UtilitiesOG.trueogMessage((Player) sender, playerNotFoundMessage);
+				UtilitiesOG.trueogMessage((Player) sender, playerNotFoundMessage);
 
-            }
+			}
 
-            return true;
+			return true;
 
-        }
+		}
 
-        // Check limits.
-        final double minimum = plugin.getConfig().getDouble("bounty-minimum", 1.0);
-        if (parsedAmount < minimum) {
+		// Check limits.
+		final double minimum = plugin.getConfig().getDouble("bounty-minimum", 1.0);
+		if (parsedAmount < minimum) {
 
-            final String underMinimumMessage = plugin.getLang().getColored("command.bounty.set.under-minimum")
-                    .replace("{minimum}", String.valueOf(minimum));
-            if (!(sender instanceof Player)) {
+			final String underMinimumMessage = plugin.getLang().getColored("command.bounty.set.under-minimum")
+					.replace("{minimum}", String.valueOf(minimum));
+			if (!(sender instanceof Player)) {
 
-                UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), underMinimumMessage);
+				UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), underMinimumMessage);
 
-            } else {
+			} else {
 
-                UtilitiesOG.trueogMessage((Player) sender, underMinimumMessage);
+				UtilitiesOG.trueogMessage((Player) sender, underMinimumMessage);
 
-            }
+			}
 
-            return true;
+			return true;
 
-        }
+		}
 
-        final double maximum = plugin.getConfig().getDouble("bounty-maximum", 1000000.0);
-        if (parsedAmount > maximum) {
+		final double maximum = plugin.getConfig().getDouble("bounty-maximum", 1000000.0);
+		if (parsedAmount > maximum) {
 
-            final String overMaximumMessage = plugin.getLang().getColored("command.bounty.set.over-maximum")
-                    .replace("{maximum}", String.valueOf(maximum));
-            if (!(sender instanceof Player)) {
+			final String overMaximumMessage = plugin.getLang().getColored("command.bounty.set.over-maximum")
+					.replace("{maximum}", String.valueOf(maximum));
+			if (!(sender instanceof Player)) {
 
-                UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), overMaximumMessage);
+				UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), overMaximumMessage);
 
-            } else {
+			} else {
 
-                UtilitiesOG.trueogMessage((Player) sender, overMaximumMessage);
+				UtilitiesOG.trueogMessage((Player) sender, overMaximumMessage);
 
-            }
+			}
 
-            return true;
+			return true;
 
-        }
+		}
 
-        // Apply bounty multiplier.
-        double amount = parsedAmount * plugin.getConfig().getDouble("bounty-multiplier", 1.0);
+		// Apply bounty multiplier.
+		double amount = parsedAmount * plugin.getConfig().getDouble("bounty-multiplier", 1.0);
 
-        // Trigger bounty set event.
-        final BountySetEvent event = new BountySetEvent(sender instanceof Player ? (Player) sender : null, target,
-                (float) amount);
-        plugin.getServer().getPluginManager().callEvent(event);
-        amount = event.getAmount();
+		// Trigger bounty set event.
+		final BountySetEvent event = new BountySetEvent(sender instanceof Player ? (Player) sender : null, target,
+				(float) amount);
+		plugin.getServer().getPluginManager().callEvent(event);
+		amount = event.getAmount();
 
-        // Check if event was cancelled.
-        if (event.isCancelled()) {
+		// Check if event was cancelled.
+		if (event.isCancelled()) {
 
-            final String cancelledBounty = plugin.getLang().getColored("command.bounty.set.cancelled");
-            if (!(sender instanceof Player)) {
+			final String cancelledBounty = plugin.getLang().getColored("command.bounty.set.cancelled");
+			if (!(sender instanceof Player)) {
 
-                UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), cancelledBounty);
+				UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), cancelledBounty);
 
-            } else {
+			} else {
 
-                UtilitiesOG.trueogMessage((Player) sender, cancelledBounty);
+				UtilitiesOG.trueogMessage((Player) sender, cancelledBounty);
 
-            }
+			}
 
-            return true;
+			return true;
 
-        }
+		}
 
-        // Sanity check final amount.
-        if (amount <= 0) {
+		// Sanity check final amount.
+		if (amount <= 0) {
 
-            final String invalidValueMessage = plugin.getLang().getColored("command.bounty.set.internal-invalid-value");
-            if (!(sender instanceof Player)) {
+			final String invalidValueMessage = plugin.getLang().getColored("command.bounty.set.internal-invalid-value");
+			if (!(sender instanceof Player)) {
 
-                UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), invalidValueMessage);
+				UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), invalidValueMessage);
 
-            } else {
+			} else {
 
-                UtilitiesOG.trueogMessage((Player) sender, invalidValueMessage);
+				UtilitiesOG.trueogMessage((Player) sender, invalidValueMessage);
 
-            }
+			}
 
-            return true;
+			return true;
 
-        }
+		}
 
-        // Check economy. Only charge if sender is a player.
-        if (sender instanceof Player player) {
+		// Check economy. Only charge if sender is a player.
+		if (sender instanceof Player player) {
 
-            final boolean allowed = plugin.getEcoHook().takeEco(player, target, amount);
+			final boolean allowed = plugin.getEcoHook().takeEco(player, target, amount);
 
-            if (!allowed) {
+			if (!allowed) {
 
-                final String notEnoughDiamondsMessage = plugin.getLang()
-                        .getColored("command.bounty.set.not-enough-money");
-                if (!(sender instanceof Player)) {
+				final String notEnoughDiamondsMessage = plugin.getLang()
+						.getColored("command.bounty.set.not-enough-money");
+				if (!(sender instanceof Player)) {
 
-                    UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), notEnoughDiamondsMessage);
+					UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), notEnoughDiamondsMessage);
 
-                } else {
+				} else {
 
-                    UtilitiesOG.trueogMessage((Player) sender, notEnoughDiamondsMessage);
+					UtilitiesOG.trueogMessage((Player) sender, notEnoughDiamondsMessage);
 
-                }
+				}
 
-                return true;
+				return true;
 
-            }
+			}
 
-        }
+		}
 
-        final UUID playerUUID = target.getUniqueId();
+		final UUID playerUUID = target.getUniqueId();
 
-        // Calculate total bounty including previous bounties.
-        final BountyDataManager bountyDataManager = plugin.getBountyDataManager();
-        final double bountyAlreadyPresent = bountyDataManager.getBounty(playerUUID);
-        final double chargeAndBountyAmount = (int) amount;
-        final double totalBounty = chargeAndBountyAmount + bountyAlreadyPresent;
-        bountyDataManager.setBounty(playerUUID, totalBounty);
+		// Calculate total bounty including previous bounties.
+		final BountyDataManager bountyDataManager = plugin.getBountyDataManager();
+		final double bountyAlreadyPresent = bountyDataManager.getBounty(playerUUID);
+		final double chargeAndBountyAmount = (int) amount;
+		final double totalBounty = chargeAndBountyAmount + bountyAlreadyPresent;
+		bountyDataManager.setBounty(playerUUID, totalBounty);
 
-        // Confirmation.
-        final String bountySetSuccessMessage = plugin.getLang().getColored("command.bounty.set.success")
-                .replace("{bounty}", String.valueOf(chargeAndBountyAmount))
-                .replace("{total}", String.valueOf(totalBounty)).replace("{target}", target.getName())
-                .replace("{player}", sender.getName());
-        if (!(sender instanceof Player)) {
+		// Confirmation.
+		final String bountySetSuccessMessage = plugin.getLang().getColored("command.bounty.set.success")
+				.replace("{bounty}", String.valueOf(chargeAndBountyAmount))
+				.replace("{total}", String.valueOf(totalBounty)).replace("{target}", target.getName())
+				.replace("{player}", sender.getName());
+		if (!(sender instanceof Player)) {
 
-            UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), bountySetSuccessMessage);
+			UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), bountySetSuccessMessage);
 
-        } else {
+		} else {
 
-            UtilitiesOG.trueogMessage((Player) sender, bountySetSuccessMessage);
+			UtilitiesOG.trueogMessage((Player) sender, bountySetSuccessMessage);
 
-        }
+		}
 
-        // Announcement.
-        final String extra;
-        if (bountyAlreadyPresent == 0) {
+		// Announcement.
+		final String extra;
+		if (bountyAlreadyPresent == 0) {
 
-            extra = "";
+			extra = "";
 
-        } else {
+		} else {
 
-            extra = plugin.getLang().getColored("command.bounty.set.announce-extra").replace("{total}",
-                    String.valueOf(totalBounty));
+			extra = plugin.getLang().getColored("command.bounty.set.announce-extra").replace("{total}",
+					String.valueOf(totalBounty));
 
-        }
+		}
 
-        if (plugin.getConfig().getBoolean("bounty-placed-announce", true)) {
+		if (plugin.getConfig().getBoolean("bounty-placed-announce", true)) {
 
-            Bukkit.getOnlinePlayers()
-                    .forEach((Player player) -> UtilitiesOG.trueogMessage(player,
-                            plugin.getLang().getColored("command.bounty.set.announce")
-                                    .replace("{bounty}", String.valueOf(chargeAndBountyAmount))
-                                    .replace("{target}", target.getName()).replace("{player}", sender.getName())
-                                    .replace("{extra}", extra)));
+			Bukkit.getOnlinePlayers()
+			.forEach((Player player) -> UtilitiesOG.trueogMessage(player, PlayerBountiesOG.getPrefix() + "&a" +
+					plugin.getLang().getColored("command.bounty.set.announce")
+					.replace("{bounty}", String.valueOf(chargeAndBountyAmount))
+					.replace("{target}", target.getName()).replace("{player}", sender.getName())
+					.replace("{extra}", extra)));
 
-        }
+		}
 
-        bountyDataManager.saveBountiesAsync();
+		bountyDataManager.saveBountiesAsync();
 
-        return true;
+		return true;
 
-    }
+	}
 
-    @Nullable
-    public static List<String> onTabComplete(@NotNull CommandSender sender, @NotNull String[] args) {
+	@Nullable
+	public static List<String> onTabComplete(@NotNull CommandSender sender, @NotNull String[] args) {
 
-        if (args.length == 2) {
+		if (args.length == 2) {
 
-            // Suggest online player names for the username.
-            return sender.getServer().getOnlinePlayers().stream().map(Player::getName)
-                    .filter(name -> name.toLowerCase().startsWith(args[1].toLowerCase())).collect(Collectors.toList());
+			// Suggest online player names for the username.
+			return sender.getServer().getOnlinePlayers().stream().map(Player::getName)
+					.filter(name -> name.toLowerCase().startsWith(args[1].toLowerCase())).collect(Collectors.toList());
 
-        } else if (args.length == 3) {
+		} else if (args.length == 3) {
 
-            // Suggest a placeholder for the amount.
-            return Collections.singletonList("<amount>");
+			// Suggest a placeholder for the amount.
+			return Collections.singletonList("<amount>");
 
-        }
+		}
 
-        return Collections.emptyList();
+		return Collections.emptyList();
 
-    }
+	}
 
 }
