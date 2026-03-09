@@ -47,12 +47,12 @@ public class BountySetCmd {
 
         }
 
-        if (sender instanceof Player && !sender.hasPermission("playerbountiesplus.command.bounty.set")) {
+        if (sender instanceof Player && !sender.hasPermission("playerbountiesog.command.bounty.set")) {
 
             final String noPerm = plugin.getLang().getColored("command.no-permission");
             final String noPermDetailed = plugin.getLang().getColored("command.no-permission-detailed")
                     .replace("{no-permission-msg}", noPerm)
-                    .replace("{permission}", "playerbountiesplus.command.bounty.set");
+                    .replace("{permission}", "playerbountiesog.command.bounty.set");
             if (!(sender instanceof Player)) {
 
                 UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), noPermDetailed);

@@ -19,7 +19,7 @@ import net.trueog.utilitiesog.UtilitiesOG;
 
 public class AdminBountySetCmd {
 
-    private static final String PERMISSION = "playerbountiesplus.command.admin.bounty.set";
+    private static final String PERMISSION = "playerbountiesog.command.admin.bounty.set";
 
     public static boolean handleCmd(PlayerBountiesOG plugin, CommandSender sender, Command cmd, String label,
             String[] args)

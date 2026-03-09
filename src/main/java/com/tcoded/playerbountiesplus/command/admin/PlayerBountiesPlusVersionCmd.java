@@ -14,7 +14,7 @@ import net.trueog.utilitiesog.UtilitiesOG;
 
 public class PlayerBountiesPlusVersionCmd {
 
-    private static final String VERSION_PERMISSION = "playerbountiesplus.command.playerbountiesplus.version";
+    private static final String VERSION_PERMISSION = "playerbountiesog.command.admin.version";
 
     public static boolean handleCmd(PlayerBountiesOG plugin, CommandSender sender, Command cmd, String cmdName,
             String[] args)

@@ -16,7 +16,7 @@ import net.trueog.utilitiesog.UtilitiesOG;
 
 public class PlayerBountiesPlusReloadCmd implements TabCompleter {
 
-    private static final String RELOAD_PERMISSION = "playerbountiesplus.command.playerbountiesplus.reload";
+    private static final String RELOAD_PERMISSION = "playerbountiesog.command.admin.reload";
 
     public static boolean handleCmd(PlayerBountiesOG plugin, CommandSender sender, Command cmd, String cmdName,
             String[] args)

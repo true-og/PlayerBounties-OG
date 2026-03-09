@@ -28,17 +28,17 @@ PlayerBounties-OG is a hard fork of [PlayerBountiesPlus](https://github.com/Tech
 ## Permissions
 | Permission | Default |
 | --- | --- |
-| `playerbountiesplus.command.bounty` | all |
-| `playerbountiesplus.command.bounty.set` | all |
-| `playerbountiesplus.event.claim` | all |
-| `playerbountiesplus.command.admin` | op |
-| `playerbountiesplus.command.admin.version` | op |
-| `playerbountiesplus.command.admin.reload` | op |
-| `playerbountiesplus.command.admin.bounty.set` | op |
-| `playerbountiesplus.command.admin.bounty.add` | op |
-| `playerbountiesplus.command.admin.bounty.remove` | op |
-| `playerbountiesplus.command.admin.bounty.delete` | op |
-| `playerbountiesplus.command.admin.bounty.get` | op |
+| `playerbountiesog.command.bounty` | all |
+| `playerbountiesog.command.bounty.set` | all |
+| `playerbountiesog.event.claim` | all |
+| `playerbountiesog.command.admin` | op |
+| `playerbountiesog.command.admin.version` | op |
+| `playerbountiesog.command.admin.reload` | op |
+| `playerbountiesog.command.admin.bounty.set` | op |
+| `playerbountiesog.command.admin.bounty.add` | op |
+| `playerbountiesog.command.admin.bounty.remove` | op |
+| `playerbountiesog.command.admin.bounty.delete` | op |
+| `playerbountiesog.command.admin.bounty.get` | op |
 
 ## Developer Notes
 - Commands reside in `com.tcoded.playerbountiesplus.command` with subpackages for bounty and admin actions.

@@ -62,7 +62,7 @@ public class DeathListener implements Listener {
 
         }
 
-        if (!killer.hasPermission("playerbountiesplus.event.claim")) {
+        if (!killer.hasPermission("playerbountiesog.event.claim")) {
 
             UtilitiesOG.trueogMessage(killer, plugin.getLang().getColored("death.no-permission"));
             return;
