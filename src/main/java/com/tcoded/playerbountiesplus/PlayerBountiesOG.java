@@ -19,6 +19,7 @@ import com.tcoded.playerbountiesplus.hook.currency.DiamondBankOGHook;
 import com.tcoded.playerbountiesplus.hook.currency.EconomyHook;
 import com.tcoded.playerbountiesplus.hook.team.TeamHook;
 import com.tcoded.playerbountiesplus.listener.DeathListener;
+import com.tcoded.playerbountiesplus.listener.GuiProtectionListener;
 import com.tcoded.playerbountiesplus.manager.BountyDataManager;
 import com.tcoded.playerbountiesplus.util.LangUtil;
 
@@ -143,6 +144,7 @@ public final class PlayerBountiesOG extends JavaPlugin {
         // Listeners.
         this.getServer().getPluginManager().registerEvents(new DeathListener(this, this.diamondBankAPI, this.luckPerms),
                 this);
+        this.getServer().getPluginManager().registerEvents(new GuiProtectionListener(this), this);
 
         final List<Plugin> plugins = ImmutableList.copyOf(this.getServer().getPluginManager().getPlugins());
         findPluginWithQuery(plugins, "team");
