@@ -122,10 +122,11 @@ public class DeathListener implements Listener {
         // handled as a bounty claim.
         event.deathMessage(null);
 
+        final String killerDisplay = formatLuckPermsDisplay(killer);
+        final String victimDisplay = formatLuckPermsDisplay(victim);
+
         if (plugin.getConfig().getBoolean("bounty-claimed-announce", true)) {
 
-            final String killerDisplay = formatLuckPermsDisplay(killer);
-            final String victimDisplay = formatLuckPermsDisplay(victim);
             final String bountyDisplay = formatDiamonds(bounty);
             final String awardedDisplay = formatDiamonds(awardedAmount);
 
@@ -155,7 +156,14 @@ public class DeathListener implements Listener {
 
         }
 
-        maybeDropPlayerHead(event, victim);
+        final boolean beheaded = maybeDropPlayerHead(event, victim);
+
+        if (beheaded) {
+
+            Bukkit.getOnlinePlayers().forEach(player -> UtilitiesOG.trueogMessage(player,
+                    killerDisplay + " &abeheaded " + victimDisplay + "&a!"));
+
+        }
 
         bountyDataManager.removeBounty(victimId);
         bountyDataManager.saveBountiesAsync();
@@ -197,13 +205,13 @@ public class DeathListener implements Listener {
 
     }
 
-    private void maybeDropPlayerHead(PlayerDeathEvent event, Player victim) {
+    private boolean maybeDropPlayerHead(PlayerDeathEvent event, Player victim) {
 
         final double dropChance = Math.max(0D,
                 Math.min(100D, plugin.getConfig().getDouble("bounty-head-drop-chance", 50D)));
         if (ThreadLocalRandom.current().nextDouble(100D) >= dropChance) {
 
-            return;
+            return false;
 
         }
 
@@ -215,6 +223,8 @@ public class DeathListener implements Listener {
         head.setItemMeta(headMeta);
 
         event.getDrops().add(head);
+
+        return true;
 
     }
 
