@@ -256,7 +256,7 @@ public class DeathListener implements Listener {
 
         }
 
-        return out.toString();
+        return StringUtils.trim(out.toString()).replaceAll("\\s*>$", "");
 
     }
 
@@ -275,7 +275,7 @@ public class DeathListener implements Listener {
 
         final PlayerProfile profile = Bukkit.createProfile(victim.getUniqueId());
         headMeta.setPlayerProfile(profile);
-        headMeta.displayName(UtilitiesOG.trueogColorize("&c" + victim.getName() + "'s Bounty Head"));
+        headMeta.displayName(UtilitiesOG.trueogColorize("&c" + victim.getName() + "'s Head"));
         final String bountyDisplay = formatDiamonds(bounty);
         headMeta.lore(java.util.List.of(
                 Component.text("Target: ", NamedTextColor.GRAY)
@@ -400,7 +400,7 @@ public class DeathListener implements Listener {
 
         }
 
-        return out.toString();
+        return StringUtils.trim(out.toString()).replaceAll("\\s*>$", "");
 
     }
 

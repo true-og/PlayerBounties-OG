@@ -17,7 +17,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -184,6 +186,40 @@ public class BountyHeadListener implements Listener {
 
     }
 
+    @EventHandler(ignoreCancelled = true)
+    public void onInventoryHover(InventoryClickEvent event) {
+
+        if (!(event.getWhoClicked() instanceof Player player)) {
+
+            return;
+
+        }
+
+        final ItemStack currentItem = event.getCurrentItem();
+        if (currentItem == null || !isHeadMaterial(currentItem.getType())) {
+
+            return;
+
+        }
+
+        sendBountyHeadActionbar(player, currentItem.getItemMeta());
+
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onHotbarScroll(PlayerItemHeldEvent event) {
+
+        final ItemStack newSlotItem = event.getPlayer().getInventory().getItem(event.getNewSlot());
+        if (newSlotItem == null || !isHeadMaterial(newSlotItem.getType())) {
+
+            return;
+
+        }
+
+        sendBountyHeadActionbar(event.getPlayer(), newSlotItem.getItemMeta());
+
+    }
+
     private void sendBountyHeadActionbar(Player player, ItemMeta itemMeta) {
 
         if (itemMeta == null) {
@@ -211,14 +247,14 @@ public class BountyHeadListener implements Listener {
         final UUID uuid = parseUuid(targetUuid);
         final String playerDisplay = formatLuckPermsDisplay(uuid, targetName);
         final String diamonds = formatDiamonds(bountyAmount);
-        player.sendActionBar(
-                UtilitiesOG.trueogColorize("&cBounty Head: " + playerDisplay + " &7- &b" + diamonds + " &bDiamonds"));
+        player.sendActionBar(UtilitiesOG.trueogColorize("&c" + playerDisplay + "'s Head &7- &b" + diamonds
+                + " &bDiamonds"));
 
     }
 
     private void applyBountyData(SkullMeta meta, String targetName, String targetUuid, double bountyAmount) {
 
-        meta.displayName(UtilitiesOG.trueogColorize("&c" + targetName + "'s Bounty Head"));
+        meta.displayName(UtilitiesOG.trueogColorize("&c" + targetName + "'s Head"));
 
         final UUID uuid = parseUuid(targetUuid);
         final String playerDisplay = formatLuckPermsDisplay(uuid, targetName);

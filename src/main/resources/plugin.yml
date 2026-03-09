@@ -36,5 +36,7 @@ permissions:
       playerbountiesplus.command.admin.bounty.delete: {}
   playerbountiesplus.command.bounty.set:
     default: true
+  playerbountiesplus.command.bounty.add:
+    default: true
   playerbountiesplus.event.claim:
     default: true
