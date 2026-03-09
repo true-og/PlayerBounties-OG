@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -40,7 +41,7 @@ public class LangUtil {
 
             for (SupportedLang lang : SupportedLang.values()) {
 
-                if (lang.name().equalsIgnoreCase(name)) {
+                if (StringUtils.equalsIgnoreCase(lang.name(), name)) {
 
                     return lang;
 
@@ -54,7 +55,7 @@ public class LangUtil {
 
         public String fileName() {
 
-            return this.name().toLowerCase(Locale.ROOT) + ".yml";
+            return StringUtils.lowerCase(this.name(), Locale.ROOT) + ".yml";
 
         }
 
@@ -66,7 +67,7 @@ public class LangUtil {
         this.logger = plugin.getLogger();
 
         final SupportedLang resolvedLang = resolveSupportedLang(configuredLang);
-        this.lang = resolvedLang.name().toLowerCase(Locale.ROOT);
+        this.lang = StringUtils.lowerCase(resolvedLang.name(), Locale.ROOT);
 
         final String englishFilePath = "lang/" + SupportedLang.EN_US.fileName();
         final String langFilePath = "lang/" + resolvedLang.fileName();
@@ -102,7 +103,7 @@ public class LangUtil {
     private SupportedLang resolveSupportedLang(String configuredLang) {
 
         final String normalized = configuredLang == null ? DEFAULT_LANG_CODE
-                : configuredLang.trim().toUpperCase(Locale.ROOT);
+                : StringUtils.upperCase(StringUtils.trim(configuredLang), Locale.ROOT);
 
         final SupportedLang supportedLang = SupportedLang.find(normalized);
 

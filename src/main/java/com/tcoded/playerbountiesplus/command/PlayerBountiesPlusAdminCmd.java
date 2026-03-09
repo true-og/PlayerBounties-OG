@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -45,7 +46,7 @@ public class PlayerBountiesPlusAdminCmd implements CommandExecutor, TabCompleter
 
         }
 
-        final String arg0Lower = args[0].toLowerCase();
+        final String arg0Lower = StringUtils.lowerCase(args[0]);
         return switch (arg0Lower) {
 
             case "reload" -> PlayerBountiesPlusReloadCmd.handleCmd(plugin, sender, command, label, args);
@@ -96,12 +97,13 @@ public class PlayerBountiesPlusAdminCmd implements CommandExecutor, TabCompleter
 
         if (args.length == 1) {
 
-            return completions.stream().filter(s -> s.toLowerCase().startsWith(args[0].toLowerCase()))
+            return completions.stream()
+                    .filter(s -> StringUtils.startsWith(StringUtils.lowerCase(s), StringUtils.lowerCase(args[0])))
                     .collect(Collectors.toList());
 
         } else if (args.length > 1) {
 
-            final String subCommand = args[0].toLowerCase();
+            final String subCommand = StringUtils.lowerCase(args[0]);
             return switch (subCommand) {
 
                 case "bounty" -> AdminBountyCmd.onTabComplete(sender, args);

@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -36,7 +37,7 @@ public class AdminBountyCmd {
 
         }
 
-        final String action = args[1].toLowerCase();
+        final String action = StringUtils.lowerCase(args[1]);
         return switch (action) {
 
             case "set" -> AdminBountySetCmd.handleCmd(plugin, sender, cmd, label, args);
@@ -75,7 +76,7 @@ public class AdminBountyCmd {
 
         } else if (args.length > 2) {
 
-            final String sub = args[1].toLowerCase();
+            final String sub = StringUtils.lowerCase(args[1]);
             switch (sub) {
 
                 case "add" -> suggestions = AdminBountyAddCmd.onTabComplete(sender, null, null, args);
@@ -88,8 +89,9 @@ public class AdminBountyCmd {
 
         }
 
-        final String input = args[args.length - 1].toLowerCase();
-        return suggestions.stream().filter(opt -> opt.toLowerCase().startsWith(input)).collect(Collectors.toList());
+        final String input = StringUtils.lowerCase(args[args.length - 1]);
+        return suggestions.stream().filter(opt -> StringUtils.startsWith(StringUtils.lowerCase(opt), input))
+                .collect(Collectors.toList());
 
     }
 

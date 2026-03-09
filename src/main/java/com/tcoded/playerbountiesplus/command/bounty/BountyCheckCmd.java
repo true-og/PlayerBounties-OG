@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -109,7 +110,8 @@ public class BountyCheckCmd {
 
             // Suggest online player names for the username.
             return sender.getServer().getOnlinePlayers().stream().map(Player::getName)
-                    .filter(name -> name.toLowerCase().startsWith(args[1].toLowerCase())).collect(Collectors.toList());
+                    .filter(name -> StringUtils.startsWith(StringUtils.lowerCase(name), StringUtils.lowerCase(args[1])))
+                    .collect(Collectors.toList());
 
         }
 

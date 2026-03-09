@@ -93,8 +93,8 @@ public class BountyTopCmd {
         }
 
         final CachedMetaData meta = user.getCachedData().getMetaData();
-        final String prefix = StringUtils.defaultString(meta.getPrefix()).replace('§', '&').trim();
-        final String suffix = StringUtils.defaultString(meta.getSuffix()).replace('§', '&').trim();
+        final String prefix = StringUtils.trim(StringUtils.defaultString(meta.getPrefix()).replace('§', '&'));
+        final String suffix = StringUtils.trim(StringUtils.defaultString(meta.getSuffix()).replace('§', '&'));
 
         final StringBuilder out = new StringBuilder();
         if (!prefix.isBlank()) {
