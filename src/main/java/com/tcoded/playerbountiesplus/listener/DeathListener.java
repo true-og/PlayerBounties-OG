@@ -24,6 +24,8 @@ import com.tcoded.playerbountiesplus.event.BountyClaimEvent;
 import com.tcoded.playerbountiesplus.hook.team.TeamHook;
 import com.tcoded.playerbountiesplus.manager.BountyDataManager;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.cacheddata.CachedMetaData;
 import net.luckperms.api.model.user.User;
@@ -257,9 +259,13 @@ public class DeathListener implements Listener {
 
         final PlayerProfile profile = Bukkit.createProfile(victim.getUniqueId());
         headMeta.setPlayerProfile(profile);
-        headMeta.setDisplayName("§c" + victim.getName() + "'s Bounty Head");
+        headMeta.displayName(UtilitiesOG.trueogColorize("&c" + victim.getName() + "'s Bounty Head"));
         final String bountyDisplay = formatDiamonds(bounty);
-        headMeta.setLore(java.util.List.of("§7Target: §f" + victim.getName(), "§7Beheaded for: §b" + bountyDisplay));
+        headMeta.lore(java.util.List.of(
+                Component.text("Target: ", NamedTextColor.GRAY)
+                        .append(Component.text(victim.getName(), NamedTextColor.WHITE)),
+                Component.text("Beheaded for: ", NamedTextColor.GRAY)
+                        .append(Component.text(bountyDisplay, NamedTextColor.AQUA))));
         headMeta.getPersistentDataContainer().set(new NamespacedKey(plugin, BOUNTY_HEAD_NAME_KEY),
                 PersistentDataType.STRING, victim.getName());
         headMeta.getPersistentDataContainer().set(new NamespacedKey(plugin, BOUNTY_HEAD_AMOUNT_KEY),

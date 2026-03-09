@@ -26,8 +26,10 @@ import org.bukkit.persistence.PersistentDataType;
 import com.tcoded.playerbountiesplus.PlayerBountiesOG;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.trueog.diamondbankog.api.DiamondBankAPIJava;
+import net.trueog.utilitiesog.UtilitiesOG;
 
 public class BountyHeadListener implements Listener {
 
@@ -109,8 +111,11 @@ public class BountyHeadListener implements Listener {
 
         final ItemStack drop = new ItemStack(Material.PLAYER_HEAD, 1);
         final SkullMeta meta = (SkullMeta) drop.getItemMeta();
-        meta.setOwnerProfile(skull.getOwnerProfile());
+
+        meta.setPlayerProfile(skull.getPlayerProfile());
+
         applyBountyData(meta, targetName, bountyAmount);
+
         drop.setItemMeta(meta);
 
         event.setDropItems(false);
@@ -199,19 +204,20 @@ public class BountyHeadListener implements Listener {
 
         final String diamonds = formatDiamonds(bountyAmount);
         player.sendActionBar(Component.text("Bounty Head: ", NamedTextColor.RED)
-                .append(Component.text(targetName, NamedTextColor.WHITE)).append(Component.text(" - ", NamedTextColor.GRAY))
+                .append(Component.text(targetName, NamedTextColor.WHITE))
+                .append(Component.text(" - ", NamedTextColor.GRAY))
                 .append(Component.text(diamonds + " diamonds", NamedTextColor.AQUA)));
 
     }
 
     private void applyBountyData(SkullMeta meta, String targetName, double bountyAmount) {
 
-        meta.setDisplayName("§c" + targetName + "'s Bounty Head");
+        meta.displayName(UtilitiesOG.trueogColorize("&c" + targetName + "'s Bounty Head"));
 
-        final List<String> lore = new ArrayList<>();
-        lore.add("§7Target: §f" + targetName);
-        lore.add("§7Beheaded for: §b" + formatDiamonds(bountyAmount));
-        meta.setLore(lore);
+        final List<TextComponent> lore = new ArrayList<>();
+        lore.add(UtilitiesOG.trueogColorize("&6Player: &f" + targetName));
+        lore.add(UtilitiesOG.trueogColorize("&cBeheaded for: &b" + formatDiamonds(bountyAmount)));
+        meta.lore(lore);
 
         meta.getPersistentDataContainer().set(targetKey, PersistentDataType.STRING, targetName);
         meta.getPersistentDataContainer().set(amountKey, PersistentDataType.DOUBLE, bountyAmount);
