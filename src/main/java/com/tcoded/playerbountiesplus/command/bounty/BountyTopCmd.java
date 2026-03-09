@@ -76,7 +76,6 @@ public class BountyTopCmd {
 
     }
 
-
     private static String resolveLuckPermsRankName(LuckPerms luckPerms, UUID playerId) {
 
         if (luckPerms == null) {

@@ -223,7 +223,8 @@ public class BountySetCmd {
         final BountyDataManager bountyDataManager = plugin.getBountyDataManager();
         final DiamondBankAPIJava diamondBankAPI = resolveDiamondBankApi(plugin);
         final long newBountyShards = diamondBankAPI.diamondsToShards(amount);
-        final long existingBountyShards = diamondBankAPI.diamondsToShards((float) bountyDataManager.getBounty(playerUUID));
+        final long existingBountyShards = diamondBankAPI
+                .diamondsToShards((float) bountyDataManager.getBounty(playerUUID));
         final long totalBountyShards = newBountyShards + existingBountyShards;
         final double totalBounty = Double.parseDouble(diamondBankAPI.shardsToDiamonds(totalBountyShards));
         bountyDataManager.setBounty(playerUUID, totalBounty);
@@ -253,9 +254,8 @@ public class BountySetCmd {
                     .forEach((Player player) -> UtilitiesOG.trueogMessage(player,
                             PlayerBountiesOG.getPrefix() + "&a"
                                     + plugin.getLang().getColored("command.bounty.set.announce")
-                                            .replace("{bounty}", bountyDisplay)
-                                            .replace("{target}", targetDisplay).replace("{player}", setterDisplay)
-                                            .replace("{extra}", extra)));
+                                            .replace("{bounty}", bountyDisplay).replace("{target}", targetDisplay)
+                                            .replace("{player}", setterDisplay).replace("{extra}", extra)));
 
         }
 

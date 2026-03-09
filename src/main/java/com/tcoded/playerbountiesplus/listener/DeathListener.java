@@ -179,8 +179,10 @@ public class DeathListener implements Listener {
 
             player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0F, 1.0F);
 
-            player.spawnParticle(Particle.FIREWORK, killer.getLocation().add(0D, 1D, 0D), 40, 0.6D, 0.8D, 0.6D, 0.01D);
-            player.spawnParticle(Particle.FIREWORK, victim.getLocation().add(0D, 1D, 0D), 40, 0.6D, 0.8D, 0.6D, 0.01D);
+            player.spawnParticle(Particle.FIREWORKS_SPARK, killer.getLocation().add(0D, 1D, 0D), 40, 0.6D, 0.8D, 0.6D,
+                    0.01D);
+            player.spawnParticle(Particle.FIREWORKS_SPARK, victim.getLocation().add(0D, 1D, 0D), 40, 0.6D, 0.8D, 0.6D,
+                    0.01D);
             player.spawnParticle(Particle.TOTEM, killer.getLocation().add(0D, 1D, 0D), 20, 0.5D, 0.7D, 0.5D, 0.01D);
 
         });
