@@ -7,6 +7,7 @@ PlayerBounties-OG is a hard fork of [PlayerBountiesPlus](https://github.com/Tech
 - Clan-aware bounty system that prevents teammates from claiming each other's bounties.
 - Integrates with [DiamondBank-OG](https://github.com/true-og/DiamondBank-OG) and supports [SimpleClans](https://github.com/true-og/SimpleClans) for team detection.
 - Inventory GUI for viewing bounties.
+- Customizable odds for receiving player head from bounty victim.
 - Localized messages in multiple languages.
 - Uses [LuckPerms](https://github.com/true-og/LuckPerms) for player name formatting.
 
