@@ -247,8 +247,8 @@ public class BountyHeadListener implements Listener {
         final UUID uuid = parseUuid(targetUuid);
         final String playerDisplay = formatLuckPermsDisplay(uuid, targetName);
         final String diamonds = formatDiamonds(bountyAmount);
-        player.sendActionBar(UtilitiesOG.trueogColorize("&c" + playerDisplay + "'s Head &7- &b" + diamonds
-                + " &bDiamonds"));
+        player.sendActionBar(
+                UtilitiesOG.trueogColorize("&c" + playerDisplay + "'s Head &7- &b" + diamonds + " &bDiamonds"));
 
     }
 

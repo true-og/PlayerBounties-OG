@@ -78,9 +78,8 @@ public class BountyIncreasePromptListener implements Listener {
         }
 
         pendingPrompts.remove(event.getPlayer().getUniqueId());
-        plugin.getServer().getScheduler().runTask(plugin,
-                () -> BountyAddCmd.addBounty(plugin, event.getPlayer(), prompt.targetUuid(), prompt.targetName(), amount,
-                        true));
+        plugin.getServer().getScheduler().runTask(plugin, () -> BountyAddCmd.addBounty(plugin, event.getPlayer(),
+                prompt.targetUuid(), prompt.targetName(), amount, true));
 
     }
 

@@ -266,8 +266,7 @@ public class MainBountyGui extends GUIBase {
         }
 
         item.lore(lore);
-        item.setButton(new GUIButton()
-        {
+        item.setButton(new GUIButton() {
 
             @Override
             public boolean leftClick() {
@@ -316,8 +315,8 @@ public class MainBountyGui extends GUIBase {
         final String targetName = StringUtils.defaultIfBlank(entry.targetName(), "Unknown Player");
         plugin.getBountyIncreasePromptListener().prompt(viewer.getUniqueId(), entry.targetUuid(), targetName);
 
-        final String promptMessage = plugin.getLang().getColored("command.bounty.add.prompt")
-                .replace("{target}", safeDisplayName(entry.displayName()));
+        final String promptMessage = plugin.getLang().getColored("command.bounty.add.prompt").replace("{target}",
+                safeDisplayName(entry.displayName()));
         UtilitiesOG.trueogMessage(viewer, promptMessage);
 
         viewer.closeInventory();

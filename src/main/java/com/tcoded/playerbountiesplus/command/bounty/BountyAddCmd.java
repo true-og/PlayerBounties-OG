@@ -113,9 +113,8 @@ public class BountyAddCmd {
         final double maximum = plugin.getConfig().getDouble("bounty-maximum", 1000000.0);
         if (parsedAmount > maximum) {
 
-            UtilitiesOG.trueogMessage(setter,
-                    plugin.getLang().getColored("command.bounty.set.over-maximum").replace("{maximum}",
-                            String.valueOf(maximum)));
+            UtilitiesOG.trueogMessage(setter, plugin.getLang().getColored("command.bounty.set.over-maximum")
+                    .replace("{maximum}", String.valueOf(maximum)));
             return true;
 
         }
@@ -152,12 +151,12 @@ public class BountyAddCmd {
 
         if (plugin.getConfig().getBoolean("bounty-placed-announce", true)) {
 
-            final String announce = plugin.getLang().getColored("command.bounty.add.announce").replace("{amount}",
-                    addedDisplay).replace("{target}", targetDisplay).replace("{total}", totalDisplay)
-                    .replace("{player}", setterDisplay);
+            final String announce = plugin.getLang().getColored("command.bounty.add.announce")
+                    .replace("{amount}", addedDisplay).replace("{target}", targetDisplay)
+                    .replace("{total}", totalDisplay).replace("{player}", setterDisplay);
 
-            Bukkit.getOnlinePlayers().forEach(player -> UtilitiesOG.trueogMessage(player, PlayerBountiesOG.getPrefix()
-                    + "&a" + announce));
+            Bukkit.getOnlinePlayers().forEach(
+                    player -> UtilitiesOG.trueogMessage(player, PlayerBountiesOG.getPrefix() + "&a" + announce));
 
         }
 
@@ -203,7 +202,8 @@ public class BountyAddCmd {
             return false;
 
         }
-        // TODO: Remove PlayerNotOnlineException catch block after next DiamondBank-OG update.
+        // TODO: Remove PlayerNotOnlineException catch block after next DiamondBank-OG
+        // update.
         catch (PlayerNotOnlineException temporaryPlayerNotOnlineError) {
 
             plugin.getLogger().warning("Player " + setter.getName()
