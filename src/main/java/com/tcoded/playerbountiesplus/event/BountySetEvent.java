@@ -41,7 +41,7 @@ public class BountySetEvent extends Event implements Cancellable {
 
     }
 
-    public float getAmount() {
+    public double getAmount() {
 
         return amount;
 

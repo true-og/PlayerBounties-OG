@@ -14,6 +14,8 @@ import org.jetbrains.annotations.Nullable;
 import com.tcoded.playerbountiesplus.PlayerBountiesOG;
 import com.tcoded.playerbountiesplus.manager.BountyDataManager;
 
+import net.trueog.utilitiesog.UtilitiesOG;
+
 public class BountyCheckCmd {
 
     public static boolean handleCmd(PlayerBountiesOG plugin, CommandSender sender, Command cmd, String cmdName,
@@ -22,7 +24,18 @@ public class BountyCheckCmd {
 
         if (args.length < 2) {
 
-            sender.sendMessage(plugin.getLang().getColored("command.bounty.check.no-player-specified"));
+            final String noPlayerSpecifiedMessage = plugin.getLang()
+                    .getColored("command.bounty.check.no-player-specified");
+            if (!(sender instanceof Player)) {
+
+                UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), noPlayerSpecifiedMessage);
+
+            } else {
+
+                UtilitiesOG.trueogMessage((Player) sender, noPlayerSpecifiedMessage);
+
+            }
+
             return true;
 
         }
@@ -33,7 +46,17 @@ public class BountyCheckCmd {
 
         if (target == null) {
 
-            sender.sendMessage(plugin.getLang().getColored("command.bounty.check.player-not-found"));
+            final String playerNotFoundMessage = plugin.getLang().getColored("command.bounty.check.player-not-found");
+            if (!(sender instanceof Player)) {
+
+                UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), playerNotFoundMessage);
+
+            } else {
+
+                UtilitiesOG.trueogMessage((Player) sender, playerNotFoundMessage);
+
+            }
+
             return true;
 
         }
@@ -45,15 +68,33 @@ public class BountyCheckCmd {
 
         if (hasBounty) {
 
-            // Confirmation
-            int bounty = bountyDataManager.getBounty(playerUUID);
-            sender.sendMessage(plugin.getLang().getColored("command.bounty.check.bounty-found").content()
-                    .replace("{target}", target.getName()).replace("{bounty}", Integer.toString(bounty)));
+            // Confirmation.
+            final double bounty = bountyDataManager.getBounty(playerUUID);
+            final String bountyFoundMessage = plugin.getLang().getColored("command.bounty.check.bounty-found")
+                    .replace("{target}", target.getName()).replace("{bounty}", Double.toString(bounty));
+            if (!(sender instanceof Player)) {
+
+                UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), bountyFoundMessage);
+
+            } else {
+
+                UtilitiesOG.trueogMessage((Player) sender, bountyFoundMessage);
+
+            }
 
         } else {
 
-            sender.sendMessage(plugin.getLang().getColored("command.bounty.check.no-bounty").content()
-                    .replace("{target}", target.getName()));
+            final String noBountyFoundMessage = plugin.getLang().getColored("command.bounty.check.no-bounty")
+                    .replace("{target}", target.getName());
+            if (!(sender instanceof Player)) {
+
+                UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), noBountyFoundMessage);
+
+            } else {
+
+                UtilitiesOG.trueogMessage((Player) sender, noBountyFoundMessage);
+
+            }
 
         }
 
@@ -66,7 +107,7 @@ public class BountyCheckCmd {
 
         if (args.length == 2) {
 
-            // Suggest online player names for the username
+            // Suggest online player names for the username.
             return sender.getServer().getOnlinePlayers().stream().map(Player::getName)
                     .filter(name -> name.toLowerCase().startsWith(args[1].toLowerCase())).collect(Collectors.toList());
 

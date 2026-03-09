@@ -15,6 +15,8 @@ import org.jetbrains.annotations.Nullable;
 import com.tcoded.playerbountiesplus.PlayerBountiesOG;
 import com.tcoded.playerbountiesplus.manager.BountyDataManager;
 
+import net.trueog.utilitiesog.UtilitiesOG;
+
 public class AdminBountyAddCmd {
 
     private static final String PERMISSION = "playerbountiesplus.command.admin.bounty.add";
@@ -25,17 +27,38 @@ public class AdminBountyAddCmd {
 
         if (!sender.hasPermission(PERMISSION)) {
 
-            final String noPerm = plugin.getLang().getColored("command.no-permission").content();
-            final String noPermDetailed = plugin.getLang().getColored("command.no-permission-detailed").content()
+            final String noPerm = plugin.getLang().getColored("command.no-permission");
+            final String noPermDetailed = plugin.getLang().getColored("command.no-permission-detailed")
                     .replace("{no-permission-msg}", noPerm).replace("{permission}", PERMISSION);
-            sender.sendMessage(noPermDetailed);
+
+            if (!(sender instanceof Player)) {
+
+                UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), noPermDetailed);
+
+            } else {
+
+                UtilitiesOG.trueogMessage((Player) sender, noPermDetailed);
+
+            }
+
             return true;
 
         }
 
         if (args.length < 4) {
 
-            sender.sendMessage(plugin.getLang().getColored("command.admin.bounty.add.missing-args"));
+            final String missingArguments = plugin.getLang().getColored("command.admin.bounty.add.missing-args");
+
+            if (!(sender instanceof Player)) {
+
+                UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), missingArguments);
+
+            } else {
+
+                UtilitiesOG.trueogMessage((Player) sender, missingArguments);
+
+            }
+
             return true;
 
         }
@@ -46,9 +69,19 @@ public class AdminBountyAddCmd {
 
             amount = Integer.parseInt(args[3]);
 
-        } catch (NumberFormatException ex) {
+        } catch (NumberFormatException numberFormatException) {
 
-            sender.sendMessage(plugin.getLang().getColored("command.admin.bounty.add.amount-nan"));
+            final String notNumber = plugin.getLang().getColored("command.admin.bounty.add.amount-nan");
+            if (!(sender instanceof Player)) {
+
+                UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), notNumber);
+
+            } else {
+
+                UtilitiesOG.trueogMessage((Player) sender, notNumber);
+
+            }
+
             return true;
 
         }
@@ -56,21 +89,44 @@ public class AdminBountyAddCmd {
         final OfflinePlayer target = plugin.getServer().getOfflinePlayer(playerName);
         if (target == null || (!target.hasPlayedBefore() && !target.isOnline())) {
 
-            sender.sendMessage(plugin.getLang().getColored("command.admin.bounty.add.player-not-found"));
+            final String playerNotFound = plugin.getLang().getColored("command.admin.bounty.add.player-not-found");
+
+            if (!(sender instanceof Player)) {
+
+                UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), playerNotFound);
+
+            } else {
+
+                UtilitiesOG.trueogMessage((Player) sender, playerNotFound);
+
+            }
+
             return true;
 
         }
 
         final UUID uuid = target.getUniqueId();
         final BountyDataManager m = plugin.getBountyDataManager();
-        final int current = m.getBounty(uuid);
-        final int total = current + amount;
+        final double current = m.getBounty(uuid);
+        final double total = current + amount;
+
         m.setBounty(uuid, total);
         m.saveBountiesAsync();
 
-        sender.sendMessage(plugin.getLang().getColored("command.admin.bounty.add.success").content()
+        final String bountyAdded = plugin.getLang().getColored("command.admin.bounty.add.success")
                 .replace("{target}", target.getName()).replace("{amount}", String.valueOf(amount))
-                .replace("{total}", String.valueOf(total)));
+                .replace("{total}", String.valueOf(total));
+
+        if (!(sender instanceof Player)) {
+
+            UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), bountyAdded);
+
+        } else {
+
+            UtilitiesOG.trueogMessage((Player) sender, bountyAdded);
+
+        }
+
         return true;
 
     }

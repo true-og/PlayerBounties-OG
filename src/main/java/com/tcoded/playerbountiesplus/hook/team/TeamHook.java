@@ -8,31 +8,31 @@ import com.tcoded.playerbountiesplus.PlayerBountiesOG;
 
 public interface TeamHook {
 
-	static AbstractTeamHook findTeamHook(PlayerBountiesOG plugin) {
+    static AbstractTeamHook findTeamHook(PlayerBountiesOG plugin) {
 
-		final PluginManager pluginManager = plugin.getServer().getPluginManager();
+        final PluginManager pluginManager = plugin.getServer().getPluginManager();
 
-		// RoinujNosde - SimpleClans - TrueOG Network Branch
-		// https://www.spigotmc.org/resources/simpleclans.71242
-		// https://github.com/true-og/SimpleClans
-		// License: GPLv3 (https://raw.githubusercontent.com/true-og/SimpleClans/refs/heads/master/LICENSE)
-		final Plugin simpleClansPlugin = pluginManager.getPlugin("SimpleClans");
-		if (simpleClansPlugin != null && simpleClansPlugin.isEnabled()) {
+        // RoinujNosde's SimpleClans: TrueOG Network branch.
+        // https://github.com/true-og/SimpleClans
+        // License: GPLv3
+        // (https://raw.githubusercontent.com/true-og/SimpleClans/refs/heads/master/LICENSE)
+        final Plugin simpleClansPlugin = pluginManager.getPlugin("SimpleClans");
+        if (simpleClansPlugin != null && simpleClansPlugin.isEnabled()) {
 
-			return new SimpleClansHook(plugin, simpleClansPlugin);
+            return new SimpleClansHook(plugin, simpleClansPlugin);
 
-		}
+        }
 
-		return null;
+        return null;
 
-	}
+    }
 
-	String getPluginName();
+    String getPluginName();
 
-	String getAuthor();
+    String getAuthor();
 
-	String[] getAuthors();
+    String[] getAuthors();
 
-	boolean isFriendly(Player player1, Player player2);
+    boolean isFriendly(Player player1, Player player2);
 
 }

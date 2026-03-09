@@ -76,13 +76,13 @@ public class PlayerBountiesPlusAdminCmd implements CommandExecutor, TabCompleter
                 &f/pbp help &7- Get this message.\
                 """;
 
-        if (sender instanceof Player player) {
+        if (!(sender instanceof Player)) {
 
-            sender.sendMessage(UtilitiesOG.trueogExpand(help, player));
+            UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), help);
 
         } else {
 
-            sender.sendMessage(UtilitiesOG.stripFormatting(help));
+            UtilitiesOG.trueogMessage((Player) sender, help);
 
         }
 

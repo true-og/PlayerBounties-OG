@@ -29,7 +29,7 @@ kotlin { jvmToolchain(17) }
 /* ----------------------------- Metadata ------------------------------ */
 group = "com.tcoded" // Declare bundle identifier.
 
-version = "1.4.17" // Declare plugin version (will be in .jar).
+version = "1.0" // Declare plugin version (will be in .jar).
 
 val apiVersion = "1.19" // Declare minecraft server target version.
 
@@ -46,6 +46,8 @@ repositories {
     mavenCentral() // Import the Maven Central Maven Repository.
     gradlePluginPortal() // Import the Gradle Plugin Portal Maven Repository.
     maven { url = uri("https://repo.purpurmc.org/snapshots") } // Import the PurpurMC Maven Repository.
+    maven { url = uri("https://repo.codemc.io/repository/maven-releases/") }
+    maven { url = uri("https://repo.codemc.io/repository/maven-snapshots/") }
     maven { url = uri("file://${System.getProperty("user.home")}/.m2/repository") }
     System.getProperty("SELF_MAVEN_LOCAL_REPO")?.let { // TrueOG Bootstrap mavenLocal().
         val dir = file(it)
@@ -69,15 +71,10 @@ repositories {
 /* ---------------------- Java project deps ---------------------------- */
 dependencies {
     compileOnly("org.purpurmc.purpur:purpur-api:1.19.4-R0.1-SNAPSHOT") // Declare Purpur API version to be packaged.
-    compileOnly("org.jetbrains:annotations:23.0.0")
-    compileOnly("com.github.CraptiCraft-Development:ClansLite-API:1.4.4")
-    compileOnly("com.cortezromeo.clansplus:clansplus-plugin:2.8")
-    implementation("com.github.lightlibs:LegacyColorCodeParser:1.0.0")
     compileOnly("net.sacredlabyrinth.phaed.simpleclans:SimpleClans:2.15.2")
-    compileOnly("com.github.SaberLLC:Saber-Factions:4.1.4-STABLE")
-    compileOnly("com.palmergames.bukkit.towny:towny:0.100.0.0")
-    compileOnly("me.clip:placeholderapi:2.11.6")
+    compileOnly("net.luckperms:api:5.5") // Import LuckPerms API.
     compileOnlyApi(project(":libs:Utilities-OG")) // Import TrueOG Network Utilities-OG Java API (from source).
+    compileOnlyApi(project(":libs:GxUI-OG")) // Import TrueOG Network GxUI-OG Java API (from source).
     compileOnlyApi(project(":libs:DiamondBank-OG")) {
         attributes { attribute(kotlinAttribute, true) }
     } // Import TrueOG network DiamondBank-OG Kotlin API (from source).

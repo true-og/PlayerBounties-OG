@@ -7,8 +7,8 @@ PlayerBounties-OG is a hard fork of [PlayerBountiesPlus](https://github.com/Tech
 - Clan-aware bounty system that prevents teammates from claiming each other's bounties.
 - Integrates with [DiamondBank-OG](https://github.com/true-og/DiamondBank-OG) and supports [SimpleClans](https://github.com/true-og/SimpleClans) for team detection.
 - Inventory GUI for viewing bounties.
-- PlaceholderAPI support for custom placeholders.
 - Localized messages in multiple languages.
+- Uses [LuckPerms](https://github.com/true-og/LuckPerms) for player name formatting.
 
 ## Commands
 - `/bounty set <player> <amount>` – set a bounty on a player
@@ -40,7 +40,7 @@ PlayerBounties-OG is a hard fork of [PlayerBountiesPlus](https://github.com/Tech
 ## Developer Notes
 - Commands reside in `com.tcoded.playerbountiesplus.command` with subpackages for bounty and admin actions.
 - Event listeners like `DeathListener` handle bounty claim logic.
-- Hooks under `com.tcoded.playerbountiesplus.hook` integrate with DiamondBank-OG, PlaceholderAPI and SimpleClans.
+- Hooks under `com.tcoded.playerbountiesplus.hook` integrate with DiamondBank-OG and SimpleClans.
 - Inventory GUIs in `com.tcoded.playerbountiesplus.gui` present bounty data.
 - `BountyDataManager` manages persistence of bounties.
 

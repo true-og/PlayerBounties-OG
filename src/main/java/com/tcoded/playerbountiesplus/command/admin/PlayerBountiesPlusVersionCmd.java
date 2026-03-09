@@ -21,7 +21,6 @@ public class PlayerBountiesPlusVersionCmd {
     {
 
         final LangUtil lang = plugin.getLang();
-
         final String version;
         if (sender.hasPermission(VERSION_PERMISSION)) {
 

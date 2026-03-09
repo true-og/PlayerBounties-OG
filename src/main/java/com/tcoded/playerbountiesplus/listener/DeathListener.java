@@ -2,6 +2,7 @@ package com.tcoded.playerbountiesplus.listener;
 
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -14,15 +15,23 @@ import com.tcoded.playerbountiesplus.event.BountyClaimEvent;
 import com.tcoded.playerbountiesplus.hook.team.TeamHook;
 import com.tcoded.playerbountiesplus.manager.BountyDataManager;
 
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.cacheddata.CachedMetaData;
+import net.luckperms.api.model.user.User;
+import net.trueog.diamondbankog.api.DiamondBankAPIJava;
 import net.trueog.utilitiesog.UtilitiesOG;
 
 public class DeathListener implements Listener {
 
     private final PlayerBountiesOG plugin;
+    private final DiamondBankAPIJava diamondBankAPI;
+    private final LuckPerms luckPerms;
 
-    public DeathListener(PlayerBountiesOG plugin) {
+    public DeathListener(PlayerBountiesOG plugin, DiamondBankAPIJava diamondBankAPI, LuckPerms luckPerms) {
 
         this.plugin = plugin;
+        this.diamondBankAPI = diamondBankAPI;
+        this.luckPerms = luckPerms;
 
     }
 
@@ -40,7 +49,7 @@ public class DeathListener implements Listener {
 
         if (!killer.hasPermission("playerbountiesplus.event.claim")) {
 
-            killer.sendMessage(plugin.getLang().getColored("death.no-permission"));
+            UtilitiesOG.trueogMessage(killer, plugin.getLang().getColored("death.no-permission"));
             return;
 
         }
@@ -54,12 +63,19 @@ public class DeathListener implements Listener {
 
         }
 
-        final int bounty = bountyDataManager.getBounty(victimId);
-
         final TeamHook teamHook = this.plugin.getTeamHook();
         if (teamHook != null && teamHook.isFriendly(killer, victim)) {
 
-            killer.sendMessage(plugin.getLang().getColored("death.same-team"));
+            UtilitiesOG.trueogMessage(killer, plugin.getLang().getColored("death.same-team"));
+            return;
+
+        }
+
+        final double bounty = bountyDataManager.getBounty(victimId);
+        if (bounty <= 0D) {
+
+            bountyDataManager.removeBounty(victimId);
+            bountyDataManager.saveBountiesAsync();
             return;
 
         }
@@ -73,14 +89,25 @@ public class DeathListener implements Listener {
 
         }
 
-        if (plugin.getConfig().getBoolean("bounty-claimable", true)) {
+        final boolean bountyClaimable = plugin.getConfig().getBoolean("bounty-claimable", true);
+        final double claimMultiplier = plugin.getConfig().getDouble("bounty-claim-multiplier", 1.0D);
+        final double awardedAmount = Math.max(0D, bounty * claimMultiplier);
 
-            final double claimMultiplier = plugin.getConfig().getDouble("bounty-claim-multiplier", 1.0);
-            final double awardedAmount = bounty * claimMultiplier;
+        if (bountyClaimable && awardedAmount > 0D) {
 
-            if (awardedAmount > 0) {
+            try {
 
                 this.plugin.getEcoHook().giveEco(killer, victim, awardedAmount);
+
+            } catch (RuntimeException runtimeException) {
+
+                plugin.getLogger().severe("Failed to award bounty payout to " + killer.getName() + " for killing "
+                        + victim.getName() + ": " + runtimeException.getMessage());
+                runtimeException.printStackTrace();
+
+                UtilitiesOG.trueogMessage(killer,
+                        "&cAn error occurred while awarding the bounty payout. The bounty was not removed.");
+                return;
 
             }
 
@@ -88,13 +115,154 @@ public class DeathListener implements Listener {
 
         if (plugin.getConfig().getBoolean("bounty-claimed-announce", true)) {
 
-            Bukkit.getOnlinePlayers().forEach((Player player) -> UtilitiesOG.trueogMessage(player, killer.getName()
-                    + "killed " + victim.getName() + " and earned the " + String.valueOf(bounty) + " Diamond bounty!"));
+            final String killerDisplay = formatLuckPermsDisplay(killer);
+            final String victimDisplay = formatLuckPermsDisplay(victim);
+            final String bountyDisplay = formatDiamonds(bounty);
+            final String awardedDisplay = formatDiamonds(awardedAmount);
+
+            final String message;
+            if (bountyClaimable && awardedAmount > 0D) {
+
+                if (Double.compare(awardedAmount, bounty) == 0) {
+
+                    message = killerDisplay + " &akilled " + victimDisplay + " &aand earned the &b" + awardedDisplay
+                            + " &abounty!";
+
+                } else {
+
+                    message = killerDisplay + " &akilled " + victimDisplay + " &aand claimed the &b" + bountyDisplay
+                            + " &abounty for &b" + awardedDisplay + "&a!";
+
+                }
+
+            } else {
+
+                message = killerDisplay + " &akilled " + victimDisplay + " &aand claimed the &b" + bountyDisplay
+                        + " &abounty!";
+
+            }
+
+            Bukkit.getOnlinePlayers().forEach(player -> UtilitiesOG.trueogMessage(player, message));
 
         }
 
         bountyDataManager.removeBounty(victimId);
         bountyDataManager.saveBountiesAsync();
+
+    }
+
+    private String formatDiamonds(double diamonds) {
+
+        try {
+
+            return diamondBankAPI.shardsToDiamonds(diamondBankAPI.diamondsToShards(diamonds));
+
+        } catch (RuntimeException runtimeException) {
+
+            return String.valueOf(diamonds);
+
+        }
+
+    }
+
+    private String formatLuckPermsDisplay(Player player) {
+
+        final String prefix = stripLeadingReset(stripTrailingReset(getLuckPermsPrefixLegacy(player)));
+        final String leadingColorCodes = extractLeadingColorCodes(prefix);
+
+        if (prefix.isBlank()) {
+
+            return player.getName();
+
+        }
+
+        if (leadingColorCodes.isBlank()) {
+
+            return prefix + " " + player.getName();
+
+        }
+
+        return prefix + " " + leadingColorCodes + player.getName();
+
+    }
+
+    private String getLuckPermsPrefixLegacy(Player player) {
+
+        if (luckPerms == null) {
+
+            return "";
+
+        }
+
+        final User user = luckPerms.getUserManager().getUser(player.getUniqueId());
+        if (user == null) {
+
+            return "";
+
+        }
+
+        final CachedMetaData meta = user.getCachedData().getMetaData();
+        final String prefix = meta.getPrefix();
+
+        if (prefix == null || prefix.isBlank()) {
+
+            return "";
+
+        }
+
+        return StringUtils.trim(prefix).replace('§', '&');
+
+    }
+
+    private static String stripTrailingReset(String input) {
+
+        if (input == null || input.isBlank()) {
+
+            return "";
+
+        }
+
+        return StringUtils.trim(input.replaceAll("(?i)(?:\\s*(?:<reset>|[&§]r))+$", ""));
+
+    }
+
+    private static String stripLeadingReset(String input) {
+
+        if (input == null || input.isBlank()) {
+
+            return "";
+
+        }
+
+        return StringUtils.trim(input.replaceFirst("(?i)^(?:\\s*(?:<reset>|[&§]r))+", ""));
+
+    }
+
+    private static String extractLeadingColorCodes(String input) {
+
+        if (input == null || input.length() < 2) {
+
+            return "";
+
+        }
+
+        final StringBuilder out = new StringBuilder();
+        for (int i = 0; i < input.length() - 1; i++) {
+
+            final char current = input.charAt(i);
+            if (current != '&' && current != '§') {
+
+                break;
+
+            }
+
+            out.append(current).append(input.charAt(i + 1));
+
+            i++;
+
+        }
+
+        return out.toString();
 
     }
 

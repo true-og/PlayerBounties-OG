@@ -15,6 +15,8 @@ import org.jetbrains.annotations.Nullable;
 import com.tcoded.playerbountiesplus.PlayerBountiesOG;
 import com.tcoded.playerbountiesplus.manager.BountyDataManager;
 
+import net.trueog.utilitiesog.UtilitiesOG;
+
 public class AdminBountyRemoveCmd {
 
     private static final String PERMISSION = "playerbountiesplus.command.admin.bounty.remove";
@@ -25,17 +27,37 @@ public class AdminBountyRemoveCmd {
 
         if (!sender.hasPermission(PERMISSION)) {
 
-            final String noPerm = plugin.getLang().getColored("command.no-permission").content();
-            final String noPermDetailed = plugin.getLang().getColored("command.no-permission-detailed").content()
+            final String noPerm = plugin.getLang().getColored("command.no-permission");
+            final String noPermDetailed = plugin.getLang().getColored("command.no-permission-detailed")
                     .replace("{no-permission-msg}", noPerm).replace("{permission}", PERMISSION);
-            sender.sendMessage(noPermDetailed);
+            if (!(sender instanceof Player)) {
+
+                UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), noPermDetailed);
+
+            } else {
+
+                UtilitiesOG.trueogMessage((Player) sender, noPermDetailed);
+
+            }
+
             return true;
 
         }
 
         if (args.length < 4) {
 
-            sender.sendMessage(plugin.getLang().getColored("command.admin.bounty.remove.missing-args"));
+            final String missingArguments = plugin.getLang().getColored("command.admin.bounty.remove.missing-args");
+
+            if (!(sender instanceof Player)) {
+
+                UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), missingArguments);
+
+            } else {
+
+                UtilitiesOG.trueogMessage((Player) sender, missingArguments);
+
+            }
+
             return true;
 
         }
@@ -46,9 +68,20 @@ public class AdminBountyRemoveCmd {
 
             amount = Integer.parseInt(args[3]);
 
-        } catch (NumberFormatException ex) {
+        } catch (NumberFormatException numberFormatException) {
 
-            sender.sendMessage(plugin.getLang().getColored("command.admin.bounty.remove.amount-nan"));
+            final String notNumberMessage = plugin.getLang().getColored("command.admin.bounty.remove.amount-nan");
+
+            if (!(sender instanceof Player)) {
+
+                UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), notNumberMessage);
+
+            } else {
+
+                UtilitiesOG.trueogMessage((Player) sender, notNumberMessage);
+
+            }
+
             return true;
 
         }
@@ -56,15 +89,26 @@ public class AdminBountyRemoveCmd {
         final OfflinePlayer target = plugin.getServer().getOfflinePlayer(playerName);
         if (target == null || (!target.hasPlayedBefore() && !target.isOnline())) {
 
-            sender.sendMessage(plugin.getLang().getColored("command.admin.bounty.remove.player-not-found"));
+            final String playerNotFound = plugin.getLang().getColored("command.admin.bounty.remove.player-not-found");
+
+            if (!(sender instanceof Player)) {
+
+                UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), playerNotFound);
+
+            } else {
+
+                UtilitiesOG.trueogMessage((Player) sender, playerNotFound);
+
+            }
+
             return true;
 
         }
 
         final UUID uuid = target.getUniqueId();
         final BountyDataManager m = plugin.getBountyDataManager();
-        final int current = m.getBounty(uuid);
-        int total = current - amount;
+        final double current = m.getBounty(uuid);
+        double total = current - amount;
         if (total <= 0) {
 
             m.removeBounty(uuid);
@@ -78,9 +122,19 @@ public class AdminBountyRemoveCmd {
 
         m.saveBountiesAsync();
 
-        sender.sendMessage(plugin.getLang().getColored("command.admin.bounty.remove.success").content()
+        final String bountyRemovedMessage = plugin.getLang().getColored("command.admin.bounty.remove.success")
                 .replace("{target}", target.getName()).replace("{amount}", String.valueOf(amount))
-                .replace("{total}", String.valueOf(total)));
+                .replace("{total}", String.valueOf(total));
+        if (!(sender instanceof Player)) {
+
+            UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), bountyRemovedMessage);
+
+        } else {
+
+            UtilitiesOG.trueogMessage((Player) sender, bountyRemovedMessage);
+
+        }
+
         return true;
 
     }
@@ -92,12 +146,12 @@ public class AdminBountyRemoveCmd {
 
         if (args.length == 3) {
 
-            // Suggest all online player names for the username
+            // Suggest all online player names for the username.
             return sender.getServer().getOnlinePlayers().stream().map(Player::getName).collect(Collectors.toList());
 
         } else if (args.length == 4) {
 
-            // Suggest a placeholder for the amount
+            // Suggest a placeholder for the amount.
             return Collections.singletonList("<amount>");
 
         }

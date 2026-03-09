@@ -15,6 +15,8 @@ import org.jetbrains.annotations.Nullable;
 import com.tcoded.playerbountiesplus.PlayerBountiesOG;
 import com.tcoded.playerbountiesplus.manager.BountyDataManager;
 
+import net.trueog.utilitiesog.UtilitiesOG;
+
 public class AdminBountyGetCmd {
 
     private static final String PERMISSION = "playerbountiesplus.command.admin.bounty.get";
@@ -25,17 +27,36 @@ public class AdminBountyGetCmd {
 
         if (!sender.hasPermission(PERMISSION)) {
 
-            final String noPerm = plugin.getLang().getColored("command.no-permission").content();
-            final String noPermDetailed = plugin.getLang().getColored("command.no-permission-detailed").content()
+            final String noPerm = plugin.getLang().getColored("command.no-permission");
+            final String noPermDetailed = plugin.getLang().getColored("command.no-permission-detailed")
                     .replace("{no-permission-msg}", noPerm).replace("{permission}", PERMISSION);
-            sender.sendMessage(noPermDetailed);
+            if (!(sender instanceof Player)) {
+
+                UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), noPermDetailed);
+
+            } else {
+
+                UtilitiesOG.trueogMessage((Player) sender, noPermDetailed);
+
+            }
+
             return true;
 
         }
 
         if (args.length < 3) {
 
-            sender.sendMessage(plugin.getLang().getColored("command.admin.bounty.get.missing-args"));
+            final String missingArguments = plugin.getLang().getColored("command.admin.bounty.get.missing-args");
+            if (!(sender instanceof Player)) {
+
+                UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), missingArguments);
+
+            } else {
+
+                UtilitiesOG.trueogMessage((Player) sender, missingArguments);
+
+            }
+
             return true;
 
         }
@@ -45,17 +66,37 @@ public class AdminBountyGetCmd {
         final OfflinePlayer target = plugin.getServer().getOfflinePlayer(playerName);
         if (target == null || (!target.hasPlayedBefore() && !target.isOnline())) {
 
-            sender.sendMessage(plugin.getLang().getColored("command.admin.bounty.get.player-not-found"));
+            final String playerNotFound = plugin.getLang().getColored("command.admin.bounty.get.player-not-found");
+            if (!(sender instanceof Player)) {
+
+                UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), playerNotFound);
+
+            } else {
+
+                UtilitiesOG.trueogMessage((Player) sender, playerNotFound);
+
+            }
+
             return true;
 
         }
 
         final UUID uuid = target.getUniqueId();
         final BountyDataManager m = plugin.getBountyDataManager();
-        final int current = m.getBounty(uuid);
+        final double current = m.getBounty(uuid);
 
-        sender.sendMessage(plugin.getLang().getColored("command.admin.bounty.get.success").content()
-                .replace("{target}", target.getName()).replace("{bounty}", String.valueOf(current)));
+        final String bountyFetch = plugin.getLang().getColored("command.admin.bounty.get.success")
+                .replace("{target}", target.getName()).replace("{bounty}", String.valueOf(current));
+        if (!(sender instanceof Player)) {
+
+            UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), bountyFetch);
+
+        } else {
+
+            UtilitiesOG.trueogMessage((Player) sender, bountyFetch);
+
+        }
+
         return true;
 
     }
@@ -67,7 +108,7 @@ public class AdminBountyGetCmd {
 
         if (args.length == 3) {
 
-            // Suggest all online player names for the username
+            // Suggest all online player names for the username.
             return sender.getServer().getOnlinePlayers().stream().map(Player::getName).collect(Collectors.toList());
 
         }

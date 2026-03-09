@@ -3,6 +3,11 @@ package com.tcoded.playerbountiesplus.util;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
 import java.util.logging.Logger;
 
 import org.bukkit.configuration.file.FileConfiguration;
@@ -10,13 +15,12 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.tcoded.playerbountiesplus.PlayerBountiesOG;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
-import net.trueog.utilitiesog.UtilitiesOG;
-
 public class LangUtil {
 
+    private static final String DEFAULT_LANG_CODE = "en_us";
+
     private final PlayerBountiesOG plugin;
+    private final Logger logger;
     private final File overrideMessagesFile;
     private final FileConfiguration messages;
     private final String lang;
@@ -24,15 +28,21 @@ public class LangUtil {
 
     public enum SupportedLang {
 
-        DE_DE, EN_GB, EN_US, EN_UWU, ES_ES, FR_FR, HI_IN, HU_HU, IT_IT, NL_NL, RU_RU, SE_SE, ZH_CN,;
+        DE_DE, EN_GB, EN_US, EN_UWU, ES_ES, FR_FR, HI_IN, HU_HU, IT_IT, NL_NL, RU_RU, SE_SE, ZH_CN;
 
         public static SupportedLang find(String name) {
 
+            if (name == null || name.isBlank()) {
+
+                return null;
+
+            }
+
             for (SupportedLang lang : SupportedLang.values()) {
 
-                if (lang.name().equals(name)) {
+                if (lang.name().equalsIgnoreCase(name)) {
 
-                    return EN_US;
+                    return lang;
 
                 }
 
@@ -42,94 +52,164 @@ public class LangUtil {
 
         }
 
+        public String fileName() {
+
+            return this.name().toLowerCase(Locale.ROOT) + ".yml";
+
+        }
+
     }
 
-    public LangUtil(PlayerBountiesOG plugin, String lang) {
+    public LangUtil(PlayerBountiesOG plugin, String configuredLang) {
 
         this.plugin = plugin;
-        this.lang = lang;
-        final Logger logger = this.plugin.getLogger();
+        this.logger = plugin.getLogger();
 
-        // for (SupportedLang tmpLang : SupportedLang.values()) {
-        // plugin.saveResource("lang/" + tmpLang.name().toLowerCase() + ".yml", false);
-        // }
+        final SupportedLang resolvedLang = resolveSupportedLang(configuredLang);
+        this.lang = resolvedLang.name().toLowerCase(Locale.ROOT);
 
-        // Resolve the path of the lang files we're going to use
-        final String englishFilePath = "lang/" + SupportedLang.EN_US.name().toLowerCase() + ".yml";
-        final String langFilePath = "lang/" + lang + ".yml";
+        final String englishFilePath = "lang/" + SupportedLang.EN_US.fileName();
+        final String langFilePath = "lang/" + resolvedLang.fileName();
 
-        // Load internal default English file - Worst case scenario fallback
-        final InputStream internalEnglishDefaultFile = plugin.getResource(englishFilePath);
-        if (internalEnglishDefaultFile == null) {
+        final FileConfiguration englishDefaults = loadBundledYaml(englishFilePath, true);
+        final FileConfiguration selectedLangDefaults = resolvedLang == SupportedLang.EN_US ? englishDefaults
+                : loadBundledYaml(langFilePath, false);
 
-            throw new IllegalStateException("Internal default English file could not be found!");
+        selectedLangDefaults.setDefaults(englishDefaults);
 
-        }
-
-        final FileConfiguration englishDefaults = YamlConfiguration
-                .loadConfiguration(new InputStreamReader(internalEnglishDefaultFile));
-
-        // Check if language is supported
-        final SupportedLang supportedLang = SupportedLang.find(lang.toUpperCase());
-        if (supportedLang == null) {
-
-            logger.severe("Unsupported language was found: %s!".formatted(lang));
-            logger.info(
-                    "You can contribute new languages by following the instructions at the top of the config.yml file :)");
-            throw new IllegalStateException("Unsupported language in config.yml");
-
-        }
-
-        // Load user-specified internal language file
-        final InputStream internalLangFile = plugin.getResource(langFilePath);
-        if (internalLangFile == null) {
-
-            throw new IllegalStateException("Internal language file could not be found! (Lang: %s)".formatted(lang));
-
-        }
-
-        final FileConfiguration defaults = YamlConfiguration.loadConfiguration(new InputStreamReader(internalLangFile));
-        defaults.setDefaults(englishDefaults);
-
-        // Check if the user has created an override language file
         this.overrideMessagesFile = new File(plugin.getDataFolder(), langFilePath);
+
         if (this.overrideMessagesFile.exists()) {
 
-            logger.warning("Using custom override language file for language: %s".formatted(lang));
             this.messages = YamlConfiguration.loadConfiguration(this.overrideMessagesFile);
-            this.messages.setDefaults(defaults);
+            this.messages.setDefaults(selectedLangDefaults);
             this.customLang = true;
+            this.logger.warning("Using custom override language file: " + this.overrideMessagesFile.getPath());
 
         } else {
 
-            this.messages = defaults;
+            this.messages = selectedLangDefaults;
             this.customLang = false;
 
         }
 
     }
 
-    public TextComponent getColored(String key) {
+    private SupportedLang resolveSupportedLang(String configuredLang) {
 
-        if (this.messages == null) {
+        final String normalized = configuredLang == null ? DEFAULT_LANG_CODE
+                : configuredLang.trim().toUpperCase(Locale.ROOT);
 
-            return Component.text("STARTUP-ERROR-CONTACT-DEV");
+        final SupportedLang supportedLang = SupportedLang.find(normalized);
+
+        if (supportedLang != null) {
+
+            return supportedLang;
 
         }
 
-        return UtilitiesOG.trueogColorize(this.messages.getString(key));
+        this.logger.warning("Unsupported language in config.yml: " + configuredLang + ". Falling back to "
+                + DEFAULT_LANG_CODE + ".");
+        this.logger.info("You can contribute new languages by following the instructions at the top of config.yml.");
+
+        return SupportedLang.EN_US;
+
+    }
+
+    private FileConfiguration loadBundledYaml(String path, boolean required) {
+
+        final InputStream resource = this.plugin.getResource(path);
+
+        if (resource == null) {
+
+            if (required) {
+
+                throw new IllegalStateException("Required bundled language file could not be found: " + path);
+
+            }
+
+            this.logger.warning("Bundled language file not found: " + path + ". Falling back to English.");
+            return new YamlConfiguration();
+
+        }
+
+        final InputStream input = resource;
+        final InputStreamReader reader = new InputStreamReader(input, StandardCharsets.UTF_8);
+
+        return YamlConfiguration.loadConfiguration(reader);
+
+    }
+
+    public String getColored(String key) {
+
+        if (key == null || key.isBlank()) {
+
+            return "";
+
+        }
+
+        final String value = this.messages.getString(key);
+
+        if (value != null) {
+
+            return value;
+
+        }
+
+        this.logger.warning("Missing language key: " + key + " (lang=" + this.lang + ")");
+
+        return key;
+
+    }
+
+    public List<String> getColoredList(String key) {
+
+        if (key == null || key.isBlank()) {
+
+            return Collections.emptyList();
+
+        }
+
+        if (!this.messages.contains(key)) {
+
+            this.logger.warning("Missing language list key: " + key + " (lang=" + this.lang + ")");
+            return List.of(key);
+
+        }
+
+        final List<String> values = this.messages.getStringList(key);
+
+        if (values == null || values.isEmpty()) {
+
+            return Collections.emptyList();
+
+        }
+
+        return new ArrayList<>(values);
+
+    }
+
+    public boolean contains(String key) {
+
+        return this.messages.contains(key);
 
     }
 
     public String getLang() {
 
-        return lang;
+        return this.lang;
 
     }
 
     public boolean isCustomLang() {
 
-        return customLang;
+        return this.customLang;
+
+    }
+
+    public File getOverrideMessagesFile() {
+
+        return this.overrideMessagesFile;
 
     }
 

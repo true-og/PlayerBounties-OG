@@ -86,9 +86,7 @@ public class DiamondBankOGHook implements EconomyHook {
 
             return false;
 
-        }
-
-        catch (InvalidPlayerException invalidPlayerError) {
+        } catch (InvalidPlayerException invalidPlayerError) {
 
             plugin.getLogger().warning("Invalid player for consumeFromPlayer: " + player.getName());
             UtilitiesOG.trueogMessage(player,

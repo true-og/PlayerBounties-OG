@@ -6,10 +6,13 @@ import java.util.List;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.tcoded.playerbountiesplus.PlayerBountiesOG;
+
+import net.trueog.utilitiesog.UtilitiesOG;
 
 public class PlayerBountiesPlusReloadCmd implements TabCompleter {
 
@@ -21,10 +24,19 @@ public class PlayerBountiesPlusReloadCmd implements TabCompleter {
 
         if (!sender.hasPermission(RELOAD_PERMISSION)) {
 
-            final String noPerm = plugin.getLang().getColored("command.no-permission").content();
-            final String noPermDetailed = plugin.getLang().getColored("command.no-permission-detailed").content()
+            final String noPerm = plugin.getLang().getColored("command.no-permission");
+            final String noPermDetailed = plugin.getLang().getColored("command.no-permission-detailed")
                     .replace("{no-permission-msg}", noPerm).replace("{permission}", RELOAD_PERMISSION);
-            sender.sendMessage(noPermDetailed);
+            if (!(sender instanceof Player)) {
+
+                UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), noPermDetailed);
+
+            } else {
+
+                UtilitiesOG.trueogMessage((Player) sender, noPermDetailed);
+
+            }
+
             return true;
 
         }
@@ -32,7 +44,17 @@ public class PlayerBountiesPlusReloadCmd implements TabCompleter {
         plugin.reloadConfig();
         plugin.reloadLang();
 
-        sender.sendMessage(plugin.getLang().getColored("command.admin.reload.reloaded"));
+        final String reloadMessage = plugin.getLang().getColored("command.admin.reload.reloaded");
+
+        if (!(sender instanceof Player)) {
+
+            UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), reloadMessage);
+
+        } else {
+
+            UtilitiesOG.trueogMessage((Player) sender, reloadMessage);
+
+        }
 
         return true;
 
@@ -44,7 +66,7 @@ public class PlayerBountiesPlusReloadCmd implements TabCompleter {
             @NotNull String[] args)
     {
 
-        // No additional arguments for reload command
+        // No additional arguments for reload command.
         return Collections.emptyList();
 
     }

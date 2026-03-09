@@ -8,6 +8,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,22 +18,40 @@ import com.tcoded.playerbountiesplus.command.bounty.BountyCheckCmd;
 import com.tcoded.playerbountiesplus.command.bounty.BountySetCmd;
 import com.tcoded.playerbountiesplus.command.bounty.BountyTopCmd;
 
+import net.trueog.diamondbankog.api.DiamondBankAPIJava;
+import net.trueog.utilitiesog.UtilitiesOG;
+
 public class BountyCommand implements CommandExecutor, TabCompleter {
 
     private final PlayerBountiesOG plugin;
+    private final DiamondBankAPIJava diamondBankAPI;
 
-    public BountyCommand(PlayerBountiesOG plugin) {
+    public BountyCommand(PlayerBountiesOG plugin, DiamondBankAPIJava diamondBankAPI) {
 
         this.plugin = plugin;
+        this.diamondBankAPI = diamondBankAPI;
 
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String cmdName, String[] args) {
 
+        final Player player;
+        if (!(sender instanceof Player)) {
+
+            UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), "&cERROR: Only players can use this command.");
+
+            return true;
+
+        } else {
+
+            player = (Player) sender;
+
+        }
+
         if (args.length < 1) {
 
-            sender.sendMessage(plugin.getLang().getColored("command.bounty.no-action"));
+            UtilitiesOG.trueogMessage(player, plugin.getLang().getColored("command.bounty.no-action"));
             return true;
 
         }
@@ -45,21 +64,27 @@ public class BountyCommand implements CommandExecutor, TabCompleter {
                 return BountySetCmd.handleCmd(plugin, sender, cmd, cmdName, args);
 
             }
+
             case "top" -> {
 
-                return BountyTopCmd.handleCmd(plugin, sender, cmd, cmdName, args);
+                return BountyTopCmd.handleCmd(plugin, diamondBankAPI, sender, cmd, cmdName, args);
 
             }
+
             case "check" -> {
 
                 return BountyCheckCmd.handleCmd(plugin, sender, cmd, cmdName, args);
 
             }
-            default -> sender.sendMessage(plugin.getLang().getColored("command.bounty.invalid-action"));
+
+            default -> {
+
+                // If "/bounty" is run without a valid subcommand, treat it as "/bounty top".
+                return BountyTopCmd.handleCmd(plugin, diamondBankAPI, sender, cmd, cmdName, args);
+
+            }
 
         }
-
-        return true;
 
     }
 

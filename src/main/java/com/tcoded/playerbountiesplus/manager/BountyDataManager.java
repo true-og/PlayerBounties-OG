@@ -22,7 +22,7 @@ public class BountyDataManager {
 
     private final Object savingFileLock = new Object();
     private final AtomicBoolean savingAsync = new AtomicBoolean(false);
-    private final ConcurrentHashMap<UUID, Integer> bounties;
+    private final ConcurrentHashMap<UUID, Double> bounties;
 
     public BountyDataManager(PlayerBountiesOG plugin) {
 
@@ -44,23 +44,12 @@ public class BountyDataManager {
         bountiesConfig = YamlConfiguration.loadConfiguration(bountiesFile);
 
         final Set<String> keys = bountiesConfig.getKeys(false);
-        keys.forEach(key -> {
 
-            try {
-
-                this.bounties.put(UUID.fromString(key), bountiesConfig.getInt(key));
-
-            } catch (Exception ex) {
-
-                ex.printStackTrace();
-
-            }
-
-        });
+        keys.forEach(key -> this.bounties.put(UUID.fromString(key), bountiesConfig.getDouble(key)));
 
     }
 
-    public ConcurrentHashMap<UUID, Integer> getBounties() {
+    public ConcurrentHashMap<UUID, Double> getBounties() {
 
         return this.bounties;
 
@@ -72,15 +61,15 @@ public class BountyDataManager {
 
     }
 
-    public void setBounty(UUID player, int amount) {
+    public void setBounty(UUID player, double amount) {
 
         this.bounties.put(player, amount);
 
     }
 
-    public int getBounty(UUID player) {
+    public double getBounty(UUID player) {
 
-        return this.bounties.getOrDefault(player, 0);
+        return this.bounties.getOrDefault(player, 0.0);
 
     }
 
@@ -104,9 +93,9 @@ public class BountyDataManager {
 
                 this.bountiesConfig.save(this.bountiesFile);
 
-            } catch (IOException error) {
+            } catch (IOException ioException) {
 
-                error.printStackTrace();
+                ioException.printStackTrace();
 
             }
 

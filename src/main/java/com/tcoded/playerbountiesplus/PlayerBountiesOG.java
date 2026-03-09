@@ -2,6 +2,7 @@ package com.tcoded.playerbountiesplus;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.event.HandlerList;
@@ -16,13 +17,12 @@ import com.tcoded.playerbountiesplus.command.BountyCommand;
 import com.tcoded.playerbountiesplus.command.PlayerBountiesPlusAdminCmd;
 import com.tcoded.playerbountiesplus.hook.currency.DiamondBankOGHook;
 import com.tcoded.playerbountiesplus.hook.currency.EconomyHook;
-import com.tcoded.playerbountiesplus.hook.placeholder.PlaceholderHook;
 import com.tcoded.playerbountiesplus.hook.team.TeamHook;
 import com.tcoded.playerbountiesplus.listener.DeathListener;
-import com.tcoded.playerbountiesplus.listener.GuiListener;
 import com.tcoded.playerbountiesplus.manager.BountyDataManager;
 import com.tcoded.playerbountiesplus.util.LangUtil;
 
+import net.luckperms.api.LuckPerms;
 import net.trueog.diamondbankog.api.DiamondBankAPIJava;
 import net.trueog.utilitiesog.UtilitiesOG;
 
@@ -52,10 +52,12 @@ public final class PlayerBountiesOG extends JavaPlugin {
     // Hooks.
     private EconomyHook ecoHook;
     private TeamHook teamHook;
-    private PlaceholderHook placeholderHook;
 
     // DiamondBank-OG Economy.
     private DiamondBankAPIJava diamondBankAPI;
+
+    // LuckPerms API hook.
+    private LuckPerms luckPerms;
 
     public PlayerBountiesOG() {
 
@@ -68,6 +70,21 @@ public final class PlayerBountiesOG extends JavaPlugin {
 
         // Config
         saveDefaultConfig();
+
+        // Initialize the LuckPerms API.
+        final RegisteredServiceProvider<LuckPerms> luckPermsProvider = getServer().getServicesManager()
+                .getRegistration(LuckPerms.class);
+
+        if (luckPermsProvider != null) {
+
+            this.luckPerms = luckPermsProvider.getProvider();
+
+        } else {
+
+            getLogger().warning(
+                    "LuckPerms not found – bounty claim announcements will not include rank colors or prefixes.");
+
+        }
 
         // Initialize the DiamondBank-OG API.
         final RegisteredServiceProvider<DiamondBankAPIJava> provider = getServer().getServicesManager()
@@ -104,15 +121,11 @@ public final class PlayerBountiesOG extends JavaPlugin {
 
         }
 
-        // Placeholder Hooks.
-        this.placeholderHook = PlaceholderHook.findPlaceholderHook(this);
-        this.placeholderHook.enable();
-
         // Commands.
         final PluginCommand bountyCmd = this.getCommand("bounty");
         if (bountyCmd != null) {
 
-            final BountyCommand bountyExec = new BountyCommand(this);
+            final BountyCommand bountyExec = new BountyCommand(this, diamondBankAPI);
             bountyCmd.setExecutor(bountyExec);
             bountyCmd.setTabCompleter(bountyExec);
 
@@ -128,8 +141,8 @@ public final class PlayerBountiesOG extends JavaPlugin {
         }
 
         // Listeners.
-        this.getServer().getPluginManager().registerEvents(new DeathListener(this), this);
-        this.getServer().getPluginManager().registerEvents(new GuiListener(), this);
+        this.getServer().getPluginManager().registerEvents(new DeathListener(this, this.diamondBankAPI, this.luckPerms),
+                this);
 
         final List<Plugin> plugins = ImmutableList.copyOf(this.getServer().getPluginManager().getPlugins());
         findPluginWithQuery(plugins, "team");
@@ -145,7 +158,7 @@ public final class PlayerBountiesOG extends JavaPlugin {
 
     public void reloadLang() {
 
-        this.langUtil = new LangUtil(this, this.getConfig().getString("lang", "en_us").toLowerCase());
+        this.langUtil = new LangUtil(this, StringUtils.lowerCase(this.getConfig().getString("lang", "en_us")));
 
     }
 
@@ -153,7 +166,8 @@ public final class PlayerBountiesOG extends JavaPlugin {
     public void onDisable() {
 
         HandlerList.unregisterAll(this);
-        this.placeholderHook.disable();
+
+        UtilitiesOG.logToConsole(getPrefix(), "PlayerBounties-OG has been shut down successfully!");
 
     }
 
@@ -175,12 +189,6 @@ public final class PlayerBountiesOG extends JavaPlugin {
 
     }
 
-    public PlaceholderHook getPlaceholderHook() {
-
-        return placeholderHook;
-
-    }
-
     public BountyDataManager getBountyDataManager() {
 
         return bountyDataManager;
@@ -193,14 +201,14 @@ public final class PlayerBountiesOG extends JavaPlugin {
 
     }
 
-    // Utils.
+    // Utilities.
     private static void findPluginWithQuery(List<Plugin> plugins, String pluginNameQuery, String... excludeStrings) {
 
         final String firstPluginFound = plugins.stream().filter(p -> {
 
-            final String lowerName = p.getName().toLowerCase();
+            final String lowerName = StringUtils.lowerCase(p.getName());
             // If the plugin name doesn't contain the query, skip.
-            if (!lowerName.contains(pluginNameQuery)) {
+            if (!StringUtils.contains(lowerName, pluginNameQuery)) {
 
                 return false;
 
@@ -209,7 +217,7 @@ public final class PlayerBountiesOG extends JavaPlugin {
             // If the plugin name contains any of the exclude strings, skip.
             for (String excludeString : excludeStrings) {
 
-                if (lowerName.contains(excludeString)) {
+                if (StringUtils.contains(lowerName, excludeString)) {
 
                     return false;
 
@@ -245,7 +253,8 @@ public final class PlayerBountiesOG extends JavaPlugin {
         // Initialize the DiamondBank-OG hook with the active plugin instance.
         final DiamondBankOGHook diamondBankOGHook = new DiamondBankOGHook(getInstance(), diamondBankAPI);
 
-        // Set DiamondBank-OG as the active economy implementation used by commands/listeners.
+        // Set DiamondBank-OG as the active economy implementation used by
+        // commands/listeners.
         this.ecoHook = diamondBankOGHook;
 
         // Register the DiamondBank-OG hook as the active economy hook.
