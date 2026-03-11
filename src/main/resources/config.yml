@@ -1,7 +1,4 @@
-# We currently only support a few languages, but please contribute your own translations!
-# To contribute new languages, please join our Discord server or open a pull request on GitHub!
-# You can find both of these links on the plugin download page: https://www.spigotmc.org/resources/player-bounties-plus.108637/
-#
+# PlayerBounties-OG Config File.
 # Manually verified translations:
 # de_de - German (Germany)
 # en_us - English (US)
@@ -19,29 +16,29 @@
 # en_uwu - English (Don't ask)
 lang: "en_us"
 
-# Add more money on the victim player than the command sender spends
-# For example: /bounty set TechnicallyCoded 100 -> turns into a bounty of 200 while only taking 100 from the sender
+# Add more money on the victim player than the command sender spends.
+# For example: /bounty set TechnicallyCoded 100 -> turns into a bounty of 200 while only taking 100 from the sender.
 bounty-multiplier: 1.0
 
 # Minimum and maximum bounty amount - These values are checked BEFORE the multiplier above is applied.
 bounty-minimum: 1.0
 bounty-maximum: 1000000.0
 
-# If we should give the bounty money to the killer
+# If we should give the bounty money to the killer.
 bounty-claimable: true
 
 # Give more or less money to the killer. This value can be negative if you want to.
 bounty-claim-multiplier: 1.0
 
-# If we should announce that the bounty was claimed
+# If we should announce that the bounty was claimed.
 bounty-claimed-announce: true
 
 # Chance (0-100) that claiming a bounty drops the victim's player head.
 bounty-head-drop-chance: 50.0
 
-# If we should announce that the bounty was placed
+# If we should announce that the bounty was placed.
 bounty-placed-announce: true
 
 # Should the bounty money be taken from the player who dies?
-# This can reduce same-team killing (or the use of alts) to claim the bounty from themselves
+# This can reduce same-team killing (or the use of alts) to claim the bounty from themselves.
 bounty-take-from-victim: false
