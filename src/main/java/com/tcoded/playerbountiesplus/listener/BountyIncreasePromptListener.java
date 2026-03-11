@@ -7,12 +7,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import com.tcoded.playerbountiesplus.PlayerBountiesOG;
 import com.tcoded.playerbountiesplus.command.bounty.BountyAddCmd;
 
+import io.papermc.paper.event.player.AsyncChatEvent;
 import net.trueog.utilitiesog.UtilitiesOG;
 
 public class BountyIncreasePromptListener implements Listener {
@@ -39,7 +39,7 @@ public class BountyIncreasePromptListener implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onChat(AsyncPlayerChatEvent event) {
+    public void onChat(AsyncChatEvent event) {
 
         final PendingIncreasePrompt prompt = pendingPrompts.get(event.getPlayer().getUniqueId());
         if (prompt == null) {
@@ -50,11 +50,13 @@ public class BountyIncreasePromptListener implements Listener {
 
         event.setCancelled(true);
 
-        final String input = StringUtils.trimToEmpty(event.getMessage());
-        if (input.equalsIgnoreCase("cancel")) {
+        final String input = StringUtils.trimToEmpty(event.message().examinableName());
+        if (StringUtils.equalsIgnoreCase(input, "cancel")) {
 
             pendingPrompts.remove(event.getPlayer().getUniqueId());
+
             UtilitiesOG.trueogMessage(event.getPlayer(), plugin.getLang().getColored("command.bounty.add.cancelled"));
+
             return;
 
         }
@@ -73,20 +75,22 @@ public class BountyIncreasePromptListener implements Listener {
         } catch (NumberFormatException numberFormatException) {
 
             UtilitiesOG.trueogMessage(event.getPlayer(), plugin.getLang().getColored("command.bounty.add.amount-nan"));
+
             return;
 
         }
 
         pendingPrompts.remove(event.getPlayer().getUniqueId());
+
         plugin.getServer().getScheduler().runTask(plugin, () -> BountyAddCmd.addBounty(plugin, event.getPlayer(),
                 prompt.targetUuid(), prompt.targetName(), amount, true));
 
     }
 
     @EventHandler
-    public void onQuit(PlayerQuitEvent event) {
+    public void onQuit(PlayerQuitEvent playerQuitEvent) {
 
-        pendingPrompts.remove(event.getPlayer().getUniqueId());
+        pendingPrompts.remove(playerQuitEvent.getPlayer().getUniqueId());
 
     }
 

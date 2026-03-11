@@ -330,22 +330,10 @@ public class BountyAddCmd {
 
         }
 
-        final String normalizedText = stripFormatting(text).toLowerCase(Locale.ROOT);
-        final String normalizedName = playerName.toLowerCase(Locale.ROOT);
+        final String normalizedText = StringUtils.lowerCase(UtilitiesOG.stripFormatting(text), Locale.ROOT);
+        final String normalizedName = StringUtils.lowerCase(playerName, Locale.ROOT);
 
-        return normalizedText.contains(normalizedName);
-
-    }
-
-    private static String stripFormatting(String input) {
-
-        if (input == null || input.isBlank()) {
-
-            return "";
-
-        }
-
-        return input.replaceAll("(?i)[&§][0-9A-FK-ORX]", "").replaceAll("<[^>]+>", "").trim();
+        return StringUtils.contains(normalizedText, normalizedName);
 
     }
 
