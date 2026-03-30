@@ -99,7 +99,7 @@ public final class PlayerBountiesOG extends JavaPlugin {
         if (!this.coreProtectHook.isEnabled()) {
 
             getLogger().warning(
-                    "CoreProtect API v11+ not found - custom bounty head metadata may not rollback correctly.");
+                    "CoreProtect API v10+ not found - custom bounty head metadata may not rollback correctly.");
 
         }
 

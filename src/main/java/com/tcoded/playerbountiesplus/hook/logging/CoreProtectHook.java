@@ -10,6 +10,7 @@ import net.coreprotect.CoreProtectAPI;
 
 public class CoreProtectHook {
 
+    private static final int MINIMUM_API_VERSION = 10;
     private final CoreProtectAPI coreProtectAPI;
 
     public CoreProtectHook(Plugin plugin) {
@@ -102,7 +103,7 @@ public class CoreProtectHook {
         }
 
         final CoreProtectAPI api = coreProtect.getAPI();
-        if (api == null || !api.isEnabled() || api.APIVersion() < 11) {
+        if (api == null || !api.isEnabled() || api.APIVersion() < MINIMUM_API_VERSION) {
 
             return null;
 
