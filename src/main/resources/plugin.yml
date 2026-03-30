@@ -9,8 +9,8 @@ folia-supported: false
 
 depend:
   - DiamondBank-OG
-softdepend:
   - CoreProtect-OG
+softdepend:
   - SimpleClans
   - LuckPerms
 
