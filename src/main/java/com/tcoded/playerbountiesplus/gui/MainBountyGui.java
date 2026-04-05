@@ -18,6 +18,7 @@ import net.trueog.gxui.GUIBase;
 import net.trueog.gxui.GUIButton;
 import net.trueog.gxui.GUIItem;
 import net.trueog.utilitiesog.UtilitiesOG;
+import net.kyori.adventure.text.TextComponent;
 
 public class MainBountyGui extends GUIBase {
 
@@ -76,8 +77,9 @@ public class MainBountyGui extends GUIBase {
 
             addItem(22,
                     createStaticItem(Material.WRITABLE_BOOK, "&6&lNo Active Bounties",
-                            List.of("&7Nobody currently has a bounty.", "&7Place one with your bounty command to get",
-                                    "&7this leaderboard populated again.")));
+                            List.of(UtilitiesOG.trueogColorize("&7Nobody currently has a bounty."),
+                                    UtilitiesOG.trueogColorize("&7Place one with your bounty command to get"),
+                                    UtilitiesOG.trueogColorize("&7this leaderboard populated again."))));
             return;
 
         }
@@ -104,7 +106,7 @@ public class MainBountyGui extends GUIBase {
         if (currentPage > 0) {
 
             addItem(PREVIOUS_PAGE_SLOT, createButtonItem(Material.ARROW, "&a&lPrevious Page",
-                    List.of("&7Go to page &f" + currentPage), new GUIButton()
+                    List.of(UtilitiesOG.trueogColorize("&7Go to page &f" + currentPage)), new GUIButton()
                     {
 
                         @Override
@@ -139,18 +141,18 @@ public class MainBountyGui extends GUIBase {
 
         } else {
 
-            addItem(PREVIOUS_PAGE_SLOT,
-                    createStaticItem(Material.GRAY_DYE, "&7Previous Page", List.of("&8Already on the first page.")));
+            addItem(PREVIOUS_PAGE_SLOT, createStaticItem(Material.GRAY_DYE, "&7Previous Page",
+                    List.of(UtilitiesOG.trueogColorize("&8Already on the first page."))));
 
         }
 
         addItem(PAGE_INFO_SLOT, createStaticItem(Material.BOOK, "&3&lPage " + (currentPage + 1) + "/" + (maxPage + 1),
-                List.of("&6Active bounties: &c" + totalBounties)));
+                List.of(UtilitiesOG.trueogColorize("&6Active bounties: &c" + totalBounties))));
 
         if (currentPage < maxPage) {
 
             addItem(NEXT_PAGE_SLOT, createButtonItem(Material.ARROW, "&a&lNext Page",
-                    List.of("&7Go to page &f" + (currentPage + 2)), new GUIButton()
+                    List.of(UtilitiesOG.trueogColorize("&7Go to page &f" + (currentPage + 2))), new GUIButton()
                     {
 
                         @Override
@@ -185,13 +187,13 @@ public class MainBountyGui extends GUIBase {
 
         } else {
 
-            addItem(NEXT_PAGE_SLOT,
-                    createStaticItem(Material.GRAY_DYE, "&7Next Page", List.of("&8Already on the last page.")));
+            addItem(NEXT_PAGE_SLOT, createStaticItem(Material.GRAY_DYE, "&7Next Page",
+                    List.of(UtilitiesOG.trueogColorize("&8Already on the last page."))));
 
         }
 
-        addItem(CLOSE_SLOT,
-                createButtonItem(Material.BARRIER, "&c&lClose", List.of("&7Close the bounty menu."), new GUIButton()
+        addItem(CLOSE_SLOT, createButtonItem(Material.BARRIER, "&c&lClose",
+                List.of(UtilitiesOG.trueogColorize("&7Close the bounty menu.")), new GUIButton()
                 {
 
                     @Override
@@ -245,13 +247,14 @@ public class MainBountyGui extends GUIBase {
     private GUIItem createBountyItem(BountyGuiEntry entry, int rank) {
 
         final String displayName = safeDisplayName(entry.displayName());
-        final ArrayList<String> lore = new ArrayList<>();
+        final ArrayList<TextComponent> lore = new ArrayList<>();
 
-        lore.add("&eBounty: &b" + formatBounty(entry.bountyDiamonds()));
-        lore.add("&7Click to increase this player's bounty.");
-        lore.add("&8You will be prompted in chat for the amount.");
-        lore.add("");
-        lore.add("&6Claiming the bounty will give you a 50% chance of beheading your victim!");
+        lore.add(UtilitiesOG.trueogColorize("&eBounty: &b" + formatBounty(entry.bountyDiamonds())));
+        lore.add(UtilitiesOG.trueogColorize("&7Click to increase this player's bounty."));
+        lore.add(UtilitiesOG.trueogColorize("&8You will be prompted in chat for the amount."));
+        lore.add(UtilitiesOG.trueogColorize(""));
+        lore.add(UtilitiesOG
+                .trueogColorize("&6Claiming the bounty will give you a 50% chance of beheading your victim!"));
 
         final GUIItem item;
         if (entry.targetName() != null && !entry.targetName().isBlank()) {
@@ -332,7 +335,7 @@ public class MainBountyGui extends GUIBase {
 
     }
 
-    private GUIItem createStaticItem(Material material, String displayName, List<String> lore) {
+    private GUIItem createStaticItem(Material material, String displayName, List<TextComponent> lore) {
 
         final GUIItem item = new GUIItem(material, 1, displayName);
         item.lore(new ArrayList<>(lore));
@@ -342,7 +345,9 @@ public class MainBountyGui extends GUIBase {
 
     }
 
-    private GUIItem createButtonItem(Material material, String displayName, List<String> lore, GUIButton button) {
+    private GUIItem createButtonItem(Material material, String displayName, List<TextComponent> lore,
+            GUIButton button)
+    {
 
         final GUIItem item = new GUIItem(material, 1, displayName);
         item.lore(new ArrayList<>(lore));
