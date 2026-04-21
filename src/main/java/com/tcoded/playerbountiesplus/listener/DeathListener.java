@@ -6,7 +6,6 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -16,20 +15,16 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.persistence.PersistentDataType;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.tcoded.playerbountiesplus.PlayerBountiesOG;
 import com.tcoded.playerbountiesplus.event.BountyClaimEvent;
 import com.tcoded.playerbountiesplus.hook.team.TeamHook;
 import com.tcoded.playerbountiesplus.manager.BountyDataManager;
-
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import com.tcoded.playerbountiesplus.util.BountyHeadData;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.cacheddata.CachedMetaData;
 import net.luckperms.api.model.user.User;
-import net.trueog.diamondbankog.api.DiamondBankAPIJava;
 import net.trueog.utilitiesog.UtilitiesOG;
 
 public class DeathListener implements Listener {
@@ -39,14 +34,12 @@ public class DeathListener implements Listener {
     public static final String BOUNTY_HEAD_AMOUNT_KEY = "bounty_head_diamonds";
 
     private final PlayerBountiesOG plugin;
-    private final DiamondBankAPIJava diamondBankAPI;
     private final LuckPerms luckPerms;
 
-    public DeathListener(PlayerBountiesOG plugin, DiamondBankAPIJava diamondBankAPI, LuckPerms luckPerms) {
+    public DeathListener(PlayerBountiesOG plugin) {
 
         this.plugin = plugin;
-        this.diamondBankAPI = diamondBankAPI;
-        this.luckPerms = luckPerms;
+        this.luckPerms = plugin.getLuckPerms();
 
     }
 
@@ -214,15 +207,7 @@ public class DeathListener implements Listener {
 
     private String formatDiamonds(double diamonds) {
 
-        try {
-
-            return diamondBankAPI.shardsToDiamonds(diamondBankAPI.diamondsToShards(diamonds));
-
-        } catch (RuntimeException runtimeException) {
-
-            return String.valueOf(diamonds);
-
-        }
+        return plugin.getBountyHeadFormatter().formatDiamonds(diamonds);
 
     }
 
@@ -272,22 +257,10 @@ public class DeathListener implements Listener {
 
         final ItemStack head = new ItemStack(Material.PLAYER_HEAD, 1);
         final SkullMeta headMeta = (SkullMeta) head.getItemMeta();
+        final BountyHeadData headData = new BountyHeadData(victim.getUniqueId(), victim.getName(), bounty);
 
         final PlayerProfile profile = Bukkit.createProfile(victim.getUniqueId());
-        headMeta.setPlayerProfile(profile);
-        headMeta.displayName(UtilitiesOG.trueogColorize("&c" + victim.getName() + "'s Head"));
-        final String bountyDisplay = formatDiamonds(bounty);
-        headMeta.lore(java.util.List.of(
-                Component.text("Target: ", NamedTextColor.GRAY)
-                        .append(Component.text(victim.getName(), NamedTextColor.WHITE)),
-                Component.text("Beheaded for: ", NamedTextColor.GRAY)
-                        .append(Component.text(bountyDisplay + " Diamonds", NamedTextColor.AQUA))));
-        headMeta.getPersistentDataContainer().set(new NamespacedKey(plugin, BOUNTY_HEAD_NAME_KEY),
-                PersistentDataType.STRING, victim.getName());
-        headMeta.getPersistentDataContainer().set(new NamespacedKey(plugin, BOUNTY_HEAD_UUID_KEY),
-                PersistentDataType.STRING, victim.getUniqueId().toString());
-        headMeta.getPersistentDataContainer().set(new NamespacedKey(plugin, BOUNTY_HEAD_AMOUNT_KEY),
-                PersistentDataType.DOUBLE, bounty);
+        plugin.getBountyHeadFormatter().applyHeadMeta(headMeta, headData, profile, plugin.getBountyHeadMetadata());
         head.setItemMeta(headMeta);
 
         event.getDrops().add(head);

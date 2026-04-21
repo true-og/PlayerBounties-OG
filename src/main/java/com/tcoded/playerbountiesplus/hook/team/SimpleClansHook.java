@@ -35,13 +35,7 @@ public class SimpleClansHook extends AbstractTeamHook {
 
         }
 
-        if (clan2 == null) {
-
-            return false;
-
-        }
-
-        return clan1 == clan2;
+        return clan2 == null ? false : clan1 == clan2;
 
     }
 

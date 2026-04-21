@@ -2,7 +2,6 @@ package com.tcoded.playerbountiesplus.command.bounty;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -15,10 +14,8 @@ import org.bukkit.entity.Player;
 
 import com.tcoded.playerbountiesplus.PlayerBountiesOG;
 import com.tcoded.playerbountiesplus.gui.MainBountyGui;
+import com.tcoded.playerbountiesplus.util.BountyHeadFormatter;
 
-import net.luckperms.api.LuckPerms;
-import net.luckperms.api.cacheddata.CachedMetaData;
-import net.luckperms.api.model.user.User;
 import net.trueog.diamondbankog.api.DiamondBankAPIJava;
 import net.trueog.utilitiesog.UtilitiesOG;
 
@@ -45,6 +42,8 @@ public class BountyTopCmd {
 
     private static List<MainBountyGui.BountyGuiEntry> buildGuiEntries(PlayerBountiesOG plugin) {
 
+        final BountyHeadFormatter formatter = plugin.getBountyHeadFormatter();
+
         final Set<Map.Entry<UUID, Double>> bountiesSet = plugin.getBountyDataManager().getBounties().entrySet();
         final List<Map.Entry<UUID, Double>> bounties = new ArrayList<>(bountiesSet);
 
@@ -68,7 +67,7 @@ public class BountyTopCmd {
 
             }
 
-            final String displayName = resolveLuckPermsDisplayName(plugin.getLuckPerms(), entry.getKey(), targetName);
+            final String displayName = formatter.resolvePlayerDisplay(entry.getKey(), targetName);
 
             entries.add(new MainBountyGui.BountyGuiEntry(entry.getKey(), targetName, displayName, entry.getValue()));
 
@@ -78,83 +77,11 @@ public class BountyTopCmd {
 
     }
 
-    private static String resolveLuckPermsDisplayName(LuckPerms luckPerms, UUID playerId, String playerName) {
-
-        final String safeName = StringUtils.defaultIfBlank(playerName, "Unknown Player");
-        if (luckPerms == null) {
-
-            return "&f" + safeName;
-
-        }
-
-        final User user = luckPerms.getUserManager().getUser(playerId);
-        if (user == null) {
-
-            return "&f" + safeName;
-
-        }
-
-        final CachedMetaData meta = user.getCachedData().getMetaData();
-        final String prefix = StringUtils.trim(StringUtils.defaultString(meta.getPrefix()).replace('§', '&'));
-        final String suffix = StringUtils.trim(StringUtils.defaultString(meta.getSuffix()).replace('§', '&'));
-        final boolean metaContainsName = containsVisibleName(prefix, safeName) || containsVisibleName(suffix, safeName);
-
-        final StringBuilder out = new StringBuilder();
-        if (!prefix.isBlank()) {
-
-            out.append(prefix).append(' ');
-
-        }
-
-        if (!metaContainsName) {
-
-            out.append(safeName);
-
-        }
-
-        if (!suffix.isBlank()) {
-
-            out.append(' ').append(suffix);
-
-        }
-
-        return sanitizeDisplay(out.toString(), safeName);
-
-    }
-
-    private static String sanitizeDisplay(String formatted, String fallbackName) {
-
-        final String cleaned = StringUtils.trimToEmpty(formatted).replaceAll("(?i)(?:\\s*(?:<reset>|[&§]r))+$", "")
-                .replaceAll("\\s*>$", "");
-
-        if (cleaned.isBlank()) {
-
-            return fallbackName;
-
-        }
-
-        return cleaned;
-
-    }
-
-    private static boolean containsVisibleName(String text, String playerName) {
-
-        if (text == null || playerName == null || playerName.isBlank()) {
-
-            return false;
-
-        }
-
-        final String normalizedText = StringUtils.lowerCase(UtilitiesOG.stripFormatting(text), Locale.ROOT);
-        final String normalizedName = StringUtils.lowerCase(playerName, Locale.ROOT);
-
-        return StringUtils.contains(normalizedText, normalizedName);
-
-    }
-
     private static void sendTextTopList(PlayerBountiesOG plugin, DiamondBankAPIJava diamondBankAPI,
             CommandSender sender)
     {
+
+        final BountyHeadFormatter formatter = plugin.getBountyHeadFormatter();
 
         final Set<Map.Entry<UUID, Double>> bountiesSet = plugin.getBountyDataManager().getBounties().entrySet();
         final List<Map.Entry<UUID, Double>> bounties = new ArrayList<>(bountiesSet);
@@ -184,8 +111,7 @@ public class BountyTopCmd {
                         .shardsToDiamonds(diamondBankAPI.diamondsToShards(entry.getValue()));
 
                 strb.append("&7 - ");
-                final String displayName = resolveLuckPermsDisplayName(plugin.getLuckPerms(), entry.getKey(),
-                        targetName);
+                final String displayName = formatter.resolvePlayerDisplay(entry.getKey(), targetName);
 
                 strb.append(displayName);
                 strb.append(": &b");

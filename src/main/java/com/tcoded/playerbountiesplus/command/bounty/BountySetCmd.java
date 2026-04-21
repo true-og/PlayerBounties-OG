@@ -297,13 +297,7 @@ public class BountySetCmd {
         final RegisteredServiceProvider<LuckPerms> provider = plugin.getServer().getServicesManager()
                 .getRegistration(LuckPerms.class);
 
-        if (provider == null) {
-
-            return null;
-
-        }
-
-        return provider.getProvider();
+        return provider == null ? null : provider.getProvider();
 
     }
 

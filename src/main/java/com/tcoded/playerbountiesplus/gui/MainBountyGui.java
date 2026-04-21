@@ -390,13 +390,7 @@ public class MainBountyGui extends GUIBase {
 
     private String safeName(String name) {
 
-        if (name == null || name.isBlank()) {
-
-            return "Unknown Player";
-
-        }
-
-        return name;
+        return name == null || name.isBlank() ? "Unknown Player" : name;
 
     }
 

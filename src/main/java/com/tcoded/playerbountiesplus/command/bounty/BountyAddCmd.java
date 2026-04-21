@@ -75,14 +75,15 @@ public class BountyAddCmd {
         }
 
         final OfflinePlayer target = Bukkit.getOfflinePlayer(targetNameArg);
-        if (target.getUniqueId() == null) {
+        if (target.getUniqueId() != null) {
 
-            UtilitiesOG.trueogMessage(player, plugin.getLang().getColored("command.bounty.add.player-not-found"));
-            return true;
+            return addBounty(plugin, player, target.getUniqueId(), target.getName(), amount, true);
 
         }
 
-        return addBounty(plugin, player, target.getUniqueId(), target.getName(), amount, true);
+        UtilitiesOG.trueogMessage(player, plugin.getLang().getColored("command.bounty.add.player-not-found"));
+
+        return true;
 
     }
 
@@ -247,13 +248,7 @@ public class BountyAddCmd {
         final RegisteredServiceProvider<LuckPerms> provider = plugin.getServer().getServicesManager()
                 .getRegistration(LuckPerms.class);
 
-        if (provider == null) {
-
-            return null;
-
-        }
-
-        return provider.getProvider();
+        return provider == null ? null : provider.getProvider();
 
     }
 
@@ -312,13 +307,7 @@ public class BountyAddCmd {
         final String cleaned = StringUtils.trimToEmpty(formatted).replaceAll("(?i)(?:\\s*(?:<reset>|[&§]r))+$", "")
                 .replaceAll("\\s*>$", "");
 
-        if (cleaned.isBlank()) {
-
-            return fallbackName;
-
-        }
-
-        return cleaned;
+        return cleaned.isBlank() ? fallbackName : cleaned;
 
     }
 

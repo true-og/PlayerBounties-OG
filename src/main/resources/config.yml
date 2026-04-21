@@ -36,6 +36,14 @@ bounty-claimed-announce: true
 # Chance (0-100) that claiming a bounty drops the victim's player head.
 bounty-head-drop-chance: 50.0
 
+# How placed bounty heads should display extra labels.
+# none = disabled
+# hover = show a temporary floating label while a player aims at the head
+bounty-head-label-mode: hover
+
+# Maximum range in blocks for detecting a looked-at bounty head.
+bounty-head-label-range: 8.0
+
 # If we should announce that the bounty was placed.
 bounty-placed-announce: true
 

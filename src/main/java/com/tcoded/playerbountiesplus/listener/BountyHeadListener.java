@@ -1,13 +1,6 @@
 package com.tcoded.playerbountiesplus.listener;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.UUID;
-
-import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Skull;
 import org.bukkit.entity.Player;
@@ -23,38 +16,20 @@ import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.persistence.PersistentDataContainer;
-import org.bukkit.persistence.PersistentDataType;
 
 import com.tcoded.playerbountiesplus.PlayerBountiesOG;
 import com.tcoded.playerbountiesplus.hook.logging.CoreProtectHook;
-
-import net.kyori.adventure.text.TextComponent;
-import net.luckperms.api.LuckPerms;
-import net.luckperms.api.cacheddata.CachedMetaData;
-import net.luckperms.api.model.user.User;
-import net.trueog.diamondbankog.api.DiamondBankAPIJava;
-import net.trueog.utilitiesog.UtilitiesOG;
+import com.tcoded.playerbountiesplus.util.BountyHeadData;
 
 public class BountyHeadListener implements Listener {
 
-    private final DiamondBankAPIJava diamondBankAPI;
-    private final NamespacedKey targetKey;
-    private final NamespacedKey targetUuidKey;
-    private final NamespacedKey amountKey;
-    private final LuckPerms luckPerms;
+    private final PlayerBountiesOG plugin;
     private final CoreProtectHook coreProtectHook;
 
-    public BountyHeadListener(PlayerBountiesOG plugin, DiamondBankAPIJava diamondBankAPI, LuckPerms luckPerms,
-            CoreProtectHook coreProtectHook)
-    {
+    public BountyHeadListener(PlayerBountiesOG plugin) {
 
-        this.diamondBankAPI = diamondBankAPI;
-        this.targetKey = new NamespacedKey(plugin, DeathListener.BOUNTY_HEAD_NAME_KEY);
-        this.targetUuidKey = new NamespacedKey(plugin, DeathListener.BOUNTY_HEAD_UUID_KEY);
-        this.amountKey = new NamespacedKey(plugin, DeathListener.BOUNTY_HEAD_AMOUNT_KEY);
-        this.luckPerms = luckPerms;
-        this.coreProtectHook = coreProtectHook;
+        this.plugin = plugin;
+        this.coreProtectHook = plugin.getCoreProtectHook();
 
     }
 
@@ -74,11 +49,8 @@ public class BountyHeadListener implements Listener {
 
         }
 
-        final String targetName = itemMeta.getPersistentDataContainer().get(targetKey, PersistentDataType.STRING);
-        final String targetUuid = itemMeta.getPersistentDataContainer().get(targetUuidKey, PersistentDataType.STRING);
-        final Double bountyAmount = itemMeta.getPersistentDataContainer().get(amountKey, PersistentDataType.DOUBLE);
-
-        if (targetName == null || targetUuid == null || bountyAmount == null) {
+        final BountyHeadData headData = plugin.getBountyHeadMetadata().read(itemMeta.getPersistentDataContainer());
+        if (headData == null) {
 
             return;
 
@@ -91,10 +63,7 @@ public class BountyHeadListener implements Listener {
 
         }
 
-        final PersistentDataContainer blockData = skull.getPersistentDataContainer();
-        blockData.set(targetKey, PersistentDataType.STRING, targetName);
-        blockData.set(targetUuidKey, PersistentDataType.STRING, targetUuid);
-        blockData.set(amountKey, PersistentDataType.DOUBLE, bountyAmount);
+        plugin.getBountyHeadMetadata().write(skull.getPersistentDataContainer(), headData);
         skull.update(true, false);
 
         if (this.coreProtectHook != null) {
@@ -122,11 +91,8 @@ public class BountyHeadListener implements Listener {
 
         }
 
-        final String targetName = skull.getPersistentDataContainer().get(targetKey, PersistentDataType.STRING);
-        final String targetUuid = skull.getPersistentDataContainer().get(targetUuidKey, PersistentDataType.STRING);
-        final Double bountyAmount = skull.getPersistentDataContainer().get(amountKey, PersistentDataType.DOUBLE);
-
-        if (targetName == null || targetUuid == null || bountyAmount == null) {
+        final BountyHeadData headData = plugin.getBountyHeadMetadata().read(skull.getPersistentDataContainer());
+        if (headData == null) {
 
             return;
 
@@ -135,10 +101,8 @@ public class BountyHeadListener implements Listener {
         final ItemStack drop = new ItemStack(Material.PLAYER_HEAD, 1);
         final SkullMeta meta = (SkullMeta) drop.getItemMeta();
 
-        meta.setPlayerProfile(skull.getPlayerProfile());
-
-        applyBountyData(meta, targetName, targetUuid, bountyAmount);
-
+        plugin.getBountyHeadFormatter().applyHeadMeta(meta, headData, skull.getPlayerProfile(),
+                plugin.getBountyHeadMetadata());
         drop.setItemMeta(meta);
 
         if (this.coreProtectHook != null) {
@@ -232,150 +196,16 @@ public class BountyHeadListener implements Listener {
 
     }
 
-    private void sendBountyHeadActionbar(Player player, PersistentDataContainer dataContainer) {
+    private void sendBountyHeadActionbar(Player player, org.bukkit.persistence.PersistentDataContainer dataContainer) {
 
-        final String targetName = dataContainer.get(targetKey, PersistentDataType.STRING);
-        final String targetUuid = dataContainer.get(targetUuidKey, PersistentDataType.STRING);
-        final Double bountyAmount = dataContainer.get(amountKey, PersistentDataType.DOUBLE);
-
-        if (targetName == null || targetUuid == null || bountyAmount == null) {
+        final BountyHeadData headData = plugin.getBountyHeadMetadata().read(dataContainer);
+        if (headData == null) {
 
             return;
 
         }
 
-        final UUID uuid = parseUuid(targetUuid);
-        final String playerDisplay = formatLuckPermsDisplay(uuid, targetName);
-        final String diamonds = formatDiamonds(bountyAmount);
-        player.sendActionBar(
-                UtilitiesOG.trueogColorize("&c" + playerDisplay + "'s Head &7- &b" + diamonds + " &bDiamonds"));
-
-    }
-
-    private void applyBountyData(SkullMeta meta, String targetName, String targetUuid, double bountyAmount) {
-
-        meta.displayName(UtilitiesOG.trueogColorize("&c" + targetName + "'s Head"));
-
-        final UUID uuid = parseUuid(targetUuid);
-        final String playerDisplay = formatLuckPermsDisplay(uuid, targetName);
-
-        final List<TextComponent> lore = new ArrayList<>();
-        lore.add(UtilitiesOG.trueogColorize("&6Player: " + playerDisplay));
-        lore.add(UtilitiesOG.trueogColorize("&cBeheaded for: &b" + formatDiamonds(bountyAmount) + " &bDiamonds"));
-        meta.lore(lore);
-
-        meta.getPersistentDataContainer().set(targetKey, PersistentDataType.STRING, targetName);
-        meta.getPersistentDataContainer().set(targetUuidKey, PersistentDataType.STRING, targetUuid);
-        meta.getPersistentDataContainer().set(amountKey, PersistentDataType.DOUBLE, bountyAmount);
-
-    }
-
-    private UUID parseUuid(String uuidString) {
-
-        if (uuidString == null || uuidString.isBlank()) {
-
-            return null;
-
-        }
-
-        try {
-
-            return UUID.fromString(uuidString);
-
-        } catch (IllegalArgumentException ignored) {
-
-            return null;
-
-        }
-
-    }
-
-    private String formatLuckPermsDisplay(UUID targetUuid, String fallbackName) {
-
-        final String playerName = StringUtils.defaultIfBlank(fallbackName, "Unknown Player");
-        if (targetUuid == null || luckPerms == null) {
-
-            return "&f" + playerName;
-
-        }
-
-        final User user = luckPerms.getUserManager().getUser(targetUuid);
-        if (user == null) {
-
-            return "&f" + playerName;
-
-        }
-
-        final CachedMetaData meta = user.getCachedData().getMetaData();
-        final String prefix = StringUtils.trim(StringUtils.defaultString(meta.getPrefix()).replace('§', '&'));
-        final String suffix = StringUtils.trim(StringUtils.defaultString(meta.getSuffix()).replace('§', '&'));
-        final boolean metaContainsName = containsVisibleName(prefix, playerName)
-                || containsVisibleName(suffix, playerName);
-
-        final StringBuilder out = new StringBuilder();
-        if (!prefix.isBlank()) {
-
-            out.append(prefix).append(' ');
-
-        }
-
-        if (!metaContainsName) {
-
-            out.append(playerName);
-
-        }
-
-        if (!suffix.isBlank()) {
-
-            out.append(' ').append(suffix);
-
-        }
-
-        return sanitizeDisplay(out.toString(), playerName);
-
-    }
-
-    private static String sanitizeDisplay(String formatted, String fallbackName) {
-
-        final String cleaned = StringUtils.trimToEmpty(formatted).replaceAll("(?i)(?:\\s*(?:<reset>|[&§]r))+$", "")
-                .replaceAll("\\s*>$", "");
-
-        if (cleaned.isBlank()) {
-
-            return fallbackName;
-
-        }
-
-        return cleaned;
-
-    }
-
-    private static boolean containsVisibleName(String text, String playerName) {
-
-        if (text == null || playerName == null || playerName.isBlank()) {
-
-            return false;
-
-        }
-
-        final String normalizedText = StringUtils.lowerCase(UtilitiesOG.stripFormatting(text), Locale.ROOT);
-        final String normalizedName = StringUtils.lowerCase(playerName, Locale.ROOT);
-
-        return StringUtils.contains(normalizedText, normalizedName);
-
-    }
-
-    private String formatDiamonds(double diamonds) {
-
-        try {
-
-            return diamondBankAPI.shardsToDiamonds(diamondBankAPI.diamondsToShards(diamonds));
-
-        } catch (RuntimeException runtimeException) {
-
-            return String.valueOf(diamonds);
-
-        }
+        player.sendActionBar(plugin.getBountyHeadFormatter().buildActionBar(headData));
 
     }
 

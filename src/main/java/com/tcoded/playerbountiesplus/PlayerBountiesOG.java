@@ -19,11 +19,14 @@ import com.tcoded.playerbountiesplus.hook.currency.DiamondBankOGHook;
 import com.tcoded.playerbountiesplus.hook.logging.CoreProtectHook;
 import com.tcoded.playerbountiesplus.hook.currency.EconomyHook;
 import com.tcoded.playerbountiesplus.hook.team.TeamHook;
+import com.tcoded.playerbountiesplus.listener.BountyHeadLabelListener;
 import com.tcoded.playerbountiesplus.listener.BountyHeadListener;
 import com.tcoded.playerbountiesplus.listener.BountyIncreasePromptListener;
 import com.tcoded.playerbountiesplus.listener.DeathListener;
 import com.tcoded.playerbountiesplus.listener.GuiProtectionListener;
 import com.tcoded.playerbountiesplus.manager.BountyDataManager;
+import com.tcoded.playerbountiesplus.util.BountyHeadFormatter;
+import com.tcoded.playerbountiesplus.util.BountyHeadMetadata;
 import com.tcoded.playerbountiesplus.util.LangUtil;
 
 import net.luckperms.api.LuckPerms;
@@ -49,6 +52,8 @@ public final class PlayerBountiesOG extends JavaPlugin {
 
     // Utilities.
     private LangUtil langUtil;
+    private BountyHeadFormatter bountyHeadFormatter;
+    private BountyHeadMetadata bountyHeadMetadata;
 
     // Managers.
     private BountyDataManager bountyDataManager;
@@ -67,6 +72,7 @@ public final class PlayerBountiesOG extends JavaPlugin {
     private CoreProtectHook coreProtectHook;
 
     private BountyIncreasePromptListener bountyIncreasePromptListener;
+    private BountyHeadLabelListener bountyHeadLabelListener;
 
     public PlayerBountiesOG() {
 
@@ -121,6 +127,8 @@ public final class PlayerBountiesOG extends JavaPlugin {
 
         // Utils.
         this.reloadLang();
+        this.bountyHeadFormatter = new BountyHeadFormatter(this.diamondBankAPI, this.luckPerms);
+        this.bountyHeadMetadata = new BountyHeadMetadata(this);
 
         // Managers.
         this.bountyDataManager = new BountyDataManager(this);
@@ -158,12 +166,12 @@ public final class PlayerBountiesOG extends JavaPlugin {
         }
 
         // Listeners.
-        this.getServer().getPluginManager().registerEvents(new DeathListener(this, this.diamondBankAPI, this.luckPerms),
-                this);
+        this.getServer().getPluginManager().registerEvents(new DeathListener(this), this);
         this.bountyIncreasePromptListener = new BountyIncreasePromptListener(this);
 
-        this.getServer().getPluginManager().registerEvents(
-                new BountyHeadListener(this, this.diamondBankAPI, this.luckPerms, this.coreProtectHook), this);
+        this.getServer().getPluginManager().registerEvents(new BountyHeadListener(this), this);
+        this.bountyHeadLabelListener = new BountyHeadLabelListener(this);
+        this.getServer().getPluginManager().registerEvents(this.bountyHeadLabelListener, this);
         this.getServer().getPluginManager().registerEvents(this.bountyIncreasePromptListener, this);
         this.getServer().getPluginManager().registerEvents(new GuiProtectionListener(this), this);
 
@@ -187,6 +195,12 @@ public final class PlayerBountiesOG extends JavaPlugin {
 
     @Override
     public void onDisable() {
+
+        if (this.bountyHeadLabelListener != null) {
+
+            this.bountyHeadLabelListener.shutdown();
+
+        }
 
         HandlerList.unregisterAll(this);
 
@@ -233,6 +247,18 @@ public final class PlayerBountiesOG extends JavaPlugin {
     public CoreProtectHook getCoreProtectHook() {
 
         return this.coreProtectHook;
+
+    }
+
+    public BountyHeadFormatter getBountyHeadFormatter() {
+
+        return this.bountyHeadFormatter;
+
+    }
+
+    public BountyHeadMetadata getBountyHeadMetadata() {
+
+        return this.bountyHeadMetadata;
 
     }
 

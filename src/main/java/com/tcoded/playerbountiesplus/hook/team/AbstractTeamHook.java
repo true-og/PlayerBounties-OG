@@ -30,13 +30,8 @@ public abstract class AbstractTeamHook implements TeamHook {
     public String getAuthor() {
 
         final List<String> authors = this.teamPlugin.getPluginMeta().getAuthors();
-        if (authors.isEmpty()) {
 
-            return "N/A";
-
-        }
-
-        return authors.get(0);
+        return authors.isEmpty() ? "N/A" : authors.get(0);
 
     }
 
