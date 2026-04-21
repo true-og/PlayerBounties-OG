@@ -10,9 +10,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerItemHeldEvent;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -126,50 +125,30 @@ public class BountyHeadListener implements Listener {
 
         }
 
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK && event.getClickedBlock() != null
+                && isHeadMaterial(event.getClickedBlock().getType()))
+        {
+
+            final BlockState state = event.getClickedBlock().getState();
+            if (state instanceof Skull skull) {
+
+                sendClaimantActionbar(event.getPlayer(), skull.getPersistentDataContainer());
+                return;
+
+            }
+
+        }
+
         final ItemStack item = event.getItem();
         if (item != null && isHeadMaterial(item.getType())) {
 
-            sendBountyHeadActionbar(event.getPlayer(), item.getItemMeta());
+            sendClaimantActionbar(event.getPlayer(), item.getItemMeta());
 
         }
 
     }
 
-    @EventHandler(ignoreCancelled = true)
-    public void onInventoryHover(InventoryClickEvent event) {
-
-        if (!(event.getWhoClicked() instanceof Player player)) {
-
-            return;
-
-        }
-
-        final ItemStack currentItem = event.getCurrentItem();
-        if (currentItem == null || !isHeadMaterial(currentItem.getType())) {
-
-            return;
-
-        }
-
-        sendBountyHeadActionbar(player, currentItem.getItemMeta());
-
-    }
-
-    @EventHandler(ignoreCancelled = true)
-    public void onHotbarScroll(PlayerItemHeldEvent event) {
-
-        final ItemStack newSlotItem = event.getPlayer().getInventory().getItem(event.getNewSlot());
-        if (newSlotItem == null || !isHeadMaterial(newSlotItem.getType())) {
-
-            return;
-
-        }
-
-        sendBountyHeadActionbar(event.getPlayer(), newSlotItem.getItemMeta());
-
-    }
-
-    private void sendBountyHeadActionbar(Player player, ItemMeta itemMeta) {
+    private void sendClaimantActionbar(Player player, ItemMeta itemMeta) {
 
         if (itemMeta == null) {
 
@@ -177,11 +156,11 @@ public class BountyHeadListener implements Listener {
 
         }
 
-        sendBountyHeadActionbar(player, itemMeta.getPersistentDataContainer());
+        sendClaimantActionbar(player, itemMeta.getPersistentDataContainer());
 
     }
 
-    private void sendBountyHeadActionbar(Player player, org.bukkit.persistence.PersistentDataContainer dataContainer) {
+    private void sendClaimantActionbar(Player player, PersistentDataContainer dataContainer) {
 
         final BountyHeadData headData = plugin.getBountyHeadMetadata().read(dataContainer);
         if (headData == null) {
@@ -190,7 +169,7 @@ public class BountyHeadListener implements Listener {
 
         }
 
-        player.sendActionBar(plugin.getBountyHeadFormatter().buildActionBar(headData));
+        player.sendActionBar(plugin.getBountyHeadFormatter().buildClaimedByActionBar(headData));
 
     }
 

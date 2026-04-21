@@ -45,7 +45,8 @@ public final class BountyHeadFormatter {
 
     public TextComponent buildHeadDisplayName(BountyHeadData data) {
 
-        return UtilitiesOG.trueogColorize(resolvePlayerDisplay(data.targetUuid(), data.targetName()));
+        return UtilitiesOG.trueogColorize(resolvePlayerDisplay(data.targetUuid(), data.targetName()) + " &7(&b"
+                + formatDiamonds(data.bountyAmount()) + " &bDiamonds&7)");
 
     }
 
@@ -57,17 +58,28 @@ public final class BountyHeadFormatter {
 
     }
 
-    public TextComponent buildActionBar(BountyHeadData data) {
+    public TextComponent buildClaimedByActionBar(BountyHeadData data) {
 
-        return UtilitiesOG.trueogColorize(resolvePlayerDisplay(data.targetUuid(), data.targetName()) + " &7slain for &b"
-                + formatDiamonds(data.bountyAmount()) + " &bDiamonds");
+        return UtilitiesOG.trueogColorize("&7Claimed by " + resolveClaimantDisplay(data));
 
     }
 
     public Component buildHoverLabel(BountyHeadData data) {
 
-        return UtilitiesOG.trueogColorize(resolvePlayerDisplay(data.targetUuid(), data.targetName()) + " &7slain for &b"
-                + formatDiamonds(data.bountyAmount()) + " &bDiamonds");
+        return UtilitiesOG.trueogColorize(resolvePlayerDisplay(data.targetUuid(), data.targetName())
+                + "\n&7Slain for &b" + formatDiamonds(data.bountyAmount()) + " &bDiamonds");
+
+    }
+
+    public String resolveClaimantDisplay(BountyHeadData data) {
+
+        if (data == null) {
+
+            return "&fUnknown";
+
+        }
+
+        return resolvePlayerDisplay(data.claimantUuid(), data.claimantName());
 
     }
 

@@ -32,6 +32,8 @@ public class DeathListener implements Listener {
     public static final String BOUNTY_HEAD_NAME_KEY = "bounty_head_target";
     public static final String BOUNTY_HEAD_UUID_KEY = "bounty_head_target_uuid";
     public static final String BOUNTY_HEAD_AMOUNT_KEY = "bounty_head_diamonds";
+    public static final String BOUNTY_HEAD_CLAIMANT_KEY = "bounty_head_claimant";
+    public static final String BOUNTY_HEAD_CLAIMANT_UUID_KEY = "bounty_head_claimant_uuid";
 
     private final PlayerBountiesOG plugin;
     private final LuckPerms luckPerms;
@@ -128,7 +130,7 @@ public class DeathListener implements Listener {
         final String killerDisplay = formatLuckPermsDisplay(killer);
         final String victimDisplay = formatLuckPermsDisplay(victim);
 
-        final boolean beheaded = maybeDropPlayerHead(event, victim, bounty);
+        final boolean beheaded = maybeDropPlayerHead(event, killer, victim, bounty);
 
         if (beheaded) {
 
@@ -245,7 +247,7 @@ public class DeathListener implements Listener {
 
     }
 
-    private boolean maybeDropPlayerHead(PlayerDeathEvent event, Player victim, double bounty) {
+    private boolean maybeDropPlayerHead(PlayerDeathEvent event, Player killer, Player victim, double bounty) {
 
         final double dropChance = Math.max(0D,
                 Math.min(100D, plugin.getConfig().getDouble("bounty-head-drop-chance", 50D)));
@@ -257,7 +259,8 @@ public class DeathListener implements Listener {
 
         final ItemStack head = new ItemStack(Material.PLAYER_HEAD, 1);
         final SkullMeta headMeta = (SkullMeta) head.getItemMeta();
-        final BountyHeadData headData = new BountyHeadData(victim.getUniqueId(), victim.getName(), bounty);
+        final BountyHeadData headData = new BountyHeadData(victim.getUniqueId(), victim.getName(), bounty,
+                killer.getUniqueId(), killer.getName());
 
         final PlayerProfile profile = Bukkit.createProfile(victim.getUniqueId());
         plugin.getBountyHeadFormatter().applyHeadMeta(headMeta, headData, profile, plugin.getBountyHeadMetadata());
