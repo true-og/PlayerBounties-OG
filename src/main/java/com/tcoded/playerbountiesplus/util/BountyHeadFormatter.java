@@ -45,32 +45,28 @@ public final class BountyHeadFormatter {
 
     public TextComponent buildHeadDisplayName(BountyHeadData data) {
 
-        return UtilitiesOG
-                .trueogColorize("&cBounty Head: &r" + resolvePlayerDisplay(data.targetUuid(), data.targetName()));
+        return UtilitiesOG.trueogColorize(resolvePlayerDisplay(data.targetUuid(), data.targetName()));
 
     }
 
     public List<TextComponent> buildHeadLore(BountyHeadData data) {
 
-        final String display = resolvePlayerDisplay(data.targetUuid(), data.targetName());
         final String bounty = formatDiamonds(data.bountyAmount());
 
-        return List.of(UtilitiesOG.trueogColorize("&6Target: " + display),
-                UtilitiesOG.trueogColorize("&bBounty: &f" + bounty + " &bDiamonds"));
+        return List.of(UtilitiesOG.trueogColorize("&7Slain for &b" + bounty + " &bDiamonds"));
 
     }
 
     public TextComponent buildActionBar(BountyHeadData data) {
 
-        return UtilitiesOG
-                .trueogColorize("&cBounty Head: &r" + resolvePlayerDisplay(data.targetUuid(), data.targetName())
-                        + " &7- &b" + formatDiamonds(data.bountyAmount()) + " &bDiamonds");
+        return UtilitiesOG.trueogColorize(resolvePlayerDisplay(data.targetUuid(), data.targetName()) + " &7slain for &b"
+                + formatDiamonds(data.bountyAmount()) + " &bDiamonds");
 
     }
 
     public Component buildHoverLabel(BountyHeadData data) {
 
-        return UtilitiesOG.trueogColorize(resolvePlayerDisplay(data.targetUuid(), data.targetName()) + " &7- &b"
+        return UtilitiesOG.trueogColorize(resolvePlayerDisplay(data.targetUuid(), data.targetName()) + " &7slain for &b"
                 + formatDiamonds(data.bountyAmount()) + " &bDiamonds");
 
     }

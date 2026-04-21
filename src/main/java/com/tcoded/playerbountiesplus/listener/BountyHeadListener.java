@@ -133,21 +133,6 @@ public class BountyHeadListener implements Listener {
 
         }
 
-        if (event.getClickedBlock() == null || !isHeadMaterial(event.getClickedBlock().getType())) {
-
-            return;
-
-        }
-
-        final BlockState state = event.getClickedBlock().getState();
-        if (!(state instanceof Skull skull)) {
-
-            return;
-
-        }
-
-        sendBountyHeadActionbar(event.getPlayer(), skull.getPersistentDataContainer());
-
     }
 
     @EventHandler(ignoreCancelled = true)
