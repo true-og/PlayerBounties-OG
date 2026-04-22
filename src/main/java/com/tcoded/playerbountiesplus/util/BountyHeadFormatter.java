@@ -1,9 +1,12 @@
 package com.tcoded.playerbountiesplus.util;
 
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.inventory.meta.SkullMeta;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
@@ -12,13 +15,21 @@ import net.kyori.adventure.text.TextComponent;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.cacheddata.CachedMetaData;
 import net.luckperms.api.model.user.User;
+import net.luckperms.api.model.user.UserManager;
 import net.trueog.diamondbankog.api.DiamondBankAPIJava;
 import net.trueog.utilitiesog.UtilitiesOG;
 
 public final class BountyHeadFormatter {
 
+    // LuckPerms data for offline players is not in memory, so we load it async
+    // and cache the resolved display string. Entries expire so rank changes get
+    // picked up without requiring a server restart.
+    private static final long DISPLAY_CACHE_TTL_MILLIS = 5L * 60L * 1000L;
+
     private final DiamondBankAPIJava diamondBankAPI;
     private final LuckPerms luckPerms;
+    private final Map<UUID, CachedDisplay> offlineDisplayCache = new ConcurrentHashMap<>();
+    private final Map<UUID, Boolean> offlineLoadsInFlight = new ConcurrentHashMap<>();
 
     public BountyHeadFormatter(DiamondBankAPIJava diamondBankAPI, LuckPerms luckPerms) {
 
@@ -68,12 +79,83 @@ public final class BountyHeadFormatter {
 
         }
 
-        final User user = luckPerms.getUserManager().getUser(targetUuid);
-        if (user == null) {
+        final User loadedUser = luckPerms.getUserManager().getUser(targetUuid);
+        if (loadedUser != null) {
 
-            return "&f" + playerName;
+            return formatFromUser(loadedUser, playerName);
 
         }
+
+        final CachedDisplay cached = offlineDisplayCache.get(targetUuid);
+        if (cached != null && !cached.isExpired()) {
+
+            return cached.display();
+
+        }
+
+        scheduleOfflineUserLoad(targetUuid, playerName);
+
+        // Serve the stale entry while we refresh so labels do not flicker back to
+        // the unformatted name each TTL expiry.
+        if (cached != null) {
+
+            return cached.display();
+
+        }
+
+        return "&f" + playerName;
+
+    }
+
+    private void scheduleOfflineUserLoad(UUID targetUuid, String playerName) {
+
+        if (luckPerms == null) {
+
+            return;
+
+        }
+
+        if (offlineLoadsInFlight.putIfAbsent(targetUuid, Boolean.TRUE) != null) {
+
+            return;
+
+        }
+
+        final UserManager userManager = luckPerms.getUserManager();
+        userManager.loadUser(targetUuid).whenComplete((user, throwable) -> {
+
+            try {
+
+                if (user == null) {
+
+                    return;
+
+                }
+
+                final String display = formatFromUser(user, playerName);
+                offlineDisplayCache.put(targetUuid,
+                        new CachedDisplay(display, System.currentTimeMillis() + DISPLAY_CACHE_TTL_MILLIS));
+
+                // LuckPerms keeps loaded users resident until explicitly released.
+                // Release only when the UUID is not currently online so we do not
+                // evict live data another system may depend on.
+                if (Bukkit.getPlayer(targetUuid) == null) {
+
+                    userManager.cleanupUser(user);
+
+                }
+
+            } finally {
+
+                offlineLoadsInFlight.remove(targetUuid);
+
+            }
+
+        });
+
+    }
+
+    private String formatFromUser(User user, String playerName) {
 
         final CachedMetaData meta = user.getCachedData().getMetaData();
         final String prefix = StringUtils.trim(StringUtils.defaultString(meta.getPrefix()).replace('§', '&'));
@@ -145,6 +227,16 @@ public final class BountyHeadFormatter {
         final String normalizedName = StringUtils.lowerCase(playerName, Locale.ROOT);
 
         return StringUtils.contains(normalizedText, normalizedName);
+
+    }
+
+    private record CachedDisplay(String display, long expiresAtMillis) {
+
+        boolean isExpired() {
+
+            return System.currentTimeMillis() >= expiresAtMillis;
+
+        }
 
     }
 
