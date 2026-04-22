@@ -11,10 +11,10 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.persistence.PersistentDataContainer;
 
 import com.tcoded.playerbountiesplus.PlayerBountiesOG;
 import com.tcoded.playerbountiesplus.hook.logging.CoreProtectHook;
@@ -169,7 +169,7 @@ public class BountyHeadListener implements Listener {
 
         }
 
-        player.sendActionBar(plugin.getBountyHeadFormatter().buildClaimedByActionBar(headData));
+        player.sendActionBar(plugin.getBountyHeadFormatter().buildCanonicalLine(headData));
 
     }
 

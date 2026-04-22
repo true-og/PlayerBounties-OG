@@ -1,6 +1,5 @@
 package com.tcoded.playerbountiesplus.util;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -9,7 +8,6 @@ import org.bukkit.inventory.meta.SkullMeta;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
 
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.cacheddata.CachedMetaData;
@@ -37,37 +35,15 @@ public final class BountyHeadFormatter {
 
         }
 
-        meta.displayName(buildHeadDisplayName(data));
-        meta.lore(buildHeadLore(data));
+        meta.displayName(buildCanonicalLine(data));
         metadata.write(meta.getPersistentDataContainer(), data);
 
     }
 
-    public TextComponent buildHeadDisplayName(BountyHeadData data) {
+    public TextComponent buildCanonicalLine(BountyHeadData data) {
 
-        return UtilitiesOG.trueogColorize(resolvePlayerDisplay(data.targetUuid(), data.targetName()) + " &7(&b"
-                + formatDiamonds(data.bountyAmount()) + " &bDiamonds&7)");
-
-    }
-
-    public List<TextComponent> buildHeadLore(BountyHeadData data) {
-
-        final String bounty = formatDiamonds(data.bountyAmount());
-
-        return List.of(UtilitiesOG.trueogColorize("&7Slain for &b" + bounty + " &bDiamonds"));
-
-    }
-
-    public TextComponent buildClaimedByActionBar(BountyHeadData data) {
-
-        return UtilitiesOG.trueogColorize("&7Claimed by " + resolveClaimantDisplay(data));
-
-    }
-
-    public Component buildHoverLabel(BountyHeadData data) {
-
-        return UtilitiesOG.trueogColorize(resolvePlayerDisplay(data.targetUuid(), data.targetName())
-                + "\n&7Slain for &b" + formatDiamonds(data.bountyAmount()) + " &bDiamonds");
+        return UtilitiesOG.trueogColorize(resolvePlayerDisplay(data.targetUuid(), data.targetName()) + " &cslain by "
+                + resolveClaimantDisplay(data) + " &cfor &b" + formatDiamonds(data.bountyAmount()) + " &bDiamonds");
 
     }
 

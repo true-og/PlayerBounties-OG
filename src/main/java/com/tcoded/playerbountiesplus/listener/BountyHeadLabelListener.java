@@ -122,7 +122,7 @@ public final class BountyHeadLabelListener implements Listener {
         final ArmorStand existing = activeLabels.get(target.key());
         if (existing != null && existing.isValid()) {
 
-            existing.customName(plugin.getBountyHeadFormatter().buildHoverLabel(target.data()));
+            existing.customName(plugin.getBountyHeadFormatter().buildCanonicalLine(target.data()));
             return;
 
         }
@@ -139,7 +139,7 @@ public final class BountyHeadLabelListener implements Listener {
             stand.setPersistent(false);
             stand.setBasePlate(false);
             stand.setArms(false);
-            stand.customName(plugin.getBountyHeadFormatter().buildHoverLabel(target.data()));
+            stand.customName(plugin.getBountyHeadFormatter().buildCanonicalLine(target.data()));
             stand.setCustomNameVisible(true);
 
         });
