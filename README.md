@@ -15,8 +15,9 @@ PlayerBounties-OG is a hard fork of [PlayerBountiesPlus](https://github.com/Tech
 
 ## Commands
 - `/bounty set <player> <amount>` – set a bounty on a player
+- `/bounty add <player> <amount>` – add diamonds to an existing bounty
 - `/bounty top` – list the top bounties
-- `/bounty check <player>` – check a player's bounty
+- `/bounty check <player>` – check a player's bounty (online or offline)
 - `/pbp reload` – reload configuration and messages
 - `/pbp version` – display plugin version
 - `/pbp bounty set <player> <amount>` – admin set a bounty
@@ -30,6 +31,7 @@ PlayerBounties-OG is a hard fork of [PlayerBountiesPlus](https://github.com/Tech
 | --- | --- |
 | `playerbountiesog.command.bounty` | all |
 | `playerbountiesog.command.bounty.set` | all |
+| `playerbountiesog.command.bounty.add` | all |
 | `playerbountiesog.event.claim` | all |
 | `playerbountiesog.command.admin` | op |
 | `playerbountiesog.command.admin.version` | op |

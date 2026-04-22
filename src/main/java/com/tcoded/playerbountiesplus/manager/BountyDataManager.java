@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -95,7 +96,8 @@ public class BountyDataManager {
 
             } catch (IOException ioException) {
 
-                ioException.printStackTrace();
+                this.plugin.getLogger().log(Level.SEVERE,
+                        "Failed to save bounties file: " + this.bountiesFile.getPath(), ioException);
 
             }
 

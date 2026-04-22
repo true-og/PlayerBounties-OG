@@ -1,18 +1,14 @@
 package com.tcoded.playerbountiesplus;
 
-import java.util.List;
-
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.event.HandlerList;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.ServicesManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.google.common.collect.ImmutableList;
 import com.tcoded.playerbountiesplus.command.BountyCommand;
 import com.tcoded.playerbountiesplus.command.PlayerBountiesPlusAdminCmd;
 import com.tcoded.playerbountiesplus.hook.currency.DiamondBankOGHook;
@@ -175,16 +171,6 @@ public final class PlayerBountiesOG extends JavaPlugin {
         this.getServer().getPluginManager().registerEvents(this.bountyIncreasePromptListener, this);
         this.getServer().getPluginManager().registerEvents(new GuiProtectionListener(this), this);
 
-        final List<Plugin> plugins = ImmutableList.copyOf(this.getServer().getPluginManager().getPlugins());
-        findPluginWithQuery(plugins, "team");
-        findPluginWithQuery(plugins, "teams");
-        findPluginWithQuery(plugins, "clan");
-        findPluginWithQuery(plugins, "clans");
-        findPluginWithQuery(plugins, "party", "voteparty");
-        findPluginWithQuery(plugins, "parties");
-        findPluginWithQuery(plugins, "guild");
-        findPluginWithQuery(plugins, "guilds");
-
     }
 
     public void reloadLang() {
@@ -265,48 +251,6 @@ public final class PlayerBountiesOG extends JavaPlugin {
     public BountyIncreasePromptListener getBountyIncreasePromptListener() {
 
         return this.bountyIncreasePromptListener;
-
-    }
-
-    // Utilities.
-    private static void findPluginWithQuery(List<Plugin> plugins, String pluginNameQuery, String... excludeStrings) {
-
-        final String firstPluginFound = plugins.stream().filter(p -> {
-
-            final String lowerName = StringUtils.lowerCase(p.getName());
-            // If the plugin name doesn't contain the query, skip.
-            if (!StringUtils.contains(lowerName, pluginNameQuery)) {
-
-                return false;
-
-            }
-
-            // If the plugin name contains any of the exclude strings, skip.
-            for (String excludeString : excludeStrings) {
-
-                if (StringUtils.contains(lowerName, excludeString)) {
-
-                    return false;
-
-                }
-
-            }
-
-            return true;
-
-        }).findFirst().map(p -> {
-
-            final List<String> authors = p.getPluginMeta().getAuthors();
-
-            return p.getName() + " (" + (authors.isEmpty() ? "N/A" : authors.get(0)) + ")";
-
-        }).orElse(null);
-
-        if (firstPluginFound == null) {
-
-            return;
-
-        }
 
     }
 

@@ -34,6 +34,7 @@ permissions:
       playerbountiesog.command.admin.bounty.add: {}
       playerbountiesog.command.admin.bounty.remove: {}
       playerbountiesog.command.admin.bounty.delete: {}
+      playerbountiesog.command.admin.bounty.get: {}
   playerbountiesog.command.bounty.set:
     default: true
   playerbountiesog.command.bounty.add:

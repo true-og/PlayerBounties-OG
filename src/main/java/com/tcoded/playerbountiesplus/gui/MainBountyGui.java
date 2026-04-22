@@ -253,8 +253,10 @@ public class MainBountyGui extends GUIBase {
         lore.add(UtilitiesOG.trueogColorize("&7Click to increase this player's bounty."));
         lore.add(UtilitiesOG.trueogColorize("&8You will be prompted in chat for the amount."));
         lore.add(UtilitiesOG.trueogColorize(""));
-        lore.add(UtilitiesOG
-                .trueogColorize("&6Claiming the bounty will give you a 50% chance of beheading your victim!"));
+        final double dropChance = Math.max(0D,
+                Math.min(100D, plugin.getConfig().getDouble("bounty-head-drop-chance", 50D)));
+        lore.add(UtilitiesOG.trueogColorize("&6Claiming the bounty will give you a " + formatDropChance(dropChance)
+                + "% chance of beheading your victim!"));
 
         final GUIItem item;
         if (entry.targetName() != null && !entry.targetName().isBlank()) {
@@ -332,6 +334,18 @@ public class MainBountyGui extends GUIBase {
         final long shards = diamondBankAPI.diamondsToShards(bountyDiamonds);
 
         return diamondBankAPI.shardsToDiamonds(shards) + " Diamonds";
+
+    }
+
+    private String formatDropChance(double chance) {
+
+        if (chance == Math.floor(chance)) {
+
+            return Long.toString((long) chance);
+
+        }
+
+        return StringUtils.stripEnd(StringUtils.stripEnd(String.format("%.2f", chance), "0"), ".");
 
     }
 

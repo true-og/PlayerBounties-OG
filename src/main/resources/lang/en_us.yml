@@ -1,6 +1,5 @@
 death:
   same-team: "&aThe player you killed has an active bounty but you are in the same team as they are!"
-  announce-claimed: "&4&l{killer} claimed {victim}'s bounty worth ${bounty}"
   no-permission: "&cYou are not allowed to claim bounties!"
 
 command:
@@ -49,6 +48,7 @@ command:
       success: "&cYou placed a bounty of {bounty} on {target}'s head!"
       announce: "\nA bounty of {bounty} was placed on {target}'s &ahead by&r {player}!{extra}\n"
       announce-extra: " (Total: {total})"
+      cancelled: "&cBounty placement was cancelled."
     add:
       missing-args: "&cYou need to specify a player and an amount! /bounty add <player> <amount>"
       amount-nan: "&cThat's not a valid number!"

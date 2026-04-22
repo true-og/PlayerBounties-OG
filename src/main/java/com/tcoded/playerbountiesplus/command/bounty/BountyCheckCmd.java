@@ -4,8 +4,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -43,36 +46,50 @@ public class BountyCheckCmd {
 
         final String playerNameArg = args[1];
 
-        final Player target = plugin.getServer().getPlayerExact(playerNameArg);
+        final UUID targetUuid;
+        final String targetName;
 
-        if (target == null) {
+        final Player onlineTarget = plugin.getServer().getPlayerExact(playerNameArg);
+        if (onlineTarget != null) {
 
-            final String playerNotFoundMessage = plugin.getLang().getColored("command.bounty.check.player-not-found");
-            if (!(sender instanceof Player)) {
+            targetUuid = onlineTarget.getUniqueId();
+            targetName = onlineTarget.getName();
 
-                UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), playerNotFoundMessage);
+        } else {
 
-            } else {
+            final OfflinePlayer offlineTarget = resolveOfflineTarget(playerNameArg);
+            if (offlineTarget == null) {
 
-                UtilitiesOG.trueogMessage((Player) sender, playerNotFoundMessage);
+                final String playerNotFoundMessage = plugin.getLang()
+                        .getColored("command.bounty.check.player-not-found");
+                if (!(sender instanceof Player)) {
+
+                    UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), playerNotFoundMessage);
+
+                } else {
+
+                    UtilitiesOG.trueogMessage((Player) sender, playerNotFoundMessage);
+
+                }
+
+                return true;
 
             }
 
-            return true;
+            targetUuid = offlineTarget.getUniqueId();
+            targetName = StringUtils.defaultIfBlank(offlineTarget.getName(), playerNameArg);
 
         }
 
-        final UUID playerUUID = target.getUniqueId();
-
         final BountyDataManager bountyDataManager = plugin.getBountyDataManager();
-        final boolean hasBounty = bountyDataManager.hasBounty(playerUUID);
+        final boolean hasBounty = bountyDataManager.hasBounty(targetUuid);
 
         if (hasBounty) {
 
-            // Confirmation.
-            final double bounty = bountyDataManager.getBounty(playerUUID);
+            final double bounty = bountyDataManager.getBounty(targetUuid);
+            final String formattedBounty = plugin.getBountyHeadFormatter().formatDiamonds(bounty) + " Diamonds";
             final String bountyFoundMessage = plugin.getLang().getColored("command.bounty.check.bounty-found")
-                    .replace("{target}", target.getName()).replace("{bounty}", Double.toString(bounty));
+                    .replace("{target}", targetName).replace("{bounty}", formattedBounty);
             if (!(sender instanceof Player)) {
 
                 UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), bountyFoundMessage);
@@ -86,7 +103,7 @@ public class BountyCheckCmd {
         } else {
 
             final String noBountyFoundMessage = plugin.getLang().getColored("command.bounty.check.no-bounty")
-                    .replace("{target}", target.getName());
+                    .replace("{target}", targetName);
             if (!(sender instanceof Player)) {
 
                 UtilitiesOG.logToConsole(PlayerBountiesOG.getPrefix(), noBountyFoundMessage);
@@ -103,19 +120,46 @@ public class BountyCheckCmd {
 
     }
 
-    @Nullable
-    public static List<String> onTabComplete(@NotNull CommandSender sender, @NotNull String[] args) {
+    private static OfflinePlayer resolveOfflineTarget(String name) {
 
-        if (args.length == 2) {
+        for (OfflinePlayer candidate : Bukkit.getOfflinePlayers()) {
 
-            // Suggest online player names for the username.
-            return sender.getServer().getOnlinePlayers().stream().map(Player::getName)
-                    .filter(name -> StringUtils.startsWith(StringUtils.lowerCase(name), StringUtils.lowerCase(args[1])))
-                    .collect(Collectors.toList());
+            if (StringUtils.equalsIgnoreCase(candidate.getName(), name)) {
+
+                return candidate;
+
+            }
 
         }
 
-        return Collections.emptyList();
+        @SuppressWarnings("deprecation")
+        final OfflinePlayer byName = Bukkit.getOfflinePlayerIfCached(name);
+
+        return byName;
+
+    }
+
+    @Nullable
+    public static List<String> onTabComplete(@NotNull CommandSender sender, @NotNull String[] args) {
+
+        if (args.length != 2) {
+
+            return Collections.emptyList();
+
+        }
+
+        final String prefix = StringUtils.lowerCase(args[1]);
+        final PlayerBountiesOG plugin = PlayerBountiesOG.getInstance();
+        final BountyDataManager bountyDataManager = plugin == null ? null : plugin.getBountyDataManager();
+
+        final Stream<String> onlineNames = sender.getServer().getOnlinePlayers().stream().map(Player::getName);
+        final Stream<String> offlineBountyNames = bountyDataManager == null ? Stream.empty()
+                : bountyDataManager.getBounties().keySet().stream().map(Bukkit::getOfflinePlayer)
+                        .map(OfflinePlayer::getName).filter(name -> name != null && !name.isBlank());
+
+        return Stream.concat(onlineNames, offlineBountyNames).distinct()
+                .filter(name -> StringUtils.startsWith(StringUtils.lowerCase(name), prefix))
+                .collect(Collectors.toList());
 
     }
 
