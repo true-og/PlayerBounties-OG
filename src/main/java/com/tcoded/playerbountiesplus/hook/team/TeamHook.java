@@ -23,6 +23,15 @@ public interface TeamHook {
 
         }
 
+        // Unions-OG is a soft fork of SimpleClans that preserves the same API
+        // and main class but exposes a different plugin name to Bukkit.
+        final Plugin unionsPlugin = pluginManager.getPlugin("Unions-OG");
+        if (unionsPlugin != null && unionsPlugin.isEnabled()) {
+
+            return new SimpleClansHook(plugin, unionsPlugin);
+
+        }
+
         return null;
 
     }

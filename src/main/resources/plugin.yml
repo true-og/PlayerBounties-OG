@@ -12,6 +12,7 @@ depend:
   - CoreProtect-OG
 softdepend:
   - SimpleClans
+  - Unions-OG
   - LuckPerms
 
 commands:
