@@ -58,6 +58,19 @@ public final class BountyHeadFormatter {
 
     }
 
+    public TextComponent buildCanonicalLineTop(BountyHeadData data) {
+
+        return UtilitiesOG.trueogColorize(resolvePlayerDisplay(data.targetUuid(), data.targetName()) + " &cslain by "
+                + resolveClaimantDisplay(data));
+
+    }
+
+    public TextComponent buildCanonicalLineBottom(BountyHeadData data) {
+
+        return UtilitiesOG.trueogColorize("&cfor &b" + formatDiamonds(data.bountyAmount()) + " &bDiamonds");
+
+    }
+
     public String resolveClaimantDisplay(BountyHeadData data) {
 
         if (data == null) {

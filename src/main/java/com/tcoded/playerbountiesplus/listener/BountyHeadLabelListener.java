@@ -27,8 +27,13 @@ public final class BountyHeadLabelListener implements Listener {
 
     private static final long UPDATE_PERIOD_TICKS = 2L;
 
+    // Two stacked armor stands per head: top = name + slayer, bottom = amount.
+    // Spacing tuned for small marker stands so the hologram stays compact.
+    private static final double LABEL_BOTTOM_Y_OFFSET = 0.85D;
+    private static final double LABEL_TOP_Y_OFFSET = 1.10D;
+
     private final PlayerBountiesOG plugin;
-    private final Map<HeadLabelKey, ArmorStand> activeLabels = new HashMap<>();
+    private final Map<HeadLabelKey, LabelPair> activeLabels = new HashMap<>();
     private final BukkitTask tickTask;
 
     public BountyHeadLabelListener(PlayerBountiesOG plugin) {
@@ -119,41 +124,76 @@ public final class BountyHeadLabelListener implements Listener {
 
     private void upsertLabel(HeadTarget target) {
 
-        final ArmorStand existing = activeLabels.get(target.key());
-        if (existing != null && existing.isValid()) {
+        final LabelPair existing = activeLabels.get(target.key());
+        if (existing != null && existing.top().isValid() && existing.bottom().isValid()) {
 
-            existing.customName(plugin.getBountyHeadFormatter().buildCanonicalLine(target.data()));
+            existing.top().customName(plugin.getBountyHeadFormatter().buildCanonicalLineTop(target.data()));
+            existing.bottom().customName(plugin.getBountyHeadFormatter().buildCanonicalLineBottom(target.data()));
             return;
 
         }
 
-        final Location labelLocation = target.location().add(0.5D, 0.85D, 0.5D);
-        final ArmorStand label = target.location().getWorld().spawn(labelLocation, ArmorStand.class, stand -> {
+        if (existing != null) {
 
-            stand.setInvisible(true);
-            stand.setGravity(false);
-            stand.setMarker(true);
-            stand.setSmall(true);
-            stand.setInvulnerable(true);
-            stand.setSilent(true);
-            stand.setPersistent(false);
-            stand.setBasePlate(false);
-            stand.setArms(false);
-            stand.customName(plugin.getBountyHeadFormatter().buildCanonicalLine(target.data()));
-            stand.setCustomNameVisible(true);
+            removeLabel(target.key());
+
+        }
+
+        final World world = target.location().getWorld();
+        final Location bottomLocation = target.location().clone().add(0.5D, LABEL_BOTTOM_Y_OFFSET, 0.5D);
+        final Location topLocation = target.location().clone().add(0.5D, LABEL_TOP_Y_OFFSET, 0.5D);
+
+        final ArmorStand top = world.spawn(topLocation, ArmorStand.class, stand -> {
+
+            configureLabelStand(stand);
+            stand.customName(plugin.getBountyHeadFormatter().buildCanonicalLineTop(target.data()));
 
         });
 
-        activeLabels.put(target.key(), label);
+        final ArmorStand bottom = world.spawn(bottomLocation, ArmorStand.class, stand -> {
+
+            configureLabelStand(stand);
+            stand.customName(plugin.getBountyHeadFormatter().buildCanonicalLineBottom(target.data()));
+
+        });
+
+        activeLabels.put(target.key(), new LabelPair(top, bottom));
+
+    }
+
+    private static void configureLabelStand(ArmorStand stand) {
+
+        stand.setInvisible(true);
+        stand.setGravity(false);
+        stand.setMarker(true);
+        stand.setSmall(true);
+        stand.setInvulnerable(true);
+        stand.setSilent(true);
+        stand.setPersistent(false);
+        stand.setBasePlate(false);
+        stand.setArms(false);
+        stand.setCustomNameVisible(true);
 
     }
 
     private void removeLabel(HeadLabelKey key) {
 
-        final ArmorStand stand = activeLabels.remove(key);
-        if (stand != null && stand.isValid()) {
+        final LabelPair pair = activeLabels.remove(key);
+        if (pair == null) {
 
-            stand.remove();
+            return;
+
+        }
+
+        if (pair.top() != null && pair.top().isValid()) {
+
+            pair.top().remove();
+
+        }
+
+        if (pair.bottom() != null && pair.bottom().isValid()) {
+
+            pair.bottom().remove();
 
         }
 
@@ -179,6 +219,9 @@ public final class BountyHeadLabelListener implements Listener {
     }
 
     private record HeadTarget(HeadLabelKey key, Location location, BountyHeadData data) {
+    }
+
+    private record LabelPair(ArmorStand top, ArmorStand bottom) {
     }
 
     private record HeadLabelKey(UUID worldId, int x, int y, int z) {
