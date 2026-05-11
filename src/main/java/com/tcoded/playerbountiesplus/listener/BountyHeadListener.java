@@ -169,7 +169,24 @@ public class BountyHeadListener implements Listener {
 
         }
 
-        player.sendActionBar(plugin.getBountyHeadFormatter().buildCanonicalLine(headData));
+        final net.kyori.adventure.text.Component line = plugin.getBountyHeadFormatter().buildCanonicalLine(headData);
+
+        // Send action bar immediately
+        player.sendActionBar(line);
+
+        // Also schedule a second send to effectively double the visible duration.
+        // 40 ticks ~= 2 seconds; sending again after that will keep the action bar
+        // visible
+        // for roughly twice the default single-send duration.
+        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+
+            if (player.isOnline()) {
+
+                player.sendActionBar(line);
+
+            }
+
+        }, 40L);
 
     }
 

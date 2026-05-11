@@ -54,7 +54,8 @@ public final class BountyHeadFormatter {
     public TextComponent buildCanonicalLine(BountyHeadData data) {
 
         return UtilitiesOG.trueogColorize(resolvePlayerDisplay(data.targetUuid(), data.targetName()) + " &cslain by "
-                + resolveClaimantDisplay(data) + " &cfor &b" + formatDiamonds(data.bountyAmount()) + " &bDiamonds");
+                + resolveClaimantDisplay(data) + " &cfor a bounty of &b" + formatDiamonds(data.bountyAmount())
+                + " &bDiamonds");
 
     }
 
@@ -67,7 +68,7 @@ public final class BountyHeadFormatter {
 
     public TextComponent buildCanonicalLineBottom(BountyHeadData data) {
 
-        return UtilitiesOG.trueogColorize("&cfor &b" + formatDiamonds(data.bountyAmount()) + " &bDiamonds");
+        return UtilitiesOG.trueogColorize("&cfor a bounty of&b" + formatDiamonds(data.bountyAmount()) + " &bDiamonds");
 
     }
 
@@ -108,15 +109,7 @@ public final class BountyHeadFormatter {
 
         scheduleOfflineUserLoad(targetUuid, playerName);
 
-        // Serve the stale entry while we refresh so labels do not flicker back to
-        // the unformatted name each TTL expiry.
-        if (cached != null) {
-
-            return cached.display();
-
-        }
-
-        return "&f" + playerName;
+        return cached != null ? cached.display() : "&f" + playerName;
 
     }
 

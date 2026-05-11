@@ -132,10 +132,7 @@ public class BountyCheckCmd {
 
         }
 
-        @SuppressWarnings("deprecation")
-        final OfflinePlayer byName = Bukkit.getOfflinePlayerIfCached(name);
-
-        return byName;
+        return Bukkit.getOfflinePlayerIfCached(name);
 
     }
 
