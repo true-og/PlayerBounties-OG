@@ -68,7 +68,7 @@ public final class BountyHeadFormatter {
 
     public TextComponent buildCanonicalLineBottom(BountyHeadData data) {
 
-        return UtilitiesOG.trueogColorize("&cfor a bounty of&b" + formatDiamonds(data.bountyAmount()) + " &bDiamonds");
+        return UtilitiesOG.trueogColorize("&cfor a bounty of &b" + formatDiamonds(data.bountyAmount()) + " &bDiamonds");
 
     }
 
