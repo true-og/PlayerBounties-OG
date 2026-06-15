@@ -34,6 +34,10 @@ bounty-claim-multiplier: 1.0
 # If we should announce that the bounty was claimed.
 bounty-claimed-announce: true
 
+# Worlds whose players should receive bounty claim and beheading announcements.
+# Leave empty to announce to players in every world. World names are case-insensitive.
+bounty-claimed-announce-world-whitelist: ["world", "world_nether", "world_the_end"]
+
 # Chance (0-100) that claiming a bounty drops the victim's player head.
 bounty-head-drop-chance: 50.0
 

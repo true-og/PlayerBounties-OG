@@ -1,5 +1,6 @@
 package com.tcoded.playerbountiesplus.listener;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -132,44 +133,43 @@ public class DeathListener implements Listener {
 
         final boolean beheaded = maybeDropPlayerHead(event, killer, victim, bounty);
 
-        if (beheaded) {
+        if (plugin.getConfig().getBoolean("bounty-claimed-announce", true)) {
 
             final String bountyDisplay = formatDiamonds(bounty);
-            final String beheadedMessage = killerDisplay + "&r &abeheaded " + victimDisplay + "&r &afor &b"
-                    + bountyDisplay + " &bDiamonds&a!";
-
-            Bukkit.getOnlinePlayers().forEach(player -> UtilitiesOG.trueogMessage(player, beheadedMessage));
-            playGlobalCelebrationEffects(killer, victim);
-
-        } else if (plugin.getConfig().getBoolean("bounty-claimed-announce", true)) {
-
-            final String bountyDisplay = formatDiamonds(bounty);
-            final String awardedDisplay = formatDiamonds(awardedAmount);
-
             final String message;
-            if (bountyClaimable && awardedAmount > 0D) {
 
-                if (Double.compare(awardedAmount, bounty) == 0) {
+            if (beheaded) {
 
-                    message = killerDisplay + "&r &akilled " + victimDisplay + "&r &aand earned &b" + awardedDisplay
-                            + " &bDiamonds &afor the bounty!";
+                message = killerDisplay + "&r &abeheaded " + victimDisplay + "&r &afor &b" + bountyDisplay
+                        + " &bDiamonds&a!";
+
+            } else {
+
+                final String awardedDisplay = formatDiamonds(awardedAmount);
+                if (bountyClaimable && awardedAmount > 0D) {
+
+                    if (Double.compare(awardedAmount, bounty) == 0) {
+
+                        message = killerDisplay + "&r &akilled " + victimDisplay + "&r &aand earned &b" + awardedDisplay
+                                + " &bDiamonds &afor the bounty!";
+
+                    } else {
+
+                        message = killerDisplay + "&r &akilled " + victimDisplay + "&r &aand claimed &b" + bountyDisplay
+                                + " &bDiamonds &afor &b" + awardedDisplay + " &bDiamonds&a!";
+
+                    }
 
                 } else {
 
                     message = killerDisplay + "&r &akilled " + victimDisplay + "&r &aand claimed &b" + bountyDisplay
-                            + " &bDiamonds &afor &b" + awardedDisplay + " &bDiamonds&a!";
+                            + " &bDiamonds &abounty!";
 
                 }
 
-            } else {
-
-                message = killerDisplay + "&r &akilled " + victimDisplay + "&r &aand claimed &b" + bountyDisplay
-                        + " &bDiamonds &abounty!";
-
             }
 
-            Bukkit.getOnlinePlayers().forEach(player -> UtilitiesOG.trueogMessage(player, message));
-            playGlobalCelebrationEffects(killer, victim);
+            announceBountyClaim(message, killer, victim);
 
         }
 
@@ -178,10 +178,11 @@ public class DeathListener implements Listener {
 
     }
 
-    private void playGlobalCelebrationEffects(Player killer, Player victim) {
+    private void announceBountyClaim(String message, Player killer, Player victim) {
 
-        Bukkit.getOnlinePlayers().forEach(player -> {
+        Bukkit.getOnlinePlayers().stream().filter(this::isClaimAnnouncementRecipient).forEach(player -> {
 
+            UtilitiesOG.trueogMessage(player, message);
             player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0F, 1.0F);
 
             final Particle fireworkParticle = resolveFireworkParticle();
@@ -190,6 +191,16 @@ public class DeathListener implements Listener {
             player.spawnParticle(Particle.TOTEM, killer.getLocation().add(0D, 1D, 0D), 20, 0.5D, 0.7D, 0.5D, 0.01D);
 
         });
+
+    }
+
+    private boolean isClaimAnnouncementRecipient(Player player) {
+
+        final List<String> worldWhitelist = plugin.getConfig().getStringList("bounty-claimed-announce-world-whitelist");
+        final boolean hasConfiguredWorld = worldWhitelist.stream().anyMatch(worldName -> !worldName.isBlank());
+
+        return !hasConfiguredWorld || worldWhitelist.stream().anyMatch(
+                worldName -> StringUtils.equalsIgnoreCase(StringUtils.trim(worldName), player.getWorld().getName()));
 
     }
 
