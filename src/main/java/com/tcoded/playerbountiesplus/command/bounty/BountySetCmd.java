@@ -17,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 import com.tcoded.playerbountiesplus.PlayerBountiesOG;
 import com.tcoded.playerbountiesplus.event.BountySetEvent;
 import com.tcoded.playerbountiesplus.manager.BountyDataManager;
+import com.tcoded.playerbountiesplus.util.BountyWorldUtil;
 
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.cacheddata.CachedMetaData;
@@ -63,6 +64,14 @@ public class BountySetCmd {
 
             }
 
+            return true;
+
+        }
+
+        if (sender instanceof Player player && !BountyWorldUtil.isBountyWorldAllowed(plugin, player)) {
+
+            UtilitiesOG.trueogMessage(player, plugin.getLang().getColored("command.bounty.world-not-whitelisted")
+                    .replace("{worlds}", BountyWorldUtil.formatBountyWorldWhitelist(plugin)));
             return true;
 
         }

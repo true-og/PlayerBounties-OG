@@ -28,6 +28,10 @@ bounty-maximum: 1000000.0
 # If we should give the bounty money to the killer.
 bounty-claimable: true
 
+# Worlds where players may set, add to, and claim bounties.
+# Leave empty to allow bounty placement and claims in every world. World names are case-insensitive.
+bounty-world-whitelist: ["world", "world_nether", "world_the_end"]
+
 # Give more or less money to the killer. This value can be negative if you want to.
 bounty-claim-multiplier: 1.0
 

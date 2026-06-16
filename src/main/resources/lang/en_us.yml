@@ -1,6 +1,7 @@
 death:
   same-team: "&aThe player you killed has an active bounty but you are in the same team as they are!"
   no-permission: "&cYou are not allowed to claim bounties!"
+  world-not-whitelisted: "&cYou can only claim bounties in these worlds: {worlds}."
 
 command:
   no-permission: "&cYou don't have the permission to use this command!"
@@ -37,6 +38,7 @@ command:
   bounty:
     no-action: "&cYou need to specify an action! /bounty <set/add/top/check>"
     invalid-action: "&cThat's not a valid action!"
+    world-not-whitelisted: "&cYou can only set or increase bounties in these worlds: {worlds}."
     set:
       missing-args: "&cYou need to specify a player and an amount! /bounty set <player> <amount>"
       amount-nan: "&cThat's not a valid number!"
@@ -69,4 +71,3 @@ command:
 gui:
   main:
     title: "&eBounties"
-

@@ -18,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.tcoded.playerbountiesplus.PlayerBountiesOG;
 import com.tcoded.playerbountiesplus.manager.BountyDataManager;
+import com.tcoded.playerbountiesplus.util.BountyWorldUtil;
 
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.cacheddata.CachedMetaData;
@@ -50,6 +51,14 @@ public class BountyAddCmd {
                     .replace("{permission}", "playerbountiesog.command.bounty.add");
             UtilitiesOG.trueogMessage(player, noPermDetailed);
 
+            return true;
+
+        }
+
+        if (!BountyWorldUtil.isBountyWorldAllowed(plugin, player)) {
+
+            UtilitiesOG.trueogMessage(player, plugin.getLang().getColored("command.bounty.world-not-whitelisted")
+                    .replace("{worlds}", BountyWorldUtil.formatBountyWorldWhitelist(plugin)));
             return true;
 
         }
@@ -90,6 +99,14 @@ public class BountyAddCmd {
     public static boolean addBounty(PlayerBountiesOG plugin, Player setter, UUID targetUuid, String targetName,
             double parsedAmount, boolean saveData)
     {
+
+        if (!BountyWorldUtil.isBountyWorldAllowed(plugin, setter)) {
+
+            UtilitiesOG.trueogMessage(setter, plugin.getLang().getColored("command.bounty.world-not-whitelisted")
+                    .replace("{worlds}", BountyWorldUtil.formatBountyWorldWhitelist(plugin)));
+            return true;
+
+        }
 
         final String safeTargetName = StringUtils.defaultIfBlank(targetName,
                 Bukkit.getOfflinePlayer(targetUuid).getName());
