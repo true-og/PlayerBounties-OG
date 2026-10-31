@@ -13,9 +13,9 @@ public interface TeamHook {
         final PluginManager pluginManager = plugin.getServer().getPluginManager();
 
         // RoinujNosde's SimpleClans: TrueOG Network branch.
-        // https://github.com/true-og/SimpleClans
+        // https://git.trueog.net/trueog/Unions-OG
         // License: GPLv3
-        // (https://raw.githubusercontent.com/true-og/SimpleClans/refs/heads/master/LICENSE)
+        // (https://git.trueog.net/trueog/Unions-OG/raw/branch/master/LICENSE)
         final Plugin simpleClansPlugin = pluginManager.getPlugin("SimpleClans");
         if (simpleClansPlugin != null && simpleClansPlugin.isEnabled()) {
 
