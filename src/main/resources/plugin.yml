@@ -4,7 +4,7 @@ main: com.tcoded.playerbountiesplus.PlayerBountiesOG
 api-version: '${apiVersion}'
 authors: [ TechnicallyCoded, NotAlexNoyle ]
 description:  A player bounty plugin for TrueOG Network using our custom Diamond Economy.
-website: https://github.com/true-og/PlayerBounties-OG/
+website: https://git.trueog.net/trueog/PlayerBounties-OG/
 folia-supported: false
 
 depend:
