@@ -1,16 +1,16 @@
 # PlayerBounties-OG
 
 ## Overview
-PlayerBounties-OG is a hard fork of [PlayerBountiesPlus](https://github.com/TechnicallyCoded/PlayerBountiesPlus) that lets players set and claim bounties while blocking teammates from claiming rewards. Hooks into [DiamondBank-OG](https://github.com/true-og/DiamondBank-OG) for economy handling and supports [SimpleClans](https://github.com/true-og/SimpleClans) and API-compatible forks such as Unions-OG. Built for Purpur 1.19.4.
+PlayerBounties-OG is a hard fork of [PlayerBountiesPlus](https://github.com/TechnicallyCoded/PlayerBountiesPlus) that lets players set and claim bounties while blocking teammates from claiming rewards. Hooks into [DiamondBank-OG](https://git.trueog.net/trueog/DiamondBank-OG) for economy handling and supports [SimpleClans](https://github.com/true-og/SimpleClans) and API-compatible forks such as Unions-OG. Built for Purpur 1.19.4.
 
 ## Features
 - Clan-aware bounty system that prevents teammates from claiming each other's bounties.
 - Inventory GUI for viewing bounties.
 - Customizable odds for receiving player head from bounty victim.
 - Localized messages in multiple languages.
-- Integrates [CoreProtect-OG](https://github.com/true-og/CoreProtect-OG) for player head rollback injection.
-- Integrates [DiamondBank-OG](https://github.com/true-og/DiamondBank-OG) for currency.
-- Integrates [LuckPerms](https://github.com/true-og/LuckPerms) for player name and rank formatting.
+- Integrates [CoreProtect-OG](https://git.trueog.net/trueog/CoreProtect-OG) for player head rollback injection.
+- Integrates [DiamondBank-OG](https://git.trueog.net/trueog/DiamondBank-OG) for currency.
+- Integrates [LuckPerms](https://git.trueog.net/trueog/LuckPerms) for player name and rank formatting.
 - Integrates [SimpleClans](https://github.com/true-og/SimpleClans) and compatible forks such as Unions-OG for team detection.
 
 ## Commands
